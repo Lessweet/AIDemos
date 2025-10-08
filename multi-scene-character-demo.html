@@ -308,7 +308,6 @@ body {
 }
 
 .char-eye.closed .char-pupil {
-  opacity: 0;
   transform: scale(0);
 }
 
@@ -374,7 +373,7 @@ body {
 
 .form-input:focus ~ .form-label,
 .form-input:not(:placeholder-shown) ~ .form-label {
-  top: -18px;
+  top: -9px;
   font-size: 12px;
   color: #000;
 }
@@ -502,15 +501,15 @@ body {
 
 /* 成功图标 */
 .success-icon {
-  width: 80px;
-  height: 80px;
+  width: 24px;
+  height: 24px;
   margin: 0 auto 24px;
   border-radius: 50%;
   background: #27ae60;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 48px;
+  font-size: 14px;
   color: white;
 }
 
@@ -580,6 +579,156 @@ body {
     grid-template-columns: 1fr 1fr;
     padding: 16px;
     gap: 12px;
+  }
+}
+
+/* 嘴巴和眼泪 */
+.char-mouth {
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  width: 32px;
+  height: 18px;
+  border: 3px solid #000000;
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  transform: translateX(-50%) rotate(0deg);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.char-mouth.show {
+  opacity: 0.7;
+  transform: translateX(-50%) rotate(0deg);
+}
+
+.char-tear-container {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 100px;
+  pointer-events: none;
+}
+
+.char-tear-container.left {
+  left: 27%;
+}
+
+.char-tear-container.right {
+  right: 27%;
+}
+
+.char-tear {
+  position: absolute;
+  width: 7px;
+  height: 11px;
+  background: linear-gradient(180deg, rgba(100, 180, 255, 0.85) 0%, rgba(100, 180, 255, 0.65) 100%);
+  border-radius: 50% 0 50% 50%;
+  opacity: 0;
+  top: 0;
+  left: 0;
+}
+
+.char-tear-container.show .char-tear:nth-child(1) {
+  animation: tearDrop1 3s ease-in infinite;
+}
+
+.char-tear-container.show .char-tear:nth-child(2) {
+  animation: tearDrop2 3s ease-in infinite;
+}
+
+.char-tear-container.show .char-tear:nth-child(3) {
+  animation: tearDrop3 3s ease-in infinite;
+}
+
+@keyframes tearDrop1 {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(60px);
+    opacity: 0.8;
+  }
+  30%, 100% {
+    transform: translateY(70px);
+    opacity: 0;
+  }
+}
+
+@keyframes tearDrop2 {
+  0%, 20%, 100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  45% {
+    transform: translateY(60px);
+    opacity: 0.8;
+  }
+  50%, 100% {
+    transform: translateY(70px);
+    opacity: 0;
+  }
+}
+
+@keyframes tearDrop3 {
+  0%, 40%, 100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+  65% {
+    transform: translateY(60px);
+    opacity: 0.8;
+  }
+  70%, 100% {
+    transform: translateY(70px);
+    opacity: 0;
+  }
+}
+
+/* 五官左右移动动画 */
+.char-eyes.swaying {
+  animation: facialSwaying 1.5s ease-in-out infinite;
+}
+
+.char-mouth.swaying {
+  animation: mouthSwaying 1.5s ease-in-out infinite;
+}
+
+.char-tear-container.swaying {
+  animation: facialSwaying 1.5s ease-in-out infinite;
+}
+
+@keyframes facialSwaying {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-8px);
+  }
+  75% {
+    transform: translateX(8px);
+  }
+}
+
+@keyframes mouthSwaying {
+  0%, 100% {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  25% {
+    transform: translateX(calc(-50% - 8px)) rotate(0deg);
+  }
+  75% {
+    transform: translateX(calc(-50% + 8px)) rotate(0deg);
   }
 }
 
@@ -840,12 +989,28 @@ class Character {
             <div class="char-pupil right-pupil"></div>
           </div>
         </div>
+        <div class="char-mouth"></div>
+        <div class="char-tear-container left">
+          <div class="char-tear"></div>
+          <div class="char-tear"></div>
+          <div class="char-tear"></div>
+        </div>
+        <div class="char-tear-container right">
+          <div class="char-tear"></div>
+          <div class="char-tear"></div>
+          <div class="char-tear"></div>
+        </div>
       </div>
     `;
+    this.character = this.container.querySelector('.character');
+    this.eyes = this.container.querySelector('.char-eyes');
     this.leftEye = this.container.querySelector('.left-eye');
     this.rightEye = this.container.querySelector('.right-eye');
     this.leftPupil = this.container.querySelector('.left-pupil');
     this.rightPupil = this.container.querySelector('.right-pupil');
+    this.mouth = this.container.querySelector('.char-mouth');
+    this.leftTearContainer = this.container.querySelector('.char-tear-container.left');
+    this.rightTearContainer = this.container.querySelector('.char-tear-container.right');
   }
 
   applyProps() {
@@ -862,8 +1027,7 @@ class Character {
   lookAt(target) {
     if (this.isLookingDown || this.eyesClosed) return;
 
-    const face = this.container.querySelector('.character');
-    const faceRect = face.getBoundingClientRect();
+    const faceRect = this.character.getBoundingClientRect();
     const faceCenterX = faceRect.left + faceRect.width / 2;
     const faceCenterY = faceRect.top + faceRect.height / 2;
 
@@ -907,6 +1071,49 @@ class Character {
     blink();
   }
 
+  startRapidBlink(blinkInterval = 400, pauseDuration = 200) {
+    if (this.blinkTimer) clearTimeout(this.blinkTimer);
+    if (this.rapidBlinkInterval) clearInterval(this.rapidBlinkInterval);
+    if (this.rapidBlinkTimeout) clearTimeout(this.rapidBlinkTimeout);
+
+    const doBlink = () => {
+      this.leftEye.classList.add('closed');
+      this.rightEye.classList.add('closed');
+      setTimeout(() => {
+        this.leftEye.classList.remove('closed');
+        this.rightEye.classList.remove('closed');
+      }, 100);
+    };
+
+    const blinkCycle = () => {
+      let count = 0;
+      const blinkLoop = setInterval(() => {
+        if (count < 3) {
+          doBlink();
+          count++;
+        } else {
+          clearInterval(blinkLoop);
+          this.rapidBlinkTimeout = setTimeout(blinkCycle, pauseDuration);
+        }
+      }, blinkInterval);
+      this.rapidBlinkInterval = blinkLoop;
+    };
+
+    blinkCycle();
+  }
+
+  stopRapidBlink() {
+    if (this.rapidBlinkInterval) {
+      clearInterval(this.rapidBlinkInterval);
+      this.rapidBlinkInterval = null;
+    }
+    if (this.rapidBlinkTimeout) {
+      clearTimeout(this.rapidBlinkTimeout);
+      this.rapidBlinkTimeout = null;
+    }
+    this.startBlink();
+  }
+
   lookDown() {
     this.isLookingDown = true;
     this.leftEye.style.transform = 'translateY(20px) scale(1.2)';
@@ -923,6 +1130,9 @@ class Character {
 
   closeEyes() {
     this.eyesClosed = true;
+    if (this.blinkTimer) clearTimeout(this.blinkTimer);
+    if (this.rapidBlinkInterval) clearInterval(this.rapidBlinkInterval);
+    if (this.rapidBlinkTimeout) clearTimeout(this.rapidBlinkTimeout);
     this.leftEye.classList.add('closed');
     this.rightEye.classList.add('closed');
   }
@@ -931,10 +1141,29 @@ class Character {
     this.eyesClosed = false;
     this.leftEye.classList.remove('closed');
     this.rightEye.classList.remove('closed');
+    if (!this.blinkTimer && !this.rapidBlinkInterval) {
+      this.startBlink();
+    }
+  }
+
+  showCrying() {
+    this.mouth.classList.add('show', 'swaying');
+    this.leftTearContainer.classList.add('show', 'swaying');
+    this.rightTearContainer.classList.add('show', 'swaying');
+    this.eyes.classList.add('swaying');
+  }
+
+  hideCrying() {
+    this.mouth.classList.remove('show', 'swaying');
+    this.leftTearContainer.classList.remove('show', 'swaying');
+    this.rightTearContainer.classList.remove('show', 'swaying');
+    this.eyes.classList.remove('swaying');
   }
 
   destroy() {
     if (this.blinkTimer) clearTimeout(this.blinkTimer);
+    if (this.rapidBlinkInterval) clearInterval(this.rapidBlinkInterval);
+    if (this.rapidBlinkTimeout) clearTimeout(this.rapidBlinkTimeout);
   }
 }
 
@@ -1089,8 +1318,10 @@ function renderSceneContent(sceneId) {
     `;
   } else if (sceneId === 'success') {
     return `
-      <div class="success-icon">✓</div>
-      <h2 class="scene-title">${t.title}</h2>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 12px;">
+        <div class="success-icon" style="margin: 0;">✓</div>
+        <h2 class="scene-title" style="margin: 0;">${t.title}</h2>
+      </div>
       <p class="scene-desc">${t.desc}</p>
       <div class="form-actions">
         <button class="btn btn-primary" data-action="submit">${t.primaryBtn}</button>
@@ -1105,18 +1336,32 @@ function attachSceneEvents(sceneId, card) {
   const submitBtn = card.querySelector('[data-action="submit"]');
   const errorMsg = card.querySelector('.error-message');
 
+  // 注销账户场景显示哭泣挽留
+  if (sceneId === 'delete-account') {
+    currentCharacter.showCrying();
+  } else {
+    currentCharacter.hideCrying();
+  }
+
   // 输入框焦点事件
   inputs.forEach(input => {
     input.addEventListener('focus', e => {
       const field = e.target.dataset.field;
       if (field === 'email' || field === 'name' || field === 'code') {
+        if (field === 'email') {
+          currentCharacter.startRapidBlink(400);
+        }
         currentCharacter.lookDown();
       } else if (field === 'password') {
         currentCharacter.closeEyes();
       }
     });
 
-    input.addEventListener('blur', () => {
+    input.addEventListener('blur', e => {
+      const field = e.target.dataset.field;
+      if (field === 'email') {
+        currentCharacter.stopRapidBlink();
+      }
       currentCharacter.lookNormal();
       currentCharacter.openEyes();
     });
