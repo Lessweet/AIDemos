@@ -72,11 +72,16 @@
         }
 
         .pupil {
-            width: 20px;
-            height: 20px;
+            width: 32px;
+            height: 32px;
             background: #000;
             border-radius: 50%;
             position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -16px;
+            margin-top: -16px;
+            transform: translate(17px, 0);
             transition: all 0.05s ease-out;
         }
 
@@ -303,8 +308,8 @@
             const deltaY = mouseY - faceCenterY;
             const angle = Math.atan2(deltaY, deltaX);
 
-            // 计算瞳孔可以移动的最大距离
-            const maxDistance = 15;
+            // 计算瞳孔可以移动的最大距离（眼白半径25 - 眼球半径16/2 = 17）
+            const maxDistance = 17;
 
             // 计算瞳孔的新位置（两只眼睛使用相同的偏移）
             const pupilX = Math.cos(angle) * maxDistance;
@@ -318,6 +323,7 @@
         // 添加状态标记
         let isLookingDown = false;
         let eyesClosed = false;
+        let blinkInterval = null;
 
         // 监听鼠标移动事件
         document.addEventListener('mousemove', (event) => {
@@ -356,6 +362,16 @@
             }
         }
 
+        // 眨眼函数
+        function blink() {
+            leftEye.classList.add('closed');
+            rightEye.classList.add('closed');
+            setTimeout(() => {
+                leftEye.classList.remove('closed');
+                rightEye.classList.remove('closed');
+            }, 150);
+        }
+
         // 邮箱输入时眼睛向下偷看
         const usernameInput = document.getElementById('username');
 
@@ -364,9 +380,12 @@
             // 眼白向下移动并放大
             leftEye.style.transform = 'translateY(20px) scale(1.2)';
             rightEye.style.transform = 'translateY(20px) scale(1.2)';
-            // 眼球向下移动并放大
-            leftPupil.style.transform = 'translate(0, 12px) scale(1.3)';
-            rightPupil.style.transform = 'translate(0, 12px) scale(1.3)';
+            // 眼球向下移动
+            leftPupil.style.transform = 'translate(0, 12px)';
+            rightPupil.style.transform = 'translate(0, 12px)';
+
+            // 启动低频眨眼（每1.5秒眨一次）
+            blinkInterval = setInterval(blink, 1500);
         });
 
         usernameInput.addEventListener('blur', () => {
@@ -375,6 +394,12 @@
             rightEye.style.transform = '';
             leftPupil.style.transform = '';
             rightPupil.style.transform = '';
+
+            // 停止眨眼
+            if (blinkInterval) {
+                clearInterval(blinkInterval);
+                blinkInterval = null;
+            }
         });
 
         // 密码输入时眼睛闭合
@@ -396,6 +421,22 @@
         function playSound() {
             const card = document.querySelector('.card');
             const monsterFace = document.querySelector('.monster-face');
+
+            // 恢复眼睛到默认状态
+            isLookingDown = false;
+            eyesClosed = false;
+            leftEye.style.transform = '';
+            rightEye.style.transform = '';
+            leftPupil.style.transform = '';
+            rightPupil.style.transform = '';
+            leftEye.classList.remove('closed');
+            rightEye.classList.remove('closed');
+
+            // 停止眨眼
+            if (blinkInterval) {
+                clearInterval(blinkInterval);
+                blinkInterval = null;
+            }
 
             // 添加抖动动画
             card.style.animation = 'shake 0.5s ease';
