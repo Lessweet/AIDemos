@@ -56,13 +56,14 @@
         .eye {
             width: 50px;
             height: 50px;
-            background: white;
+            background: #FFF5DE;
             border-radius: 50%;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
             transition: all 0.3s ease;
+            overflow: hidden;
         }
 
         .eye.closed {
@@ -290,46 +291,54 @@
         const leftPupil = document.getElementById('leftPupil');
         const rightPupil = document.getElementById('rightPupil');
 
-        function updatePupilPosition(eye, pupil, mouseX, mouseY) {
-            // 获取眼睛的位置和尺寸
-            const eyeRect = eye.getBoundingClientRect();
-            const eyeCenterX = eyeRect.left + eyeRect.width / 2;
-            const eyeCenterY = eyeRect.top + eyeRect.height / 2;
+        function updatePupilPosition(mouseX, mouseY) {
+            // 获取脸部中心位置（两只眼睛之间）
+            const monsterFace = document.querySelector('.monster-face');
+            const faceRect = monsterFace.getBoundingClientRect();
+            const faceCenterX = faceRect.left + faceRect.width / 2;
+            const faceCenterY = faceRect.top + faceRect.height / 2;
 
-            // 计算鼠标相对于眼睛中心的角度
-            const deltaX = mouseX - eyeCenterX;
-            const deltaY = mouseY - eyeCenterY;
+            // 计算鼠标相对于脸部中心的角度（统一方向）
+            const deltaX = mouseX - faceCenterX;
+            const deltaY = mouseY - faceCenterY;
             const angle = Math.atan2(deltaY, deltaX);
 
-            // 计算瞳孔可以移动的最大距离（眼睛半径 - 瞳孔半径）
-            const maxDistance = 18;
+            // 计算瞳孔可以移动的最大距离
+            const maxDistance = 15;
 
-            // 计算瞳孔的新位置
+            // 计算瞳孔的新位置（两只眼睛使用相同的偏移）
             const pupilX = Math.cos(angle) * maxDistance;
             const pupilY = Math.sin(angle) * maxDistance;
 
-            // 应用变换
-            pupil.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+            // 应用变换到两只眼睛
+            leftPupil.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+            rightPupil.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
         }
+
+        // 添加状态标记
+        let isLookingDown = false;
+        let eyesClosed = false;
 
         // 监听鼠标移动事件
         document.addEventListener('mousemove', (event) => {
+            if (isLookingDown || eyesClosed) return;
+
             const mouseX = event.clientX;
             const mouseY = event.clientY;
 
-            updatePupilPosition(leftEye, leftPupil, mouseX, mouseY);
-            updatePupilPosition(rightEye, rightPupil, mouseX, mouseY);
+            updatePupilPosition(mouseX, mouseY);
         });
 
         // 移动端触摸支持
         document.addEventListener('touchmove', (event) => {
+            if (isLookingDown || eyesClosed) return;
+
             if (event.touches.length > 0) {
                 const touch = event.touches[0];
                 const mouseX = touch.clientX;
                 const mouseY = touch.clientY;
 
-                updatePupilPosition(leftEye, leftPupil, mouseX, mouseY);
-                updatePupilPosition(rightEye, rightPupil, mouseX, mouseY);
+                updatePupilPosition(mouseX, mouseY);
             }
         });
 
@@ -347,15 +356,38 @@
             }
         }
 
+        // 邮箱输入时眼睛向下偷看
+        const usernameInput = document.getElementById('username');
+
+        usernameInput.addEventListener('focus', () => {
+            isLookingDown = true;
+            // 眼白向下移动并放大
+            leftEye.style.transform = 'translateY(20px) scale(1.2)';
+            rightEye.style.transform = 'translateY(20px) scale(1.2)';
+            // 眼球向下移动并放大
+            leftPupil.style.transform = 'translate(0, 12px) scale(1.3)';
+            rightPupil.style.transform = 'translate(0, 12px) scale(1.3)';
+        });
+
+        usernameInput.addEventListener('blur', () => {
+            isLookingDown = false;
+            leftEye.style.transform = '';
+            rightEye.style.transform = '';
+            leftPupil.style.transform = '';
+            rightPupil.style.transform = '';
+        });
+
         // 密码输入时眼睛闭合
         const passwordInput = document.getElementById('password');
 
         passwordInput.addEventListener('focus', () => {
+            eyesClosed = true;
             leftEye.classList.add('closed');
             rightEye.classList.add('closed');
         });
 
         passwordInput.addEventListener('blur', () => {
+            eyesClosed = false;
             leftEye.classList.remove('closed');
             rightEye.classList.remove('closed');
         });
