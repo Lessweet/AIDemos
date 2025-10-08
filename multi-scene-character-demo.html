@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>multi-scene-character-demo</title>
+<style>
+/*
+=== 设计令牌（Design Tokens）===
+基于 Login-eye-following-card.html 的视觉系统
+
+=== 可覆盖角色参数（Character Overridable Props）===
+--char-face-color: 脸部颜色
+--char-eye-bg: 眼睛背景色
+--char-pupil-color: 瞳孔颜色
+--char-head-scale: 头部缩放 (0.8-1.2)
+--char-head-x/y: 头部偏移 (px)
+--char-pupil-scale: 瞳孔缩放
+--char-blink-min/max: 眨眼间隔 (ms)
+--char-look-damp: 眼神跟随阻尼
+--char-look-max: 眼神最大位移 (px)
+--char-idle-bias-x/y: 空闲视线偏移 (px)
+
+=== 事件→状态映射表 ===
+idle → pointermove/focus → focus:field
+focus:field → input → typing
+typing → valid → confirmable
+confirmable → submit → submitting
+submitting → success/error → success/error
+error → retry → idle
+*/
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f8f8f8;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* 开发工具栏 */
+.dev-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-bottom: 1px solid #EDEFF3;
+  padding: 12px 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+.dev-toolbar select, .dev-toolbar button {
+  padding: 8px 16px;
+  border: 1px solid #EDEFF3;
+  border-radius: 8px;
+  background: white;
+  color: #2c3e50;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dev-toolbar select {
+  text-align: center;
+  padding-right: 32px;
+  padding-left: 16px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232c3e50' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 10px) center;
+  background-size: 12px;
+}
+
+.dev-toolbar button {
+  text-align: center;
+}
+
+.dev-toolbar select:hover, .dev-toolbar button:hover {
+  background-color: #f8f8f8;
+}
+
+.dev-toolbar select:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232c3e50' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+/* 开发面板 */
+.dev-panel {
+  position: fixed;
+  top: 60px;
+  right: 0;
+  bottom: 0;
+  width: 480px;
+  background: white;
+  border-left: 1px solid #EDEFF3;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 100;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  box-shadow: -4px 0 16px rgba(0,0,0,.08);
+}
+
+.dev-panel.open {
+  transform: translateX(0);
+}
+
+.dev-panel-content {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.dev-prop {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dev-prop-number {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.dev-prop-number input {
+  flex: 1;
+}
+
+.dev-prop label {
+  font-size: 12px;
+  color: #7f8c8d;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.dev-prop label:hover {
+  color: #4A90E2;
+}
+
+.dev-prop input {
+  padding: 8px 10px;
+  border: 1px solid #EDEFF3;
+  border-radius: 6px;
+  background: white;
+  color: #2c3e50;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.dev-prop input:focus {
+  outline: none;
+  border-color: #4A90E2;
+}
+
+.dev-prop-color {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.dev-prop-color input[type="color"] {
+  width: 40px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid #EDEFF3;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.dev-prop-color input[type="text"] {
+  flex: 1;
+  min-width: 80px;
+}
+
+.dev-reset-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #EDEFF3;
+  border-radius: 6px;
+  background: white;
+  color: #999;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.dev-reset-btn:hover {
+  background: #f8f8f8;
+  color: #666;
+  border-color: #d0d0d0;
+}
+
+/* 场景容器 */
+.scene {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 80px 20px 20px;
+  opacity: 0;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* 卡片 */
+.scene-card {
+  background: white;
+  width: 375px;
+  height: 812px;
+  padding: 60px 40px 40px;
+  border-radius: 24px;
+  border: 1px solid #EDEFF3;
+  text-align: center;
+  position: relative;
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+/* 角色/小人 */
+.character {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 30px;
+  background: var(--char-face-color, #4A90E2);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: scale(var(--char-head-scale, 1)) translate(var(--char-head-x, 0), var(--char-head-y, 0));
+  transition: transform 0.3s ease, outline 0.2s ease;
+}
+
+.character.highlight {
+  outline: 3px dashed #4A90E2;
+  outline-offset: 8px;
+}
+
+.char-eyes {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: center;
+  transition: outline 0.2s ease;
+  border-radius: 50px;
+}
+
+.char-eyes.highlight {
+  outline: 3px dashed #f39c12;
+  outline-offset: 8px;
+}
+
+.char-eye {
+  width: 50px;
+  height: 50px;
+  background: var(--char-eye-bg, #FFF5DE);
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease, outline 0.2s ease;
+  overflow: hidden;
+}
+
+.char-eye.highlight {
+  outline: 3px dashed #27ae60;
+  outline-offset: 4px;
+}
+
+.char-eye.closed {
+  height: 5px;
+  border-radius: 25px;
+}
+
+.char-pupil {
+  width: 32px;
+  height: 32px;
+  background: var(--char-pupil-color, #000);
+  border-radius: 50%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -16px;
+  margin-top: -16px;
+  transform: translate(17px, 0) scale(var(--char-pupil-scale, 1));
+  transition: transform 0.05s ease-out;
+}
+
+.char-eye.closed .char-pupil {
+  opacity: 0;
+  transform: scale(0);
+}
+
+/* 文本 */
+.scene-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 12px;
+}
+
+.scene-desc {
+  font-size: 16px;
+  color: #7f8c8d;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* 表单 */
+.form-group {
+  position: relative;
+  width: 100%;
+  margin-top: 20px;
+  text-align: left;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 2px solid #d0d0d0;
+  font-size: 16px;
+  color: #2c3e50;
+  background: transparent;
+  transition: all 0.3s ease;
+  outline: none;
+  font-family: inherit;
+}
+
+.form-input:focus {
+  border-bottom-color: #000;
+}
+
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px white inset;
+  box-shadow: 0 0 0 1000px white inset;
+  -webkit-text-fill-color: #2c3e50;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.form-label {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  color: #999;
+  font-size: 16px;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left top;
+}
+
+.form-input:focus ~ .form-label,
+.form-input:not(:placeholder-shown) ~ .form-label {
+  top: -18px;
+  font-size: 12px;
+  color: #000;
+}
+
+/* 复选框 */
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.form-checkbox input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.form-checkbox label {
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+}
+
+/* 按钮 */
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 64px;
+}
+
+.btn {
+  width: 100%;
+  padding: 16px 32px;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #000;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: scale(1.02);
+  background: #222;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  transform: scale(1.02);
+  background: #c0392b;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.btn-danger:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #999;
+  border: none;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  color: #666;
+}
+
+/* 辅助链接 */
+.secondary-link {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 16px;
+  font-family: inherit;
+}
+
+.link-btn:hover {
+  color: #666;
+}
+
+/* 错误提示 */
+.error-message {
+  color: #e74c3c;
+  font-size: 13px;
+  margin-top: 12px;
+  text-align: left;
+  display: none;
+}
+
+.error-message.show {
+  display: block;
+}
+
+/* 成功图标 */
+.success-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  background: #27ae60;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 48px;
+  color: white;
+}
+
+/* Remember/Forgot 行 */
+.remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #666;
+  margin-top: 16px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.forgot-password {
+  color: #999;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.forgot-password:hover {
+  color: #666;
+}
+
+@media (max-width: 900px) {
+  .dev-panel {
+    width: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dev-panel {
+    width: 360px;
+  }
+}
+
+@media (max-width: 480px) {
+  .scene-card {
+    width: 100%;
+    max-width: 375px;
+    height: 812px;
+    padding: 40px 30px 30px;
+  }
+  .character {
+    width: 160px;
+    height: 160px;
+  }
+  .dev-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #EDEFF3;
+    top: auto;
+    bottom: 0;
+    height: 50vh;
+    transform: translateY(100%);
+    box-shadow: 0 -4px 16px rgba(0,0,0,.08);
+  }
+  .dev-panel.open {
+    transform: translateY(0);
+  }
+  .dev-panel-content {
+    grid-template-columns: 1fr 1fr;
+    padding: 16px;
+    gap: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="dev-toolbar">
+  <select id="sceneSelector" aria-label="场景选择">
+    <option value="login">登录</option>
+    <option value="settings">设置</option>
+    <option value="delete-account">注销账户</option>
+    <option value="reset-password">重置密码</option>
+    <option value="2fa">两步验证</option>
+    <option value="locked">账户锁定</option>
+    <option value="success">成功</option>
+  </select>
+  <select id="langSelector" aria-label="语言选择">
+    <option value="zh">中文</option>
+    <option value="en">English</option>
+  </select>
+  <button id="devPanelToggle">开发面板</button>
+</div>
+
+<div class="dev-panel" id="devPanel">
+  <div class="dev-panel-content" id="devPanelContent"></div>
+</div>
+
+<div id="app"></div>
+
+<script>
+'use strict';
+
+// ========== i18n ==========
+const i18n = {
+  zh: {
+    login: {
+      title: '欢迎回来',
+      desc: '请输入您的账号密码登录系统，我们会保护您的信息安全',
+      primaryBtn: '登录',
+      secondaryBtn: '忘记密码？',
+      emailLabel: '邮箱',
+      passwordLabel: '密码',
+      rememberLabel: '记住登录 30 天',
+      error: '邮箱或密码错误'
+    },
+    settings: {
+      title: '账户设置',
+      desc: '管理您的个人信息和偏好设置',
+      primaryBtn: '保存更改',
+      secondaryBtn: '取消',
+      emailLabel: '邮箱地址',
+      nameLabel: '显示名称'
+    },
+    'delete-account': {
+      title: '注销账户',
+      desc: '此操作将永久删除您的账户和所有数据，无法恢复',
+      primaryBtn: '确认注销',
+      secondaryBtn: '取消',
+      confirmLabel: '我理解此操作无法撤销',
+      passwordLabel: '确认密码',
+      error: '请勾选确认并输入密码'
+    },
+    'reset-password': {
+      title: '重置密码',
+      desc: '我们将发送重置链接到您的邮箱',
+      primaryBtn: '发送链接',
+      secondaryBtn: '返回登录',
+      emailLabel: '邮箱地址'
+    },
+    '2fa': {
+      title: '两步验证',
+      desc: '请输入您的 6 位验证码',
+      primaryBtn: '验证',
+      secondaryBtn: '使用备用方式',
+      codeLabel: '验证码',
+      error: '验证码错误'
+    },
+    locked: {
+      title: '账户已锁定',
+      desc: '由于多次登录失败，您的账户已被临时锁定 30 分钟',
+      primaryBtn: '联系支持',
+      secondaryBtn: '返回登录'
+    },
+    success: {
+      title: '操作成功',
+      desc: '您的请求已成功完成',
+      primaryBtn: '完成'
+    }
+  },
+  en: {
+    login: {
+      title: 'Welcome Back',
+      desc: 'Please enter your credentials to access your account securely',
+      primaryBtn: 'Sign In',
+      secondaryBtn: 'Forgot password?',
+      emailLabel: 'Email',
+      passwordLabel: 'Password',
+      rememberLabel: 'Remember me for 30 days',
+      error: 'Invalid email or password'
+    },
+    settings: {
+      title: 'Account Settings',
+      desc: 'Manage your personal information and preferences',
+      primaryBtn: 'Save Changes',
+      secondaryBtn: 'Cancel',
+      emailLabel: 'Email Address',
+      nameLabel: 'Display Name'
+    },
+    'delete-account': {
+      title: 'Delete Account',
+      desc: 'This action will permanently delete your account and all data',
+      primaryBtn: 'Confirm Deletion',
+      secondaryBtn: 'Cancel',
+      confirmLabel: 'I understand this action is irreversible',
+      passwordLabel: 'Confirm Password',
+      error: 'Please check confirmation and enter password'
+    },
+    'reset-password': {
+      title: 'Reset Password',
+      desc: 'We will send a reset link to your email',
+      primaryBtn: 'Send Link',
+      secondaryBtn: 'Back to Login',
+      emailLabel: 'Email Address'
+    },
+    '2fa': {
+      title: 'Two-Factor Auth',
+      desc: 'Enter your 6-digit verification code',
+      primaryBtn: 'Verify',
+      secondaryBtn: 'Use backup method',
+      codeLabel: 'Code',
+      error: 'Invalid code'
+    },
+    locked: {
+      title: 'Account Locked',
+      desc: 'Your account has been temporarily locked for 30 minutes due to multiple failed login attempts',
+      primaryBtn: 'Contact Support',
+      secondaryBtn: 'Back to Login'
+    },
+    success: {
+      title: 'Success',
+      desc: 'Your request has been completed successfully',
+      primaryBtn: 'Done'
+    }
+  }
+};
+
+// ========== 基础角色参数（冻结） ==========
+const baseCharacterProps = Object.freeze({
+  faceColor: '#4A90E2',
+  eyeBg: '#FFF5DE',
+  pupilColor: '#000',
+  headScale: 1,
+  headX: 0,
+  headY: 0,
+  pupilScale: 1,
+  blinkMin: 7000,
+  blinkMax: 11000,
+  lookDamp: 0.12,
+  lookMax: 17,
+  idleBiasX: 0,
+  idleBiasY: 0
+});
+
+// ========== 场景注册表 ==========
+const sceneRegistry = {
+  login: {
+    overrides: {}
+  },
+  settings: {
+    overrides: {
+      blinkMin: 9000,
+      blinkMax: 14000,
+      lookDamp: 0.15
+    }
+  },
+  'delete-account': {
+    overrides: {
+      faceColor: '#e74c3c',
+      headY: 6,
+      lookDamp: 0.1,
+      pupilScale: 0.9
+    }
+  },
+  'reset-password': {
+    overrides: {
+      faceColor: '#f39c12',
+      pupilScale: 1.05,
+      idleBiasY: 2
+    }
+  },
+  '2fa': {
+    overrides: {
+      lookMax: 12,
+      blinkMin: 5000,
+      blinkMax: 8000,
+      lookDamp: 0.08
+    }
+  },
+  locked: {
+    overrides: {
+      faceColor: '#95a5a6',
+      eyeBg: '#ecf0f1',
+      pupilScale: 0.85,
+      lookDamp: 0.06
+    }
+  },
+  success: {
+    overrides: {
+      faceColor: '#27ae60',
+      pupilScale: 1.1
+    }
+  }
+};
+
+// ========== 工具函数 ==========
+function deepMerge(target, source) {
+  const result = { ...target };
+  for (const key in source) {
+    if (source[key] !== undefined) result[key] = source[key];
+  }
+  return result;
+}
+
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
+}
+
+// ========== 角色组件 ==========
+class Character {
+  constructor(container, props) {
+    this.container = container;
+    this.props = props;
+    this.lookTarget = { x: 17, y: 0 };
+    this.blinkTimer = null;
+    this.isLookingDown = false;
+    this.eyesClosed = false;
+    this.render();
+    this.applyProps();
+    this.startBlink();
+    this.startLookLoop();
+  }
+
+  render() {
+    this.container.innerHTML = `
+      <div class="character">
+        <div class="char-eyes">
+          <div class="char-eye left-eye">
+            <div class="char-pupil left-pupil"></div>
+          </div>
+          <div class="char-eye right-eye">
+            <div class="char-pupil right-pupil"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    this.leftEye = this.container.querySelector('.left-eye');
+    this.rightEye = this.container.querySelector('.right-eye');
+    this.leftPupil = this.container.querySelector('.left-pupil');
+    this.rightPupil = this.container.querySelector('.right-pupil');
+  }
+
+  applyProps() {
+    const p = this.props;
+    this.container.style.setProperty('--char-face-color', p.faceColor);
+    this.container.style.setProperty('--char-eye-bg', p.eyeBg);
+    this.container.style.setProperty('--char-pupil-color', p.pupilColor);
+    this.container.style.setProperty('--char-head-scale', p.headScale);
+    this.container.style.setProperty('--char-head-x', p.headX + 'px');
+    this.container.style.setProperty('--char-head-y', p.headY + 'px');
+    this.container.style.setProperty('--char-pupil-scale', p.pupilScale);
+  }
+
+  lookAt(target) {
+    if (this.isLookingDown || this.eyesClosed) return;
+
+    const face = this.container.querySelector('.character');
+    const faceRect = face.getBoundingClientRect();
+    const faceCenterX = faceRect.left + faceRect.width / 2;
+    const faceCenterY = faceRect.top + faceRect.height / 2;
+
+    const deltaX = target.x - faceCenterX;
+    const deltaY = target.y - faceCenterY;
+    const angle = Math.atan2(deltaY, deltaX);
+
+    const maxDistance = this.props.lookMax;
+    const pupilX = Math.cos(angle) * maxDistance;
+    const pupilY = Math.sin(angle) * maxDistance;
+
+    this.lookTarget = { x: pupilX + this.props.idleBiasX, y: pupilY + this.props.idleBiasY };
+  }
+
+  startLookLoop() {
+    let currentX = 17;
+    let currentY = 0;
+    const loop = () => {
+      currentX += (this.lookTarget.x - currentX) * this.props.lookDamp;
+      currentY += (this.lookTarget.y - currentY) * this.props.lookDamp;
+
+      this.leftPupil.style.transform = `translate(${currentX}px, ${currentY}px) scale(var(--char-pupil-scale, 1))`;
+      this.rightPupil.style.transform = `translate(${currentX}px, ${currentY}px) scale(var(--char-pupil-scale, 1))`;
+
+      requestAnimationFrame(loop);
+    };
+    loop();
+  }
+
+  startBlink() {
+    const blink = () => {
+      this.leftEye.classList.add('closed');
+      this.rightEye.classList.add('closed');
+      setTimeout(() => {
+        this.leftEye.classList.remove('closed');
+        this.rightEye.classList.remove('closed');
+      }, 150);
+      const next = this.props.blinkMin + Math.random() * (this.props.blinkMax - this.props.blinkMin);
+      this.blinkTimer = setTimeout(blink, next);
+    };
+    blink();
+  }
+
+  lookDown() {
+    this.isLookingDown = true;
+    this.leftEye.style.transform = 'translateY(20px) scale(1.2)';
+    this.rightEye.style.transform = 'translateY(20px) scale(1.2)';
+    this.lookTarget = { x: 0, y: 12 };
+  }
+
+  lookNormal() {
+    this.isLookingDown = false;
+    this.leftEye.style.transform = '';
+    this.rightEye.style.transform = '';
+    this.lookTarget = { x: 17 + this.props.idleBiasX, y: this.props.idleBiasY };
+  }
+
+  closeEyes() {
+    this.eyesClosed = true;
+    this.leftEye.classList.add('closed');
+    this.rightEye.classList.add('closed');
+  }
+
+  openEyes() {
+    this.eyesClosed = false;
+    this.leftEye.classList.remove('closed');
+    this.rightEye.classList.remove('closed');
+  }
+
+  destroy() {
+    if (this.blinkTimer) clearTimeout(this.blinkTimer);
+  }
+}
+
+// ========== 应用状态 ==========
+let currentScene = null;
+let currentLang = new URLSearchParams(location.search).get('lang') || 'zh';
+let currentCharacter = null;
+
+// ========== 路由 ==========
+function navigate(scene) {
+  if (!sceneRegistry[scene]) scene = 'login';
+  location.hash = scene;
+  renderScene(scene);
+}
+
+function renderScene(sceneId) {
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+
+  const scene = sceneRegistry[sceneId];
+  const props = deepMerge({ ...baseCharacterProps }, scene.overrides);
+
+  const sceneEl = document.createElement('div');
+  sceneEl.className = 'scene';
+  sceneEl.dataset.scene = sceneId;
+
+  const card = document.createElement('div');
+  card.className = 'scene-card';
+
+  const charContainer = document.createElement('div');
+  card.appendChild(charContainer);
+
+  if (currentCharacter) currentCharacter.destroy();
+  currentCharacter = new Character(charContainer, props);
+
+  const content = renderSceneContent(sceneId);
+  card.insertAdjacentHTML('beforeend', content);
+
+  sceneEl.appendChild(card);
+  app.appendChild(sceneEl);
+
+  attachSceneEvents(sceneId, card);
+  currentScene = sceneId;
+
+  document.getElementById('sceneSelector').value = sceneId;
+  updateDevPanel(props);
+}
+
+function renderSceneContent(sceneId) {
+  const t = i18n[currentLang][sceneId];
+
+  if (sceneId === 'login') {
+    return `
+      <h2 class="scene-title">${t.title}</h2>
+      <p class="scene-desc">${t.desc}</p>
+      <div class="form-group">
+        <input type="text" class="form-input" placeholder=" " data-field="email">
+        <label class="form-label">${t.emailLabel}</label>
+      </div>
+      <div class="form-group">
+        <input type="password" class="form-input" placeholder=" " data-field="password">
+        <label class="form-label">${t.passwordLabel}</label>
+      </div>
+      <div class="remember-forgot">
+        <label class="remember-me">
+          <input type="checkbox" data-field="remember">
+          <span>${t.rememberLabel}</span>
+        </label>
+        <a href="#" class="forgot-password" data-action="forgot">${t.secondaryBtn}</a>
+      </div>
+      <div class="error-message" role="alert" aria-live="polite">${t.error}</div>
+      <div class="form-actions">
+        <button class="btn btn-primary" data-action="submit">${t.primaryBtn}</button>
+      </div>
+    `;
+  } else if (sceneId === 'settings') {
+    return `
+      <h2 class="scene-title">${t.title}</h2>
+      <p class="scene-desc">${t.desc}</p>
+      <div class="form-group">
+        <input type="text" class="form-input" placeholder=" " data-field="name">
+        <label class="form-label">${t.nameLabel}</label>
+      </div>
+      <div class="form-group">
+        <input type="email" class="form-input" placeholder=" " data-field="email">
+        <label class="form-label">${t.emailLabel}</label>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" data-action="submit">${t.primaryBtn}</button>
+        <button class="btn btn-secondary" data-action="secondary">${t.secondaryBtn}</button>
+      </div>
+    `;
+  } else if (sceneId === 'delete-account') {
+    return `
+      <h2 class="scene-title">${t.title}</h2>
+      <p class="scene-desc">${t.desc}</p>
+      <div class="form-checkbox">
+        <input type="checkbox" id="confirm-delete" data-field="confirm">
+        <label for="confirm-delete">${t.confirmLabel}</label>
+      </div>
+      <div class="form-group">
+        <input type="password" class="form-input" placeholder=" " data-field="password">
+        <label class="form-label">${t.passwordLabel}</label>
+      </div>
+      <div class="error-message" role="alert" aria-live="polite">${t.error}</div>
+      <div class="form-actions">
+        <button class="btn btn-danger" data-action="submit" disabled>${t.primaryBtn}</button>
+        <button class="btn btn-secondary" data-action="secondary">${t.secondaryBtn}</button>
+      </div>
+    `;
+  } else if (sceneId === 'reset-password') {
+    return `
+      <h2 class="scene-title">${t.title}</h2>
+      <p class="scene-desc">${t.desc}</p>
+      <div class="form-group">
+        <input type="email" class="form-input" placeholder=" " data-field="email">
+        <label class="form-label">${t.emailLabel}</label>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" data-action="submit">${t.primaryBtn}</button>
+      </div>
+      <div class="secondary-link">
+        <button class="link-btn" data-action="secondary">${t.secondaryBtn}</button>
+      </div>
+    `;
+  } else if (sceneId === '2fa') {
+    return `
+      <h2 class="scene-title">${t.title}</h2>
+      <p class="scene-desc">${t.desc}</p>
+      <div class="form-group">
+        <input type="text" class="form-input" placeholder=" " data-field="code" maxlength="6" inputmode="numeric">
+        <label class="form-label">${t.codeLabel}</label>
+      </div>
+      <div class="error-message" role="alert" aria-live="polite">${t.error}</div>
+      <div class="form-actions">
+        <button class="btn btn-primary" data-action="submit">${t.primaryBtn}</button>
+      </div>
+      <div class="secondary-link">
+        <button class="link-btn" data-action="secondary">${t.secondaryBtn}</button>
+      </div>
+    `;
+  } else if (sceneId === 'locked') {
+    return `
+      <h2 class="scene-title">${t.title}</h2>
+      <p class="scene-desc">${t.desc}</p>
+      <div class="form-actions">
+        <button class="btn btn-primary" data-action="submit">${t.primaryBtn}</button>
+      </div>
+      <div class="secondary-link">
+        <button class="link-btn" data-action="secondary">${t.secondaryBtn}</button>
+      </div>
+    `;
+  } else if (sceneId === 'success') {
+    return `
+      <div class="success-icon">✓</div>
+      <h2 class="scene-title">${t.title}</h2>
+      <p class="scene-desc">${t.desc}</p>
+      <div class="form-actions">
+        <button class="btn btn-primary" data-action="submit">${t.primaryBtn}</button>
+      </div>
+    `;
+  }
+  return '';
+}
+
+function attachSceneEvents(sceneId, card) {
+  const inputs = card.querySelectorAll('.form-input');
+  const submitBtn = card.querySelector('[data-action="submit"]');
+  const errorMsg = card.querySelector('.error-message');
+
+  // 输入框焦点事件
+  inputs.forEach(input => {
+    input.addEventListener('focus', e => {
+      const field = e.target.dataset.field;
+      if (field === 'email' || field === 'name' || field === 'code') {
+        currentCharacter.lookDown();
+      } else if (field === 'password') {
+        currentCharacter.closeEyes();
+      }
+    });
+
+    input.addEventListener('blur', () => {
+      currentCharacter.lookNormal();
+      currentCharacter.openEyes();
+    });
+  });
+
+  // 鼠标移动跟随
+  document.addEventListener('pointermove', e => {
+    currentCharacter.lookAt({ x: e.clientX, y: e.clientY });
+  });
+
+  // 删除账户验证
+  if (sceneId === 'delete-account') {
+    const confirm = card.querySelector('[data-field="confirm"]');
+    const password = card.querySelector('[data-field="password"]');
+    const validate = () => {
+      submitBtn.disabled = !(confirm.checked && password.value.length > 0);
+    };
+    confirm?.addEventListener('change', validate);
+    password?.addEventListener('input', validate);
+  }
+
+  // 提交按钮
+  submitBtn?.addEventListener('click', () => {
+    if (submitBtn.disabled) return;
+
+    if ((sceneId === 'login' || sceneId === '2fa') && errorMsg) {
+      const hasValue = Array.from(inputs).some(i => i.value.length > 0);
+      if (!hasValue) {
+        errorMsg.classList.add('show');
+        return;
+      }
+      errorMsg.classList.remove('show');
+    }
+
+    submitBtn.disabled = true;
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = originalText + '...';
+
+    setTimeout(() => {
+      if (sceneId === 'success') {
+        navigate('login');
+      } else {
+        navigate('success');
+      }
+    }, 1000);
+  });
+
+  // 次要按钮
+  const secondaryBtn = card.querySelector('[data-action="secondary"]');
+  secondaryBtn?.addEventListener('click', () => navigate('login'));
+
+  const forgotBtn = card.querySelector('[data-action="forgot"]');
+  forgotBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    navigate('reset-password');
+  });
+
+  // Enter 键提交
+  card.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && submitBtn && !submitBtn.disabled) {
+      submitBtn.click();
+    }
+  });
+
+  // 锁定场景特效
+  if (sceneId === 'locked') {
+    setInterval(() => {
+      if (Math.random() > 0.7) {
+        currentCharacter.lookTarget = { x: (Math.random() - 0.5) * 10, y: (Math.random() - 0.5) * 10 };
+      }
+    }, 3000);
+  }
+}
+
+// ========== 开发面板 ==========
+// 元素高亮辅助函数
+function highlightElement(prop) {
+  removeAllHighlights();
+
+  const character = document.querySelector('.character');
+  const eyes = document.querySelector('.char-eyes');
+  const eyeElements = document.querySelectorAll('.char-eye');
+
+  // 根据属性映射到对应元素
+  const headProps = ['faceColor', 'headScale', 'headX', 'headY'];
+  const eyeProps = ['eyeBg', 'pupilColor', 'pupilScale', 'blinkMin', 'blinkMax'];
+  const eyesProps = ['lookDamp', 'lookMax', 'idleBiasX', 'idleBiasY'];
+
+  if (headProps.includes(prop)) {
+    character?.classList.add('highlight');
+  } else if (eyeProps.includes(prop)) {
+    eyeElements.forEach(eye => eye.classList.add('highlight'));
+  } else if (eyesProps.includes(prop)) {
+    eyes?.classList.add('highlight');
+  }
+}
+
+function removeAllHighlights() {
+  document.querySelectorAll('.highlight').forEach(el => {
+    el.classList.remove('highlight');
+  });
+}
+
+function updateDevPanel(props) {
+  const content = document.getElementById('devPanelContent');
+  content.innerHTML = `
+    <div class="dev-prop">
+      <label>faceColor</label>
+      <div class="dev-prop-color">
+        <input type="color" data-prop="faceColor" data-type="color" value="${props.faceColor}">
+        <input type="text" data-prop="faceColor" data-type="text" value="${props.faceColor}">
+        <button class="dev-reset-btn" data-reset="faceColor" title="恢复默认">↺</button>
+      </div>
+    </div>
+    <div class="dev-prop">
+      <label>eyeBg</label>
+      <div class="dev-prop-color">
+        <input type="color" data-prop="eyeBg" data-type="color" value="${props.eyeBg}">
+        <input type="text" data-prop="eyeBg" data-type="text" value="${props.eyeBg}">
+        <button class="dev-reset-btn" data-reset="eyeBg" title="恢复默认">↺</button>
+      </div>
+    </div>
+    <div class="dev-prop">
+      <label>pupilColor</label>
+      <div class="dev-prop-color">
+        <input type="color" data-prop="pupilColor" data-type="color" value="${props.pupilColor}">
+        <input type="text" data-prop="pupilColor" data-type="text" value="${props.pupilColor}">
+        <button class="dev-reset-btn" data-reset="pupilColor" title="恢复默认">↺</button>
+      </div>
+    </div>
+    <div class="dev-prop">
+      <label>headScale</label>
+      <div class="dev-prop-number">
+        <input type="number" step="0.1" data-prop="headScale" value="${props.headScale}">
+        <button class="dev-reset-btn" data-reset="headScale" title="恢复默认">↺</button>
+      </div>
+    </div>
+    <div class="dev-prop">
+      <label>headX</label>
+      <div class="dev-prop-number">
+        <input type="number" data-prop="headX" value="${props.headX}">
+        <button class="dev-reset-btn" data-reset="headX" title="恢复默认">↺</button>
+      </div>
+    </div>
+    <div class="dev-prop">
+      <label>headY</label>
+      <div class="dev-prop-number">
+        <input type="number" data-prop="headY" value="${props.headY}">
+        <button class="dev-reset-btn" data-reset="headY" title="恢复默认">↺</button>
+      </div>
+    </div>
+    <div class="dev-prop">
+      <label>pupilScale</label>
+      <div class="dev-prop-number">
+        <input type="number" step="0.05" data-prop="pupilScale" value="${props.pupilScale}">
+        <button class="dev-reset-btn" data-reset="pupilScale" title="恢复默认">↺</button>
+      </div>
+    </div>
+    <div class="dev-prop">
+      <label>blinkMin</label>
+      <div class="dev-prop-number">
+        <input type="number" data-prop="blinkMin" value="${props.blinkMin}">
+        <button class="dev-reset-btn" data-reset="blinkMin" title="恢复默认">↺</button>
+      </div>
+    </div>
+    <div class="dev-prop">
+      <label>blinkMax</label>
+      <div class="dev-prop-number">
+        <input type="number" data-prop="blinkMax" value="${props.blinkMax}">
+        <button class="dev-reset-btn" data-reset="blinkMax" title="恢复默认">↺</button>
+      </div>
+    </div>
+    <div class="dev-prop">
+      <label>lookDamp</label>
+      <div class="dev-prop-number">
+        <input type="number" step="0.01" data-prop="lookDamp" value="${props.lookDamp}">
+        <button class="dev-reset-btn" data-reset="lookDamp" title="恢复默认">↺</button>
+      </div>
+    </div>
+    <div class="dev-prop">
+      <label>lookMax</label>
+      <div class="dev-prop-number">
+        <input type="number" data-prop="lookMax" value="${props.lookMax}">
+        <button class="dev-reset-btn" data-reset="lookMax" title="恢复默认">↺</button>
+      </div>
+    </div>
+    <div class="dev-prop">
+      <label>idleBiasX</label>
+      <div class="dev-prop-number">
+        <input type="number" data-prop="idleBiasX" value="${props.idleBiasX}">
+        <button class="dev-reset-btn" data-reset="idleBiasX" title="恢复默认">↺</button>
+      </div>
+    </div>
+    <div class="dev-prop">
+      <label>idleBiasY</label>
+      <div class="dev-prop-number">
+        <input type="number" data-prop="idleBiasY" value="${props.idleBiasY}">
+        <button class="dev-reset-btn" data-reset="idleBiasY" title="恢复默认">↺</button>
+      </div>
+    </div>
+  `;
+
+  // 输入框事件
+  content.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', e => {
+      const prop = e.target.dataset.prop;
+      let val = e.target.value;
+      if (e.target.type === 'number') {
+        val = parseFloat(val);
+      }
+
+      // 更新角色属性
+      currentCharacter.props[prop] = val;
+      currentCharacter.applyProps();
+
+      // 如果是颜色输入，同步更新对应的另一个输入框
+      if (e.target.dataset.type === 'color') {
+        const textInput = content.querySelector(`input[data-prop="${prop}"][data-type="text"]`);
+        if (textInput) textInput.value = val;
+      } else if (e.target.dataset.type === 'text') {
+        const colorInput = content.querySelector(`input[data-prop="${prop}"][data-type="color"]`);
+        if (colorInput) colorInput.value = val;
+      }
+    });
+
+    // 添加焦点高亮
+    input.addEventListener('focus', e => {
+      const prop = e.target.dataset.prop;
+      highlightElement(prop);
+    });
+
+    input.addEventListener('blur', () => {
+      removeAllHighlights();
+    });
+  });
+
+  // 标签悬停高亮
+  content.querySelectorAll('.dev-prop').forEach(prop => {
+    const label = prop.querySelector('label');
+    const input = prop.querySelector('input[data-prop]');
+    if (label && input) {
+      label.addEventListener('mouseenter', () => {
+        const propName = input.dataset.prop;
+        highlightElement(propName);
+      });
+      label.addEventListener('mouseleave', () => {
+        removeAllHighlights();
+      });
+    }
+  });
+
+  // 重置按钮事件
+  content.querySelectorAll('.dev-reset-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const prop = e.target.dataset.reset;
+      const defaultVal = baseCharacterProps[prop];
+
+      // 更新角色属性
+      currentCharacter.props[prop] = defaultVal;
+      currentCharacter.applyProps();
+
+      // 更新输入框显示（颜色属性）
+      const colorInput = content.querySelector(`input[data-prop="${prop}"][data-type="color"]`);
+      const textInput = content.querySelector(`input[data-prop="${prop}"][data-type="text"]`);
+      if (colorInput) colorInput.value = defaultVal;
+      if (textInput) textInput.value = defaultVal;
+
+      // 更新输入框显示（数字属性）
+      const numberInput = content.querySelector(`input[data-prop="${prop}"][type="number"]`);
+      if (numberInput) numberInput.value = defaultVal;
+    });
+
+    // 重置按钮悬停高亮
+    btn.addEventListener('mouseenter', e => {
+      const prop = e.target.dataset.reset;
+      highlightElement(prop);
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      removeAllHighlights();
+    });
+  });
+}
+
+// ========== 初始化 ==========
+document.getElementById('sceneSelector').addEventListener('change', e => navigate(e.target.value));
+document.getElementById('langSelector').addEventListener('change', e => {
+  currentLang = e.target.value;
+  renderScene(currentScene);
+});
+document.getElementById('devPanelToggle').addEventListener('click', () => {
+  document.getElementById('devPanel').classList.toggle('open');
+});
+
+window.addEventListener('hashchange', () => {
+  const scene = location.hash.slice(1) || 'login';
+  if (scene !== currentScene) renderScene(scene);
+});
+
+const initialScene = location.hash.slice(1) || 'login';
+navigate(initialScene);
+</script>
+
+</body>
+</html>
