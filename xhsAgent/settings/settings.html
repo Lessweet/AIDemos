@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小红书Agent 设置</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="settings-container">
+    <h1 class="title">小红书Agent 设置</h1>
+
+    <div class="section">
+      <h2 class="section-title">笔记理解模型配置</h2>
+      <p class="section-desc">用于理解笔记图片和文字内容（需支持视觉能力）</p>
+
+      <div class="form-group">
+        <label for="understanding-base-url">Base URL</label>
+        <input type="text" id="understanding-base-url" placeholder="例如: https://openrouter.ai/api/v1">
+      </div>
+
+      <div class="form-group">
+        <label for="understanding-api-key">API Key</label>
+        <input type="password" id="understanding-api-key" placeholder="请输入API Key">
+      </div>
+
+      <div class="form-group">
+        <label for="understanding-model">模型名称</label>
+        <input type="text" id="understanding-model" placeholder="例如: qwen/qwen-vl-max">
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">评论生成模型配置</h2>
+      <p class="section-desc">用于生成评论回复</p>
+
+      <div class="form-group">
+        <label for="generation-base-url">Base URL</label>
+        <input type="text" id="generation-base-url" placeholder="例如: https://api.deepseek.com">
+      </div>
+
+      <div class="form-group">
+        <label for="generation-api-key">API Key</label>
+        <input type="password" id="generation-api-key" placeholder="请输入API Key">
+      </div>
+
+      <div class="form-group">
+        <label for="generation-model">模型名称</label>
+        <input type="text" id="generation-model" placeholder="例如: deepseek-chat">
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">生成配置</h2>
+
+      <div class="form-group">
+        <label for="comment-count">每次生成评论数量</label>
+        <input type="number" id="comment-count" min="3" max="10" value="3">
+        <span class="hint">范围: 3-10 条</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">人设配置</h2>
+
+      <div class="form-group">
+        <label for="persona">我的人设</label>
+        <textarea id="persona" rows="5" placeholder="请描述你的人设，例如：我是一名AI产品经理，关注AI技术在实际产品中的应用，喜欢从用户体验的角度分析问题..."></textarea>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button id="save-btn" class="btn btn-primary">保存设置</button>
+      <button id="test-btn" class="btn btn-secondary">测试连接</button>
+    </div>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>
