@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小红书 Agent 浏览器插件 - AI 辅助开发流程</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            line-height: 1.4;
+            color: #333;
+            background: #f5f7fa;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #3b82f6;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        header p {
+            font-size: 1em;
+            color: #64748b;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .main-flow {
+            grid-column: 1 / -1;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #1e293b;
+            margin-bottom: 15px;
+            padding-left: 12px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 0.9em;
+            opacity: 0.95;
+        }
+
+        .mermaid-container {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-left: 3px solid #3b82f6;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .info-box h3 {
+            color: #1e293b;
+            font-size: 0.95em;
+            margin-bottom: 8px;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+            font-size: 0.85em;
+        }
+
+        .info-box ul li {
+            padding: 3px 0;
+            padding-left: 18px;
+            position: relative;
+            color: #475569;
+        }
+
+        .info-box ul li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #3b82f6;
+            font-weight: bold;
+        }
+
+        .timeline-section {
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: #3b82f6;
+            color: white;
+        }
+
+        th, td {
+            padding: 10px 15px;
+            text-align: left;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tbody tr:last-child {
+            font-weight: bold;
+            background: #eff6ff;
+        }
+
+        .key-points {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .point-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .point-card h4 {
+            color: #1e293b;
+            font-size: 0.95em;
+            margin-bottom: 8px;
+        }
+
+        .point-card ul {
+            list-style: none;
+            padding: 0;
+            font-size: 0.85em;
+        }
+
+        .point-card ul li {
+            padding: 3px 0;
+            color: #475569;
+        }
+
+        .point-card ul li:before {
+            content: "✓ ";
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .tag {
+            background: #eff6ff;
+            color: #1e40af;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            border: 1px solid #bfdbfe;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 2px solid #3b82f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .summary-box p {
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #1e293b;
+        }
+
+        footer {
+            text-align: center;
+            padding-top: 20px;
+            margin-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 0.85em;
+        }
+
+        /* 调整Mermaid图表样式 */
+        .mermaid {
+            font-size: 12px;
+        }
+
+        /* 打印优化 */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>小红书 Agent 浏览器插件 - AI 辅助开发流程</h1>
+            <p>使用 Claude Code 完成全流程开发 | 从需求到上线仅需 10 小时</p>
+        </header>
+
+        <!-- 统计数据 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>10h</h3>
+                <p>总开发时间</p>
+            </div>
+            <div class="stat-card">
+                <h3>80%</h3>
+                <p>AI 生成代码</p>
+            </div>
+            <div class="stat-card">
+                <h3>1550+</h3>
+                <p>代码行数</p>
+            </div>
+            <div class="stat-card">
+                <h3>6</h3>
+                <p>核心模块</p>
+            </div>
+        </div>
+
+        <!-- 主流程图 -->
+        <div class="main-flow">
+            <h2 class="section-title">完整开发流程</h2>
+            <div class="mermaid-container">
+                <div class="mermaid">
+graph LR
+    A[需求分析] --> B[系统设计]
+    B --> C[基础框架]
+    C --> D[核心功能]
+    D --> E[UI/样式]
+    E --> F[测试调试]
+    F --> G[优化完善]
+    G --> H[文档编写]
+    H --> I[项目完成]
+
+    A -.->|Claude Code| A1[需求澄清<br/>技术建议]
+    B -.->|Claude Code| B1[架构设计<br/>流程规划]
+    C -.->|Claude Code| C1[项目结构<br/>配置文件]
+    D -.->|Claude Code| D1[代码生成<br/>逐步实现]
+    E -.->|Claude Code| E1[样式适配<br/>UI优化]
+    F -.->|Claude Code| F1[问题诊断<br/>Bug修复]
+    G -.->|Claude Code| G1[性能优化<br/>体验改进]
+    H -.->|Claude Code| H1[文档生成<br/>代码注释]
+
+    style A fill:#dbeafe
+    style B fill:#dbeafe
+    style C fill:#dbeafe
+    style D fill:#bfdbfe
+    style E fill:#bfdbfe
+    style F fill:#fef3c7
+    style G fill:#d1fae5
+    style H fill:#d1fae5
+    style I fill:#86efac
+                </div>
+            </div>
+        </div>
+
+        <!-- 双栏布局 -->
+        <div class="content-grid">
+            <!-- 左侧：技术架构 -->
+            <div>
+                <h2 class="section-title">核心技术架构</h2>
+                <div class="mermaid-container">
+                    <div class="mermaid">
+graph TB
+    User[用户点击AI按钮] --> Check1{笔记缓存?}
+    Check1 -->|无| Vision[视觉模型<br/>理解笔记]
+    Vision --> Cache1[缓存笔记理解]
+    Check1 -->|有| Check2{评论缓存?}
+    Cache1 --> Check2
+    Check2 -->|无| LLM[生成模型<br/>生成评论]
+    LLM --> Cache2[缓存评论]
+    Check2 -->|有| Show[显示面板]
+    Cache2 --> Show
+
+    style Vision fill:#fecaca
+    style LLM fill:#bfdbfe
+    style Cache1 fill:#d1fae5
+    style Cache2 fill:#d1fae5
+                    </div>
+                </div>
+
+                <h2 class="section-title" style="margin-top: 20px;">开发时间线</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>阶段</th>
+                            <th>时间</th>
+                            <th>AI 贡献</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>需求分析</td><td>0.5h</td><td>需求澄清、技术建议</td></tr>
+                        <tr><td>系统设计</td><td>1h</td><td>架构设计、流程规划</td></tr>
+                        <tr><td>基础框架</td><td>1h</td><td>项目结构、配置文件</td></tr>
+                        <tr><td>核心功能</td><td>3h</td><td>代码生成、逐步实现</td></tr>
+                        <tr><td>UI/样式</td><td>1h</td><td>样式适配、UI优化</td></tr>
+                        <tr><td>测试调试</td><td>2h</td><td>问题诊断、Bug修复</td></tr>
+                        <tr><td>优化完善</td><td>1h</td><td>性能优化、体验改进</td></tr>
+                        <tr><td>文档编写</td><td>0.5h</td><td>文档生成、代码注释</td></tr>
+                        <tr><td>总计</td><td>10h</td><td>80% 代码由AI生成</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 右侧：AI 作用阶段 -->
+            <div>
+                <h2 class="section-title">Claude Code 各阶段作用</h2>
+                <div class="info-box">
+                    <h3>1️⃣ 需求分析</h3>
+                    <ul>
+                        <li>交互对话明确需求</li>
+                        <li>技术方案建议</li>
+                        <li>可行性评估</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <h3>2️⃣ 系统设计</h3>
+                    <ul>
+                        <li>架构设计建议</li>
+                        <li>API接口设计</li>
+                        <li>缓存策略规划</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <h3>3️⃣ 代码实现</h3>
+                    <ul>
+                        <li>生成核心代码</li>
+                        <li>模块化开发</li>
+                        <li>最佳实践应用</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <h3>4️⃣ 测试调试</h3>
+                    <ul>
+                        <li>问题诊断分析</li>
+                        <li>Bug定位修复</li>
+                        <li>兼容性处理</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <h3>5️⃣ 优化完善</h3>
+                    <ul>
+                        <li>性能优化建议</li>
+                        <li>成本优化方案</li>
+                        <li>用户体验改进</li>
+                    </ul>
+                </div>
+                <div class="info-box">
+                    <h3>6️⃣ 文档编写</h3>
+                    <ul>
+                        <li>自动生成文档</li>
+                        <li>添加代码注释</li>
+                        <li>编写使用示例</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关键成果 -->
+        <div class="key-points">
+            <div class="point-card">
+                <h4>✅ AI 辅助开发优势</h4>
+                <ul>
+                    <li>快速原型：几小时完成可用插件</li>
+                    <li>最佳实践：符合规范的代码结构</li>
+                    <li>完善文档：自动生成详细说明</li>
+                    <li>持续优化：通过对话不断改进</li>
+                </ul>
+            </div>
+            <div class="point-card">
+                <h4>🔑 成功关键因素</h4>
+                <ul>
+                    <li>清晰需求：明确告诉AI功能需求</li>
+                    <li>迭代开发：逐步完善不求完美</li>
+                    <li>主动测试：及时反馈问题</li>
+                    <li>理解代码：便于后续维护</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 技术亮点 -->
+        <h2 class="section-title">技术亮点</h2>
+        <div class="tech-tags">
+            <span class="tag">Manifest V3 标准</span>
+            <span class="tag">MutationObserver 监听</span>
+            <span class="tag">双模型协作</span>
+            <span class="tag">智能缓存机制</span>
+            <span class="tag">原生风格UI</span>
+            <span class="tag">完善错误处理</span>
+            <span class="tag">上下文感知</span>
+            <span class="tag">人设定制</span>
+        </div>
+
+        <!-- 总结 -->
+        <div class="summary-box">
+            <p><strong>通过 Claude Code 的 AI 辅助开发，在约 10 小时内完成了功能完整、代码规范、文档齐全的浏览器插件项目。</strong></p>
+            <p>AI 不仅生成了约 80% 的代码，还在架构设计、问题诊断、性能优化等方面提供了专业建议，证明了人机协作可以显著提升开发效率和代码质量。</p>
+        </div>
+
+        <footer>
+            <p>开发时间: 2025-01-10 | AI 工具: Claude Code (Anthropic) | 开发方式: AI 辅助全流程开发</p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>
