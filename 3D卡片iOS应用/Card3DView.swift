@@ -82,13 +82,23 @@ struct Card3DView: View {
                         gradient: Gradient(stops: [
                             .init(color: Color.clear, location: 0),
                             .init(color: Color.clear, location: cardModel.lightPosition - 0.35),
-                            .init(color: Color.white.opacity(0.1), location: cardModel.lightPosition - 0.25),
-                            .init(color: Color.white.opacity(0.3), location: cardModel.lightPosition - 0.15),
-                            .init(color: Color.white.opacity(0.5), location: cardModel.lightPosition - 0.08),
-                            .init(color: Color.white.opacity(0.6), location: cardModel.lightPosition),
-                            .init(color: Color.white.opacity(0.5), location: cardModel.lightPosition + 0.08),
-                            .init(color: Color.white.opacity(0.3), location: cardModel.lightPosition + 0.15),
-                            .init(color: Color.white.opacity(0.1), location: cardModel.lightPosition + 0.25),
+                            .init(color: Color.white.opacity(0.05), location: cardModel.lightPosition - 0.28),
+                            .init(color: Color.white.opacity(0.1), location: cardModel.lightPosition - 0.22),
+                            .init(color: Color.white.opacity(0.15), location: cardModel.lightPosition - 0.18),
+                            .init(color: Color.white.opacity(0.22), location: cardModel.lightPosition - 0.14),
+                            .init(color: Color.white.opacity(0.3), location: cardModel.lightPosition - 0.10),
+                            .init(color: Color.white.opacity(0.38), location: cardModel.lightPosition - 0.06),
+                            .init(color: Color.white.opacity(0.46), location: cardModel.lightPosition - 0.03),
+                            .init(color: Color.white.opacity(0.52), location: cardModel.lightPosition - 0.01),
+                            .init(color: Color.white.opacity(0.55), location: cardModel.lightPosition),
+                            .init(color: Color.white.opacity(0.52), location: cardModel.lightPosition + 0.01),
+                            .init(color: Color.white.opacity(0.46), location: cardModel.lightPosition + 0.03),
+                            .init(color: Color.white.opacity(0.38), location: cardModel.lightPosition + 0.06),
+                            .init(color: Color.white.opacity(0.3), location: cardModel.lightPosition + 0.10),
+                            .init(color: Color.white.opacity(0.22), location: cardModel.lightPosition + 0.14),
+                            .init(color: Color.white.opacity(0.15), location: cardModel.lightPosition + 0.18),
+                            .init(color: Color.white.opacity(0.1), location: cardModel.lightPosition + 0.22),
+                            .init(color: Color.white.opacity(0.05), location: cardModel.lightPosition + 0.28),
                             .init(color: Color.clear, location: cardModel.lightPosition + 0.35),
                             .init(color: Color.clear, location: 1)
                         ]),
@@ -98,7 +108,7 @@ struct Card3DView: View {
                 )
                 .frame(width: cardModel.cardWidth, height: cardModel.cardHeight)
                 .opacity(cardModel.lightIntensity)
-                .blendMode(.overlay)
+                .blendMode(.softLight)
 
             // 卡片内容
             VStack(alignment: .leading, spacing: 8) {
