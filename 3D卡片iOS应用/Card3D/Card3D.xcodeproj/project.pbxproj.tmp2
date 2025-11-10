@@ -7,16 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CDFF4C8C2EB3D41E00AAF677 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CDFF4C8B2EB3D41E00AAF677 /* Assets.xcassets */; };
-		CDFF4C8F2EB3D41E00AAF677 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CDFF4C8E2EB3D41E00AAF677 /* Preview Assets.xcassets */; };
+		CD22DC862EC23DE500388164 /* Card3D in Resources */ = {isa = PBXBuildFile; fileRef = CD22DC852EC23DE500388164 /* Card3D */; };
+		CDF7C7C52EC23F4900E59A1C /* OrbitControls.r128.js in Resources */ = {isa = PBXBuildFile; fileRef = CDF7C7C22EC23F4900E59A1C /* OrbitControls.r128.js */; };
+		CDF7C7C62EC23F4900E59A1C /* ThreeJSLiquidSphere.html in Resources */ = {isa = PBXBuildFile; fileRef = CDF7C7C32EC23F4900E59A1C /* ThreeJSLiquidSphere.html */; };
+		CDF7C7C72EC23F4900E59A1C /* ThreeJSLiquidSphereLocal.html in Resources */ = {isa = PBXBuildFile; fileRef = CDF7C7C42EC23F4900E59A1C /* ThreeJSLiquidSphereLocal.html */; };
 		CDFF4C992EB3D41E00AAF677 /* Card3DTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4C982EB3D41E00AAF677 /* Card3DTests.swift */; };
 		CDFF4CA32EB3D41E00AAF677 /* Card3DUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4CA22EB3D41E00AAF677 /* Card3DUITests.swift */; };
 		CDFF4CA52EB3D41E00AAF677 /* Card3DUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4CA42EB3D41E00AAF677 /* Card3DUITestsLaunchTests.swift */; };
-		CDFF4CB62EB3D49200AAF677 /* Card3DView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4CB22EB3D49200AAF677 /* Card3DView.swift */; };
-		CDFF4CB72EB3D49200AAF677 /* ControlPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4CB32EB3D49200AAF677 /* ControlPanelView.swift */; };
-		CDFF4CB82EB3D49200AAF677 /* Card3DApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4CB42EB3D49200AAF677 /* Card3DApp.swift */; };
-		CDFF4CB92EB3D49200AAF677 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4CB52EB3D49200AAF677 /* ContentView.swift */; };
-		CDFF4CC32EB3D49A00AAF677 /* SceneKitSphereView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4CC22EB3D49900AAF677 /* SceneKitSphereView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,21 +34,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		CDA253F32EC193E4007596F5 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CD0328B72EC241A400DEBDEA /* Card3D */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Card3D; sourceTree = "<group>"; };
+		CD22DC852EC23DE500388164 /* Card3D */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Card3D; sourceTree = "<group>"; };
+		CDF7C7C22EC23F4900E59A1C /* OrbitControls.r128.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = OrbitControls.r128.js; path = Card3D/OrbitControls.r128.js; sourceTree = "<group>"; };
+		CDF7C7C32EC23F4900E59A1C /* ThreeJSLiquidSphere.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = ThreeJSLiquidSphere.html; path = Card3D/ThreeJSLiquidSphere.html; sourceTree = "<group>"; };
+		CDF7C7C42EC23F4900E59A1C /* ThreeJSLiquidSphereLocal.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = ThreeJSLiquidSphereLocal.html; path = Card3D/ThreeJSLiquidSphereLocal.html; sourceTree = "<group>"; };
 		CDFF4C842EB3D41D00AAF677 /* Card3D.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Card3D.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CDFF4C8B2EB3D41E00AAF677 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		CDFF4C8E2EB3D41E00AAF677 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		CDFF4C942EB3D41E00AAF677 /* Card3DTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Card3DTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDFF4C982EB3D41E00AAF677 /* Card3DTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card3DTests.swift; sourceTree = "<group>"; };
 		CDFF4C9E2EB3D41E00AAF677 /* Card3DUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Card3DUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDFF4CA22EB3D41E00AAF677 /* Card3DUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card3DUITests.swift; sourceTree = "<group>"; };
 		CDFF4CA42EB3D41E00AAF677 /* Card3DUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card3DUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		CDFF4CB12EB3D49100AAF677 /* Card3D-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Card3D-Bridging-Header.h"; sourceTree = "<group>"; };
-		CDFF4CB22EB3D49200AAF677 /* Card3DView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Card3DView.swift; path = ../../Card3DView.swift; sourceTree = "<group>"; };
-		CDFF4CB32EB3D49200AAF677 /* ControlPanelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ControlPanelView.swift; path = ../../ControlPanelView.swift; sourceTree = "<group>"; };
-		CDFF4CB42EB3D49200AAF677 /* Card3DApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Card3DApp.swift; path = ../../Card3DApp.swift; sourceTree = "<group>"; };
-		CDFF4CB52EB3D49200AAF677 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = ../../ContentView.swift; sourceTree = "<group>"; };
-		CDFF4CC22EB3D49900AAF677 /* SceneKitSphereView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneKitSphereView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,7 +75,11 @@
 		CDFF4C7B2EB3D41D00AAF677 = {
 			isa = PBXGroup;
 			children = (
-				CDFF4C862EB3D41D00AAF677 /* Card3D */,
+				CD0328B72EC241A400DEBDEA /* Card3D */,
+				CDF7C7C22EC23F4900E59A1C /* OrbitControls.r128.js */,
+				CDF7C7C32EC23F4900E59A1C /* ThreeJSLiquidSphere.html */,
+				CDF7C7C42EC23F4900E59A1C /* ThreeJSLiquidSphereLocal.html */,
+				CD22DC852EC23DE500388164 /* Card3D */,
 				CDFF4C972EB3D41E00AAF677 /* Card3DTests */,
 				CDFF4CA12EB3D41E00AAF677 /* Card3DUITests */,
 				CDFF4C852EB3D41D00AAF677 /* Products */,
@@ -97,30 +94,6 @@
 				CDFF4C9E2EB3D41E00AAF677 /* Card3DUITests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		CDFF4C862EB3D41D00AAF677 /* Card3D */ = {
-			isa = PBXGroup;
-			children = (
-				CDFF4CB42EB3D49200AAF677 /* Card3DApp.swift */,
-				CDFF4CB22EB3D49200AAF677 /* Card3DView.swift */,
-				CDFF4CB52EB3D49200AAF677 /* ContentView.swift */,
-				CDFF4CB32EB3D49200AAF677 /* ControlPanelView.swift */,
-				CDFF4CC22EB3D49900AAF677 /* SceneKitSphereView.swift */,
-				CDA253F32EC193E4007596F5 /* Info.plist */,
-				CDFF4C8B2EB3D41E00AAF677 /* Assets.xcassets */,
-				CDFF4C8D2EB3D41E00AAF677 /* Preview Content */,
-				CDFF4CB12EB3D49100AAF677 /* Card3D-Bridging-Header.h */,
-			);
-			path = Card3D;
-			sourceTree = "<group>";
-		};
-		CDFF4C8D2EB3D41E00AAF677 /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				CDFF4C8E2EB3D41E00AAF677 /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		CDFF4C972EB3D41E00AAF677 /* Card3DTests */ = {
@@ -245,8 +218,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CDFF4C8F2EB3D41E00AAF677 /* Preview Assets.xcassets in Resources */,
-				CDFF4C8C2EB3D41E00AAF677 /* Assets.xcassets in Resources */,
+				CD22DC862EC23DE500388164 /* Card3D in Resources */,
+				CDF7C7C62EC23F4900E59A1C /* ThreeJSLiquidSphere.html in Resources */,
+				CDF7C7C52EC23F4900E59A1C /* OrbitControls.r128.js in Resources */,
+				CDF7C7C72EC23F4900E59A1C /* ThreeJSLiquidSphereLocal.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,11 +246,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CDFF4CB82EB3D49200AAF677 /* Card3DApp.swift in Sources */,
-				CDFF4CB62EB3D49200AAF677 /* Card3DView.swift in Sources */,
-				CDFF4CB92EB3D49200AAF677 /* ContentView.swift in Sources */,
-				CDFF4CB72EB3D49200AAF677 /* ControlPanelView.swift in Sources */,
-				CDFF4CC32EB3D49A00AAF677 /* SceneKitSphereView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -505,7 +475,6 @@
 		CDFF4CAC2EB3D41E00AAF677 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -524,7 +493,6 @@
 		CDFF4CAD2EB3D41E00AAF677 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -543,7 +511,6 @@
 		CDFF4CAF2EB3D41E00AAF677 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -560,7 +527,6 @@
 		CDFF4CB02EB3D41E00AAF677 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;

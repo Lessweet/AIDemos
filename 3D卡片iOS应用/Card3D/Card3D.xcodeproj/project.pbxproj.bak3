@@ -16,6 +16,11 @@
 		CDFF4CB72EB3D49200AAF677 /* ControlPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4CB32EB3D49200AAF677 /* ControlPanelView.swift */; };
 		CDFF4CB82EB3D49200AAF677 /* Card3DApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4CB42EB3D49200AAF677 /* Card3DApp.swift */; };
 		CDFF4CB92EB3D49200AAF677 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4CB52EB3D49200AAF677 /* ContentView.swift */; };
+		CDFF4CBA2EB3D49300AAF677 /* ThreeJSSphereView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4CBB2EB3D49300AAF677 /* ThreeJSSphereView.swift */; };
+		CDFF4CBC2EB3D49400AAF677 /* ThreeJSSphere.html in Resources */ = {isa = PBXBuildFile; fileRef = CDFF4CBD2EB3D49400AAF677 /* ThreeJSSphere.html */; };
+tt91016E2111E14967A014E8CD12E5864B /* ThreeJSLiquidSphere.html in Resources */ = {isa = PBXBuildFile; fileRef = 39493240383E4AEC98239E4C01309BB0 /* ThreeJSLiquidSphere.html */; };
+		CDFF4CBF2EB3D49600AAF677 /* js in Resources */ = {isa = PBXBuildFile; fileRef = CDFF4CBE2EB3D49500AAF677 /* js */; };
+		CDFF4CC12EB3D49800AAF677 /* test.html in Resources */ = {isa = PBXBuildFile; fileRef = CDFF4CC02EB3D49700AAF677 /* test.html */; };
 		CDFF4CC32EB3D49A00AAF677 /* SceneKitSphereView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4CC22EB3D49900AAF677 /* SceneKitSphereView.swift */; };
 /* End PBXBuildFile section */
 
@@ -51,6 +56,11 @@
 		CDFF4CB32EB3D49200AAF677 /* ControlPanelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ControlPanelView.swift; path = ../../ControlPanelView.swift; sourceTree = "<group>"; };
 		CDFF4CB42EB3D49200AAF677 /* Card3DApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Card3DApp.swift; path = ../../Card3DApp.swift; sourceTree = "<group>"; };
 		CDFF4CB52EB3D49200AAF677 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = ../../ContentView.swift; sourceTree = "<group>"; };
+		CDFF4CBB2EB3D49300AAF677 /* ThreeJSSphereView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreeJSSphereView.swift; sourceTree = "<group>"; };
+tt39493240383E4AEC98239E4C01309BB0 /* ThreeJSLiquidSphere.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = ThreeJSLiquidSphere.html; sourceTree = "<group>"; };
+		CDFF4CBD2EB3D49400AAF677 /* ThreeJSSphere.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = ThreeJSSphere.html; sourceTree = "<group>"; };
+		CDFF4CBE2EB3D49500AAF677 /* js */ = {isa = PBXFileReference; lastKnownFileType = folder; path = js; sourceTree = "<group>"; };
+		CDFF4CC02EB3D49700AAF677 /* test.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = test.html; sourceTree = "<group>"; };
 		CDFF4CC22EB3D49900AAF677 /* SceneKitSphereView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneKitSphereView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -107,6 +117,10 @@
 				CDFF4CB52EB3D49200AAF677 /* ContentView.swift */,
 				CDFF4CB32EB3D49200AAF677 /* ControlPanelView.swift */,
 				CDFF4CC22EB3D49900AAF677 /* SceneKitSphereView.swift */,
+				CDFF4CBB2EB3D49300AAF677 /* ThreeJSSphereView.swift */,
+				CDFF4CBD2EB3D49400AAF677 /* ThreeJSSphere.html */,
+				CDFF4CC02EB3D49700AAF677 /* test.html */,
+				CDFF4CBE2EB3D49500AAF677 /* js */,
 				CDA253F32EC193E4007596F5 /* Info.plist */,
 				CDFF4C8B2EB3D41E00AAF677 /* Assets.xcassets */,
 				CDFF4C8D2EB3D41E00AAF677 /* Preview Content */,
@@ -247,6 +261,9 @@
 			files = (
 				CDFF4C8F2EB3D41E00AAF677 /* Preview Assets.xcassets in Resources */,
 				CDFF4C8C2EB3D41E00AAF677 /* Assets.xcassets in Resources */,
+				CDFF4CBC2EB3D49400AAF677 /* ThreeJSSphere.html in Resources */,
+				CDFF4CC12EB3D49800AAF677 /* test.html in Resources */,
+				CDFF4CBF2EB3D49600AAF677 /* js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -276,6 +293,7 @@
 				CDFF4CB92EB3D49200AAF677 /* ContentView.swift in Sources */,
 				CDFF4CB72EB3D49200AAF677 /* ControlPanelView.swift in Sources */,
 				CDFF4CC32EB3D49A00AAF677 /* SceneKitSphereView.swift in Sources */,
+				CDFF4CBA2EB3D49300AAF677 /* ThreeJSSphereView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

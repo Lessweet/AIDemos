@@ -4,5 +4,10 @@
 <dict>
 	<key>NSMotionUsageDescription</key>
 	<string>我们需要访问您的陀螺仪来实现卡片的3D旋转效果</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

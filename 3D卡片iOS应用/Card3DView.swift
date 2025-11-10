@@ -110,7 +110,39 @@ struct Card3DView: View {
                 .opacity(cardModel.lightIntensity)
                 .blendMode(.softLight)
 
-            // 卡片内容
+            // 左上角文案
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Premium")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+
+                Text("Since 2025")
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.8))
+
+                Spacer()
+            }
+            .padding(.top, 30)
+            .padding(.leading, 30)
+            .frame(width: cardModel.cardWidth, height: cardModel.cardHeight, alignment: .topLeading)
+
+            // 右上角文案
+            VStack(alignment: .trailing, spacing: 4) {
+                Text("VIP")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
+
+                Text("Level 5")
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.8))
+
+                Spacer()
+            }
+            .padding(.top, 30)
+            .padding(.trailing, 30)
+            .frame(width: cardModel.cardWidth, height: cardModel.cardHeight, alignment: .topTrailing)
+
+            // 左下角文案
             VStack(alignment: .leading, spacing: 8) {
                 Spacer()
 
@@ -122,7 +154,8 @@ struct Card3DView: View {
                     .font(.system(size: 14))
                     .foregroundColor(.white.opacity(0.9))
             }
-            .padding(30)
+            .padding(.bottom, 30)
+            .padding(.leading, 30)
             .frame(width: cardModel.cardWidth, height: cardModel.cardHeight, alignment: .bottomLeading)
 
             // 右下角贴纸区域
@@ -424,6 +457,227 @@ class CardModel: ObservableObject {
             smoothSpeed = UserDefaults.standard.double(forKey: "smoothSpeed")
             dragSensitivity = UserDefaults.standard.double(forKey: "dragSensitivity")
             angleLimit = UserDefaults.standard.double(forKey: "angleLimit")
+        }
+    }
+}
+
+// MARK: - 液体卡片组件
+
+// 液体卡片数据模型
+class LiquidCardModel: ObservableObject {
+    // 样式参数 - 与Card3DView保持一致
+    @Published var cardWidth: CGFloat = 340
+    @Published var cardHeight: CGFloat = 210
+    @Published var borderRadius: CGFloat = 20
+    @Published var shadowSize: CGFloat = 50
+    @Published var shadowOpacity: Double = 0.3
+
+    // 液体晃动参数
+    @Published var liquidTilt: Double = 0  // 液体倾斜角度
+    @Published var liquidWaveOffset: Double = 0  // 波浪偏移
+    @Published var liquidLevel: CGFloat = 0.5  // 液体水位（0-1，0.5表示占卡片下半部分）
+
+    // 旋转状态
+    @Published var rotationX: Double = 0
+    @Published var rotationY: Double = 0
+
+    // 陀螺仪相关
+    @Published var gyroEnabled: Bool = true
+    @Published var gyroSensitivity: Double = 10.0
+    @Published var angleLimit: Double = 45
+    @Published var smoothSpeed: Double = 0.1
+
+    private let motionManager = CMMotionManager()
+    private var initialAttitude: CMAttitude?
+    private var timer: Timer?
+
+    // 启用陀螺仪
+    func enableGyro() {
+        guard motionManager.isDeviceMotionAvailable else {
+            print("设备不支持陀螺仪")
+            return
+        }
+
+        gyroEnabled = true
+        initialAttitude = nil
+
+        motionManager.deviceMotionUpdateInterval = 0.016  // 60fps
+        motionManager.startDeviceMotionUpdates(to: .main) { [weak self] (motion, error) in
+            guard let self = self, let motion = motion else { return }
+
+            // 第一次获取初始姿态
+            if self.initialAttitude == nil {
+                self.initialAttitude = motion.attitude
+                return
+            }
+
+            // 计算相对于初始姿态的旋转
+            if let initial = self.initialAttitude {
+                let currentAttitude = motion.attitude
+                currentAttitude.multiply(byInverseOf: initial)
+
+                // 将设备姿态转换为卡片旋转角度
+                let pitchDegrees = currentAttitude.pitch * 180 / .pi
+                let rollDegrees = currentAttitude.roll * 180 / .pi
+
+                // 应用灵敏度系数
+                let sensitivityFactor = self.gyroSensitivity / 10.0
+
+                // 限制角度范围并应用平滑过渡
+                let targetX = max(-self.angleLimit, min(self.angleLimit, -pitchDegrees * sensitivityFactor))
+                let targetY = max(-self.angleLimit, min(self.angleLimit, rollDegrees * sensitivityFactor))
+
+                self.rotationX += (targetX - self.rotationX) * self.smoothSpeed
+                self.rotationY += (targetY - self.rotationY) * self.smoothSpeed
+
+                // 更新液体倾斜角度
+                self.liquidTilt = self.rotationY
+
+                // 更新波浪动画
+                self.liquidWaveOffset += 2.0
+            }
+        }
+    }
+
+    // 禁用陀螺仪
+    func disableGyro() {
+        gyroEnabled = false
+        motionManager.stopDeviceMotionUpdates()
+        initialAttitude = nil
+        timer?.invalidate()
+        timer = nil
+    }
+}
+
+// 液体形状
+struct LiquidShape: Shape {
+    var tilt: Double  // 倾斜角度
+    var waveOffset: Double  // 波浪偏移
+    var level: CGFloat  // 液体水位（0-1）
+
+    var animatableData: AnimatablePair<Double, Double> {
+        get { AnimatablePair(tilt, waveOffset) }
+        set {
+            tilt = newValue.first
+            waveOffset = newValue.second
+        }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+
+        // 计算液体的基准高度（从顶部开始）
+        let baseY = rect.height * (1 - level)
+
+        // 波浪参数
+        let waveHeight: CGFloat = 8.0  // 波浪高度
+        let waveCount: Double = 2.5  // 波浪数量
+
+        // 倾斜产生的高度差
+        let maxTiltOffset: CGFloat = 30.0  // 最大倾斜偏移
+        let tiltRatio = CGFloat(sin(tilt * .pi / 180))
+
+        // 从左边开始绘制波浪线
+        path.move(to: CGPoint(x: 0, y: baseY))
+
+        let steps = 100
+        for i in 0...steps {
+            let x = rect.width * CGFloat(i) / CGFloat(steps)
+            let normalizedX = Double(i) / Double(steps)
+
+            // 正弦波浪
+            let wave = sin((normalizedX * waveCount + waveOffset / 60.0) * 2 * .pi) * waveHeight
+
+            // 倾斜效果：左右两侧高度不同
+            let tiltOffset = (normalizedX - 0.5) * 2 * maxTiltOffset * tiltRatio
+
+            let y = baseY + CGFloat(wave) + tiltOffset
+
+            path.addLine(to: CGPoint(x: x, y: y))
+        }
+
+        // 闭合路径（填充底部）
+        path.addLine(to: CGPoint(x: rect.width, y: rect.height))
+        path.addLine(to: CGPoint(x: 0, y: rect.height))
+        path.closeSubpath()
+
+        return path
+    }
+}
+
+// 液体卡片视图
+struct LiquidCard3DView: View {
+    @ObservedObject var liquidModel: LiquidCardModel
+    @GestureState private var dragOffset = CGSize.zero
+
+    var body: some View {
+        ZStack {
+            // 卡片主体 - 浅灰色背景
+            RoundedRectangle(cornerRadius: liquidModel.borderRadius)
+                .fill(Color(red: 0.96, green: 0.96, blue: 0.97))
+                .frame(width: liquidModel.cardWidth, height: liquidModel.cardHeight)
+                .shadow(
+                    color: Color(red: 0.65, green: 0.65, blue: 0.75).opacity(liquidModel.shadowOpacity),
+                    radius: liquidModel.shadowSize / 4,
+                    x: 0,
+                    y: 10
+                )
+                .overlay(
+                    // 内阴影效果模拟金属质感
+                    RoundedRectangle(cornerRadius: liquidModel.borderRadius)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.2),
+                                    Color.clear,
+                                    Color.black.opacity(0.15)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 2
+                        )
+                )
+
+            // 液体层 - 橙桃色到浅蓝色渐变
+            ZStack {
+                LiquidShape(
+                    tilt: liquidModel.liquidTilt,
+                    waveOffset: liquidModel.liquidWaveOffset,
+                    level: liquidModel.liquidLevel
+                )
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(stops: [
+                            .init(color: Color(red: 1.0, green: 0.706, blue: 0.608), location: 0.0),   // #FFB49B
+                            .init(color: Color(red: 1.0, green: 0.706, blue: 0.608), location: 0.53),  // #FFB49B
+                            .init(color: Color(red: 0.784, green: 0.918, blue: 1.0), location: 1.0)    // #C8EAFF
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+
+                // 顶部模糊遮罩
+                LiquidShape(
+                    tilt: liquidModel.liquidTilt,
+                    waveOffset: liquidModel.liquidWaveOffset,
+                    level: liquidModel.liquidLevel
+                )
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(stops: [
+                            .init(color: Color.white.opacity(0.4), location: 0.0),
+                            .init(color: Color.clear, location: 0.3)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .blur(radius: 20)
+            }
+            .frame(width: liquidModel.cardWidth, height: liquidModel.cardHeight)
+            .clipShape(RoundedRectangle(cornerRadius: liquidModel.borderRadius))
         }
     }
 }
