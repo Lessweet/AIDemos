@@ -8,7 +8,7 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $currentPage) {
             // 第一屏：全屏渐变色
-            SecondScreenView()
+            SecondScreenView(currentPage: $currentPage)
                 .tag(0)
 
             // 第二屏：iPhone设备框架 + 卡片
@@ -85,6 +85,7 @@ struct FirstScreenView: View {
 
 // 第二屏视图：全屏渐变色（支持扭曲效果）
 struct SecondScreenView: View {
+    @Binding var currentPage: Int
     @State private var hueRotation: Double = 0
     @State private var touchPoints: [TouchDistortion] = [] // 触摸扭曲点
     @State private var textPosition: CGSize = .zero // 文字位置偏移（累积）
@@ -185,27 +186,53 @@ struct SecondScreenView: View {
                 }
             }
 
-            // 底部文字（可拖动）
-            VStack {
+            // 底部文字和按钮
+            VStack(spacing: 20) {
                 Spacer()
+
                 Text("指尖的力量")
                     .font(.custom("STSongti-SC-Regular", size: 32))
                     .foregroundColor(.black)
-                    .padding(.bottom, 50)
+                    .offset(x: textPosition.width + dragOffset.width,
+                            y: textPosition.height + dragOffset.height)
+                    .gesture(
+                        DragGesture()
+                            .updating($dragOffset) { value, state, _ in
+                                state = value.translation
+                            }
+                            .onEnded { value in
+                                // 累积偏移量
+                                textPosition.width += value.translation.width
+                                textPosition.height += value.translation.height
+                            }
+                    )
+
+                // 跳转按钮
+                Button(action: {
+                    withAnimation {
+                        currentPage = 1
+                    }
+                }) {
+                    HStack {
+                        Text("进入卡片")
+                        Image(systemName: "arrow.right")
+                    }
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 30)
+                    .padding(.vertical, 14)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.orange, Color.pink],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(25)
+                    .shadow(color: Color.orange.opacity(0.3), radius: 10, x: 0, y: 5)
+                }
+                .padding(.bottom, 50)
             }
-            .offset(x: textPosition.width + dragOffset.width,
-                    y: textPosition.height + dragOffset.height)
-            .gesture(
-                DragGesture()
-                    .updating($dragOffset) { value, state, _ in
-                        state = value.translation
-                    }
-                    .onEnded { value in
-                        // 累积偏移量
-                        textPosition.width += value.translation.width
-                        textPosition.height += value.translation.height
-                    }
-            )
         }
         .ignoresSafeArea(.all, edges: .all)
     }
