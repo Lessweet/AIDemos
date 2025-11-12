@@ -199,12 +199,21 @@ struct Card3DView: View {
             .degrees(cardModel.rotationX),
             axis: (x: 1, y: 0, z: 0)
         )
-        .gesture(
+        .simultaneousGesture(
             DragGesture(minimumDistance: 30)
                 .updating($dragOffset) { value, state, _ in
                     state = value.translation
                 }
                 .onChanged { value in
+                    // 只有当拖动更偏向垂直或在卡片中心区域时，才旋转卡片
+                    let absX = abs(value.translation.width)
+                    let absY = abs(value.translation.height)
+
+                    // 如果是水平滑动占主导，不处理（让TabView处理翻页）
+                    if absX > absY * 1.5 {
+                        return
+                    }
+
                     cardModel.isAutoRotating = false
                     let deltaX = value.translation.width - value.predictedEndTranslation.width / 10
                     let deltaY = value.translation.height - value.predictedEndTranslation.height / 10
