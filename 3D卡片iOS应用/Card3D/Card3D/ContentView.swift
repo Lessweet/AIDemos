@@ -12,7 +12,7 @@ struct ContentView: View {
                 .tag(0)
 
             // 第二屏：iPhone设备框架 + 卡片
-            FirstScreenView(cardModel: cardModel, showControlPanel: $showControlPanel)
+            FirstScreenView(cardModel: cardModel, showControlPanel: $showControlPanel, currentPage: $currentPage)
                 .tag(1)
 
             // 第三屏：Three.js 球体（黑色背景）
@@ -32,6 +32,7 @@ struct ContentView: View {
 struct FirstScreenView: View {
     @ObservedObject var cardModel: CardModel
     @Binding var showControlPanel: Bool
+    @Binding var currentPage: Int
 
     var body: some View {
         ZStack {
@@ -49,6 +50,32 @@ struct FirstScreenView: View {
                 // 陀螺仪参数选项
                 ControlPanelView(cardModel: cardModel)
                     .padding(.bottom, 40)
+
+                // 跳转到第三屏按钮
+                Button(action: {
+                    withAnimation {
+                        currentPage = 2
+                    }
+                }) {
+                    HStack {
+                        Text("查看球体")
+                        Image(systemName: "arrow.right")
+                    }
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 30)
+                    .padding(.vertical, 14)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.blue, Color.purple],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(25)
+                    .shadow(color: Color.blue.opacity(0.3), radius: 10, x: 0, y: 5)
+                }
+                .padding(.bottom, 30)
             }
         }
         .contentShape(Rectangle())
