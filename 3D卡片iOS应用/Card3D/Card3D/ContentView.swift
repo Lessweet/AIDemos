@@ -7,12 +7,12 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $currentPage) {
-            // 第一屏：全屏渐变色
-            SecondScreenView(currentPage: $currentPage)
+            // 第一屏：iPhone设备框架 + 卡片
+            FirstScreenView(cardModel: cardModel, showControlPanel: $showControlPanel, currentPage: $currentPage)
                 .tag(0)
 
-            // 第二屏：iPhone设备框架 + 卡片
-            FirstScreenView(cardModel: cardModel, showControlPanel: $showControlPanel, currentPage: $currentPage)
+            // 第二屏：全屏渐变色
+            SecondScreenView(currentPage: $currentPage)
                 .tag(1)
 
             // 第三屏：Three.js 球体（黑色背景）
@@ -51,14 +51,14 @@ struct FirstScreenView: View {
                 ControlPanelView(cardModel: cardModel)
                     .padding(.bottom, 40)
 
-                // 跳转到第三屏按钮
+                // 跳转到第二屏按钮
                 Button(action: {
                     withAnimation {
-                        currentPage = 2
+                        currentPage = 1
                     }
                 }) {
                     HStack {
-                        Text("查看球体")
+                        Text("指尖的力量")
                         Image(systemName: "arrow.right")
                     }
                     .font(.system(size: 16, weight: .semibold))
@@ -210,11 +210,11 @@ struct SecondScreenView: View {
                 // 跳转按钮
                 Button(action: {
                     withAnimation {
-                        currentPage = 1
+                        currentPage = 2
                     }
                 }) {
                     HStack {
-                        Text("进入卡片")
+                        Text("查看球体")
                         Image(systemName: "arrow.right")
                     }
                     .font(.system(size: 16, weight: .semibold))
