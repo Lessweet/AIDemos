@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CD43EB522EC43EA600DE34ED /* LocalWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD43EB512EC43EA600DE34ED /* LocalWebView.swift */; };
+		CD43EB542EC43EB300DE34ED /* WebResources in Resources */ = {isa = PBXBuildFile; fileRef = CD43EB532EC43EB300DE34ED /* WebResources */; };
 		CDFF4C8C2EB3D41E00AAF677 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CDFF4C8B2EB3D41E00AAF677 /* Assets.xcassets */; };
 		CDFF4C8F2EB3D41E00AAF677 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CDFF4C8E2EB3D41E00AAF677 /* Preview Assets.xcassets */; };
 		CDFF4C992EB3D41E00AAF677 /* Card3DTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFF4C982EB3D41E00AAF677 /* Card3DTests.swift */; };
@@ -37,6 +39,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CD43EB512EC43EA600DE34ED /* LocalWebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LocalWebView.swift; path = Card3D/LocalWebView.swift; sourceTree = "<group>"; };
+		CD43EB532EC43EB300DE34ED /* WebResources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = WebResources; path = Card3D/WebResources; sourceTree = "<group>"; };
 		CDA253F32EC193E4007596F5 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CDFF4C842EB3D41D00AAF677 /* Card3D.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Card3D.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDFF4C8B2EB3D41E00AAF677 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -82,6 +86,8 @@
 		CDFF4C7B2EB3D41D00AAF677 = {
 			isa = PBXGroup;
 			children = (
+				CD43EB532EC43EB300DE34ED /* WebResources */,
+				CD43EB512EC43EA600DE34ED /* LocalWebView.swift */,
 				CDFF4C862EB3D41D00AAF677 /* Card3D */,
 				CDFF4C972EB3D41E00AAF677 /* Card3DTests */,
 				CDFF4CA12EB3D41E00AAF677 /* Card3DUITests */,
@@ -246,6 +252,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CDFF4C8F2EB3D41E00AAF677 /* Preview Assets.xcassets in Resources */,
+				CD43EB542EC43EB300DE34ED /* WebResources in Resources */,
 				CDFF4C8C2EB3D41E00AAF677 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -272,6 +279,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CDFF4CB82EB3D49200AAF677 /* Card3DApp.swift in Sources */,
+				CD43EB522EC43EA600DE34ED /* LocalWebView.swift in Sources */,
 				CDFF4CB62EB3D49200AAF677 /* Card3DView.swift in Sources */,
 				CDFF4CB92EB3D49200AAF677 /* ContentView.swift in Sources */,
 				CDFF4CB72EB3D49200AAF677 /* ControlPanelView.swift in Sources */,
@@ -437,7 +445,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Card3D/Preview Content\"";
@@ -473,7 +481,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Card3D/Preview Content\"";

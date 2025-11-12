@@ -3,12 +3,12 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var cardModel = CardModel()
     @State private var showControlPanel = false
-    @State private var currentPage = 0
+    @State private var currentPage: Int = 0
 
     var body: some View {
         TabView(selection: $currentPage) {
-            // 第一屏：3D 球体（Three.js Web 版本）
-            ThreeJSGlassSphereView()
+            // 第一屏：Three.js 球体（黑色背景）
+            LocalWebView()
                 .tag(0)
 
             // 第二屏：iPhone设备框架 + 卡片
@@ -23,7 +23,7 @@ struct ContentView: View {
         .ignoresSafeArea(.all, edges: .all)
         .onAppear {
             cardModel.loadSettings()
-            cardModel.enableGyro()  // 启动陀螺仪
+            cardModel.enableGyro()
         }
     }
 }

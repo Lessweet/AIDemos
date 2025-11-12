@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleVersion</key>
+	<string>1</string>
 	<key>NSMotionUsageDescription</key>
 	<string>我们需要访问您的陀螺仪来实现卡片的3D旋转效果</string>
 	<key>NSAppTransportSecurity</key>
