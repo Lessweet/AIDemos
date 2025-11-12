@@ -7,16 +7,16 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $currentPage) {
-            // 第一屏：Three.js 球体（黑色背景）
-            LocalWebView()
+            // 第一屏：全屏渐变色
+            SecondScreenView()
                 .tag(0)
 
             // 第二屏：iPhone设备框架 + 卡片
             FirstScreenView(cardModel: cardModel, showControlPanel: $showControlPanel)
                 .tag(1)
 
-            // 第三屏：全屏渐变色
-            SecondScreenView()
+            // 第三屏：Three.js 球体（黑色背景）
+            LocalWebView()
                 .tag(2)
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
@@ -51,6 +51,8 @@ struct FirstScreenView: View {
                     .padding(.bottom, 40)
             }
         }
+        .contentShape(Rectangle())
+        .allowsHitTesting(true)
     }
 }
 

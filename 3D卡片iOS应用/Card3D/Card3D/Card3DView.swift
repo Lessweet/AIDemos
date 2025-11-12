@@ -200,7 +200,7 @@ struct Card3DView: View {
             axis: (x: 1, y: 0, z: 0)
         )
         .gesture(
-            DragGesture()
+            DragGesture(minimumDistance: 30)
                 .updating($dragOffset) { value, state, _ in
                     state = value.translation
                 }
