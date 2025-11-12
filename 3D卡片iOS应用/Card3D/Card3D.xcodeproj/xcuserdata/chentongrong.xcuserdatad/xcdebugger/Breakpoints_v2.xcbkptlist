@@ -1,0 +1,552 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "7200C0E1-ABBE-4C8B-9729-9A835BB14991"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7F925A44-26DF-4110-A51D-964AB4B9ABB8"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Card3DView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "195"
+            endingLineNumber = "195"
+            landmarkName = "body"
+            landmarkType = "24">
+            <Locations>
+               <Location
+                  uuid = "7F925A44-26DF-4110-A51D-964AB4B9ABB8 - 3c87ea2da0d1a601"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #3 (SwiftUI.DragGesture.Value) -&gt; () in Card3D.Card3DView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/Card3DView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "344">
+               </Location>
+               <Location
+                  uuid = "7F925A44-26DF-4110-A51D-964AB4B9ABB8 - 155c81f74a83d7a9"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Card3D.Card3DView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/Card3DView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "1108">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../ContentView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "195"
+            endingLineNumber = "195"
+            landmarkName = "applyDistortion(screenSize:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - f034f82b0712d4ec"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Card3D.SecondScreenView.applyDistortion(screenSize: __C.CGSize) -&gt; ()"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "198"
+                  endingLineNumber = "198"
+                  offsetFromSymbolStart = "1712">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - f034f82b0712d4ec"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Card3D.SecondScreenView.applyDistortion(screenSize: __C.CGSize) -&gt; ()"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "198"
+                  endingLineNumber = "198"
+                  offsetFromSymbolStart = "1832">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - 35672b85f91e6109"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #3 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.Spacer, SwiftUI.Button&lt;&lt;&lt;opaque return type of SwiftUI.View.shadow(color: SwiftUI.Color, radius: CoreGraphics.CGFloat, x: CoreGraphics.CGFloat, y: CoreGraphics.CGFloat) -&gt; some&gt;&gt;.0&gt;, &lt;&lt;opaque return type of SwiftUI.View.padding(SwiftUI.Edge.Set, Swift.Optional&lt;CoreGraphics.CGFloat&gt;) -&gt; some&gt;&gt;.0)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(SwiftUI.Spacer, SwiftUI.Button&lt;&lt;&lt;opaque return type of SwiftUI.View.shadow(color: SwiftUI.Color, radius: CoreGraphics.CGFloat, x: CoreGraphics.CGFloat, y: CoreGraphics.CGFloat) -&gt; some&gt;&gt;.0&gt;, &lt;&lt;opaque return type of SwiftUI.View.padding(SwiftUI.Edge.Set, Swift.Optional&lt;CoreGraphics.CGFloat&gt;) -&gt; some&gt;&gt;.0)&gt;&gt;)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "2972">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - 35672b85f91e6109"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #3 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.Spacer, SwiftUI.Button&lt;&lt;&lt;opaque return type of SwiftUI.View.shadow(color: SwiftUI.Color, radius: CoreGraphics.CGFloat, x: CoreGraphics.CGFloat, y: CoreGraphics.CGFloat) -&gt; some&gt;&gt;.0&gt;, &lt;&lt;opaque return type of SwiftUI.View.padding(SwiftUI.Edge.Set, Swift.Optional&lt;CoreGraphics.CGFloat&gt;) -&gt; some&gt;&gt;.0)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(SwiftUI.Spacer, SwiftUI.Button&lt;&lt;&lt;opaque return type of SwiftUI.View.shadow(color: SwiftUI.Color, radius: CoreGraphics.CGFloat, x: CoreGraphics.CGFloat, y: CoreGraphics.CGFloat) -&gt; some&gt;&gt;.0&gt;, &lt;&lt;opaque return type of SwiftUI.View.padding(SwiftUI.Edge.Set, Swift.Optional&lt;CoreGraphics.CGFloat&gt;) -&gt; some&gt;&gt;.0)&gt;&gt;)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "2784">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - 5a26988073238d46"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #5 (SwiftUI.DragGesture.Value) -&gt; () in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "428">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - 73a543fc4da0a2ce"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "2080">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - 629615fb12d334d3"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #3 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.Spacer, &lt;&lt;opaque return type of SwiftUI.View.padding(SwiftUI.Edge.Set, Swift.Optional&lt;CoreGraphics.CGFloat&gt;) -&gt; some&gt;&gt;.0)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "304">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - 73a543fc4da0a2ce"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "712">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - c7fccf56b675b277"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 () -&gt; () in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "28">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - c5dd7b782cd979ae"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (SwiftUI.DragGesture.Value) -&gt; () in closure #1 (SwiftUI.GeometryProxy) -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "1796">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - fad5399d74a2d7ad"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #3 (SwiftUI.DragGesture.Value) -&gt; () in closure #1 (SwiftUI.GeometryProxy) -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "732">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - c5dd7b782cd979ae"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (SwiftUI.DragGesture.Value) -&gt; () in closure #1 (SwiftUI.GeometryProxy) -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "1712">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - c5dd7b782cd979cf"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (SwiftUI.DragGesture.Value) -&gt; () in closure #1 (SwiftUI.GeometryProxy) -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "196"
+                  endingLineNumber = "196"
+                  offsetFromSymbolStart = "736">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - c5dd7b782cd979cf"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (SwiftUI.DragGesture.Value) -&gt; () in closure #1 (SwiftUI.GeometryProxy) -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "196"
+                  endingLineNumber = "196"
+                  offsetFromSymbolStart = "1052">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - 2a3d228c0ae64e84"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Int) -&gt; SwiftUI.EllipticalGradient in closure #1 () -&gt; SwiftUI.ForEach&lt;Swift.Range&lt;Swift.Int&gt;, Swift.Int, SwiftUI.EllipticalGradient&gt; in closure #1 (SwiftUI.GeometryProxy) -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "388">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - 1be18a1719d79373"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (SwiftUI.GeometryProxy) -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onAppear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.gesture&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Gesture&gt;(_: &#x3c4;_1_0, including: SwiftUI.GestureMask) -&gt; some&gt;&gt;.0)&gt; in Card3D.SecondScreenView.body.getter : some"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "1300">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - f034f82b0712d42e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Card3D.SecondScreenView.applyDistortion(screenSize: __C.CGSize) -&gt; ()"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "196"
+                  endingLineNumber = "196"
+                  offsetFromSymbolStart = "620">
+               </Location>
+               <Location
+                  uuid = "5A95D741-E406-4C88-BEF4-9BF0E40C9D84 - f034f82b0712d42e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Card3D.SecondScreenView.applyDistortion(screenSize: __C.CGSize) -&gt; ()"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/ContentView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "196"
+                  endingLineNumber = "196"
+                  offsetFromSymbolStart = "992">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "3A262B8B-AB50-4F21-B913-03DF1C9AEF0D"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Card3DView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "280"
+            endingLineNumber = "280"
+            landmarkName = "startAutoRotation()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "3A262B8B-AB50-4F21-B913-03DF1C9AEF0D - e8a949f8ed5b87a0"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Sendable (__C.NSTimer) -&gt; () in Card3D.CardModel.startAutoRotation() -&gt; ()"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/Card3DView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "280"
+                  endingLineNumber = "280"
+                  offsetFromSymbolStart = "1124">
+               </Location>
+               <Location
+                  uuid = "3A262B8B-AB50-4F21-B913-03DF1C9AEF0D - e8a949f8ed5b87a0"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Sendable (__C.NSTimer) -&gt; () in Card3D.CardModel.startAutoRotation() -&gt; ()"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/Card3DView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "280"
+                  endingLineNumber = "280"
+                  offsetFromSymbolStart = "544">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B93B7446-1D02-4429-A888-208B718902DD"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Card3DView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "279"
+            endingLineNumber = "279"
+            landmarkName = "startAutoRotation()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "B93B7446-1D02-4429-A888-208B718902DD - e8a949f8ed5b8781"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Sendable (__C.NSTimer) -&gt; () in Card3D.CardModel.startAutoRotation() -&gt; ()"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/Card3DView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "279"
+                  endingLineNumber = "279"
+                  offsetFromSymbolStart = "1064">
+               </Location>
+               <Location
+                  uuid = "B93B7446-1D02-4429-A888-208B718902DD - e8a949f8ed5b87a0"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Sendable (__C.NSTimer) -&gt; () in Card3D.CardModel.startAutoRotation() -&gt; ()"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/Card3DView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "280"
+                  endingLineNumber = "280"
+                  offsetFromSymbolStart = "544">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B95AFE30-3826-41F4-A245-01B8B4C36D80"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Card3DView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "286"
+            endingLineNumber = "286"
+            landmarkName = "startAutoRotation()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "B95AFE30-3826-41F4-A245-01B8B4C36D80 - bc8e269851eec16b"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Card3D.CardModel.updateLightRefraction() -&gt; ()"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/Card3DView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "286"
+                  endingLineNumber = "286"
+                  offsetFromSymbolStart = "92">
+               </Location>
+               <Location
+                  uuid = "B95AFE30-3826-41F4-A245-01B8B4C36D80 - e8a949f8ed5b8689"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Sendable (__C.NSTimer) -&gt; () in Card3D.CardModel.startAutoRotation() -&gt; ()"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/Card3DView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "287"
+                  endingLineNumber = "287"
+                  offsetFromSymbolStart = "812">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D1A3D42E-57D0-4BB5-BABC-B8AF4F612989"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Card3DView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "277"
+            endingLineNumber = "277"
+            landmarkName = "startAutoRotation()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "D1A3D42E-57D0-4BB5-BABC-B8AF4F612989 - e8a949f8ed5b875e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Sendable (__C.NSTimer) -&gt; () in Card3D.CardModel.startAutoRotation() -&gt; ()"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/Card3DView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "278"
+                  endingLineNumber = "278"
+                  offsetFromSymbolStart = "1004">
+               </Location>
+               <Location
+                  uuid = "D1A3D42E-57D0-4BB5-BABC-B8AF4F612989 - e8a949f8ed5b873f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Sendable (__C.NSTimer) -&gt; () in Card3D.CardModel.startAutoRotation() -&gt; ()"
+                  moduleName = "Card3D"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/chentongrong/Documents/workspace/AIDemos/3D%E5%8D%A1%E7%89%87iOS%E5%BA%94%E7%94%A8/Card3DView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "277"
+                  endingLineNumber = "277"
+                  offsetFromSymbolStart = "448">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6E5F63D7-01B1-4781-80D7-05662EA7F4A1"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../ContentView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "152"
+            endingLineNumber = "152"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

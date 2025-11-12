@@ -145,7 +145,7 @@ struct SecondScreenView: View {
             .onAppear {
                 // 启动持续的色相旋转动画
                 Timer.scheduledTimer(withTimeInterval: 0.016, repeats: true) { _ in
-                    hueRotation += 2.5
+                    hueRotation += 1.67
                     if hueRotation >= 360 {
                         hueRotation -= 360
                     }
