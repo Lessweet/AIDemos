@@ -205,7 +205,8 @@ struct Card3DView: View {
                     state = value.translation
                 }
                 .onChanged { value in
-                    cardModel.isAutoRotating = false
+                    // 暂时禁用陀螺仪和自动旋转，使用手动拖动
+                    cardModel.gyroEnabled = false
                     let deltaX = value.translation.width - value.predictedEndTranslation.width / 10
                     let deltaY = value.translation.height - value.predictedEndTranslation.height / 10
 
@@ -213,7 +214,8 @@ struct Card3DView: View {
                     cardModel.rotationX = min(max(-deltaY * cardModel.dragSensitivity, -cardModel.angleLimit), cardModel.angleLimit)
                 }
                 .onEnded { _ in
-                    // 拖动结束后不立即重置，保持当前角度
+                    // 拖动结束后恢复陀螺仪
+                    cardModel.enableGyro()
                 }
         )
         .onAppear {
@@ -269,21 +271,24 @@ class CardModel: ObservableObject {
     func startAutoRotation() {
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 0.016, repeats: true) { [weak self] _ in
-            guard let self = self, self.isAutoRotating else { return }
+            guard let self = self else { return }
 
-            self.angle += self.rotateSpeed * 0.01
+            // 如果陀螺仪未启用，才更新自动旋转
+            if !self.gyroEnabled {
+                self.angle += self.rotateSpeed * 0.01
 
-            let targetX = sin(self.angle) * self.rotateAmplitudeX
-            let targetY = cos(self.angle) * self.rotateAmplitudeY
+                let targetX = sin(self.angle) * self.rotateAmplitudeX
+                let targetY = cos(self.angle) * self.rotateAmplitudeY
 
-            // 平滑插值
-            self.rotationX += (targetX - self.rotationX) * self.smoothSpeed
-            self.rotationY += (targetY - self.rotationY) * self.smoothSpeed
+                // 平滑插值
+                self.rotationX += (targetX - self.rotationX) * self.smoothSpeed
+                self.rotationY += (targetY - self.rotationY) * self.smoothSpeed
 
-            // 更新光线折射效果
-            self.updateLightRefraction()
+                // 更新光线折射效果
+                self.updateLightRefraction()
+            }
 
-            // 更新渐变流动效果 - 持续旋转色相和渐变角度
+            // 无论陀螺仪是否启用，都更新渐变流动效果
             self.hueRotation += 1.0  // 每帧增加1.0度 (更快)
             if self.hueRotation >= 360 {
                 self.hueRotation -= 360
@@ -339,21 +344,40 @@ class CardModel: ObservableObject {
     // 启用陀螺仪
     func enableGyro() {
         guard motionManager.isDeviceMotionAvailable else {
-            print("设备不支持陀螺仪")
+            print("❌ 设备不支持陀螺仪")
             return
         }
 
+        print("✅ 开始启用陀螺仪...")
         gyroEnabled = true
-        isAutoRotating = false
+        // 不要设置 isAutoRotating = false，让自动旋转的timer继续运行（用于渐变动画）
         initialAttitude = nil
 
-        motionManager.deviceMotionUpdateInterval = 0.016  // 60fps
-        motionManager.startDeviceMotionUpdates(to: .main) { [weak self] (motion, error) in
-            guard let self = self, let motion = motion else { return }
+        motionManager.deviceMotionUpdateInterval = 0.02  // 50fps，降低频率更稳定
+
+        // 使用 OperationQueue 而不是 .main，避免主线程阻塞
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        queue.qualityOfService = .userInteractive
+
+        motionManager.startDeviceMotionUpdates(to: queue) { [weak self] (motion, error) in
+            guard let self = self else { return }
+
+            // 检查错误
+            if let error = error {
+                print("❌ 陀螺仪错误: \(error.localizedDescription)")
+                return
+            }
+
+            guard let motion = motion else {
+                print("❌ 未获取到运动数据")
+                return
+            }
 
             // 第一次获取初始姿态
             if self.initialAttitude == nil {
                 self.initialAttitude = motion.attitude
+                print("✅ 已捕获初始姿态")
                 return
             }
 
@@ -375,31 +399,37 @@ class CardModel: ObservableObject {
                 let targetX = max(-self.angleLimit, min(self.angleLimit, -pitchDegrees * sensitivityFactor))
                 let targetY = max(-self.angleLimit, min(self.angleLimit, rollDegrees * sensitivityFactor))
 
-                self.rotationX += (targetX - self.rotationX) * self.smoothSpeed
-                self.rotationY += (targetY - self.rotationY) * self.smoothSpeed
+                // 在主线程更新 UI
+                DispatchQueue.main.async {
+                    self.rotationX += (targetX - self.rotationX) * self.smoothSpeed
+                    self.rotationY += (targetY - self.rotationY) * self.smoothSpeed
 
-                // 更新光线折射效果
-                self.updateLightRefraction()
+                    // 更新光线折射效果
+                    self.updateLightRefraction()
 
-                // 更新渐变流动效果
-                self.hueRotation += 1.0
-                if self.hueRotation >= 360 {
-                    self.hueRotation -= 360
-                }
-                self.gradientRotation += 0.5
-                if self.gradientRotation >= 360 {
-                    self.gradientRotation -= 360
+                    // 更新渐变流动效果
+                    self.hueRotation += 1.0
+                    if self.hueRotation >= 360 {
+                        self.hueRotation -= 360
+                    }
+                    self.gradientRotation += 0.5
+                    if self.gradientRotation >= 360 {
+                        self.gradientRotation -= 360
+                    }
                 }
             }
         }
+
+        print("✅ 陀螺仪已启动")
     }
 
     // 禁用陀螺仪
     func disableGyro() {
+        print("✅ 禁用陀螺仪")
         gyroEnabled = false
         motionManager.stopDeviceMotionUpdates()
         initialAttitude = nil
-        isAutoRotating = true
+        // gyroEnabled设为false后，startAutoRotation的timer会自动接管旋转
     }
 
     // 重新校准陀螺仪
@@ -423,7 +453,6 @@ class CardModel: ObservableObject {
         rotationX = 0
         rotationY = 0
         angle = 0
-        isAutoRotating = true
         disableGyro()
     }
 
@@ -494,20 +523,39 @@ class LiquidCardModel: ObservableObject {
     // 启用陀螺仪
     func enableGyro() {
         guard motionManager.isDeviceMotionAvailable else {
-            print("设备不支持陀螺仪")
+            print("❌ 液体卡片：设备不支持陀螺仪")
             return
         }
 
+        print("✅ 液体卡片：开始启用陀螺仪...")
         gyroEnabled = true
         initialAttitude = nil
 
-        motionManager.deviceMotionUpdateInterval = 0.016  // 60fps
-        motionManager.startDeviceMotionUpdates(to: .main) { [weak self] (motion, error) in
-            guard let self = self, let motion = motion else { return }
+        motionManager.deviceMotionUpdateInterval = 0.02  // 50fps，降低频率更稳定
+
+        // 使用 OperationQueue 而不是 .main，避免主线程阻塞
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        queue.qualityOfService = .userInteractive
+
+        motionManager.startDeviceMotionUpdates(to: queue) { [weak self] (motion, error) in
+            guard let self = self else { return }
+
+            // 检查错误
+            if let error = error {
+                print("❌ 液体卡片陀螺仪错误: \(error.localizedDescription)")
+                return
+            }
+
+            guard let motion = motion else {
+                print("❌ 液体卡片：未获取到运动数据")
+                return
+            }
 
             // 第一次获取初始姿态
             if self.initialAttitude == nil {
                 self.initialAttitude = motion.attitude
+                print("✅ 液体卡片：已捕获初始姿态")
                 return
             }
 
@@ -527,16 +575,21 @@ class LiquidCardModel: ObservableObject {
                 let targetX = max(-self.angleLimit, min(self.angleLimit, -pitchDegrees * sensitivityFactor))
                 let targetY = max(-self.angleLimit, min(self.angleLimit, rollDegrees * sensitivityFactor))
 
-                self.rotationX += (targetX - self.rotationX) * self.smoothSpeed
-                self.rotationY += (targetY - self.rotationY) * self.smoothSpeed
+                // 在主线程更新 UI
+                DispatchQueue.main.async {
+                    self.rotationX += (targetX - self.rotationX) * self.smoothSpeed
+                    self.rotationY += (targetY - self.rotationY) * self.smoothSpeed
 
-                // 更新液体倾斜角度
-                self.liquidTilt = self.rotationY
+                    // 更新液体倾斜角度
+                    self.liquidTilt = self.rotationY
 
-                // 更新波浪动画
-                self.liquidWaveOffset += 2.0
+                    // 更新波浪动画
+                    self.liquidWaveOffset += 2.0
+                }
             }
         }
+
+        print("✅ 液体卡片：陀螺仪已启动")
     }
 
     // 禁用陀螺仪

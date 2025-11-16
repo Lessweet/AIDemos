@@ -18,6 +18,7 @@ struct ContentView: View {
         .tabViewStyle(.page(indexDisplayMode: .never))
         .ignoresSafeArea(.all, edges: .all)
         .onAppear {
+            print("✅ ContentView appeared")
             cardModel.loadSettings()
             cardModel.enableGyro()  // 启动陀螺仪
         }
@@ -31,8 +32,16 @@ struct FirstScreenView: View {
 
     var body: some View {
         ZStack {
-            // 背景
-            Color.white.ignoresSafeArea()
+            // 背景 - 改为深色渐变，让白色卡片更明显
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.1, green: 0.1, blue: 0.15),
+                    Color(red: 0.15, green: 0.15, blue: 0.2)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
 
             VStack(spacing: 40) {
                 Spacer()

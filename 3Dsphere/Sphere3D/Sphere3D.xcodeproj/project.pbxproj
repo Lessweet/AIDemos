@@ -1,0 +1,597 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		CDB1B01E2EC86E2300697867 /* Sphere3DApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDB1B01D2EC86E2300697867 /* Sphere3DApp.swift */; };
+		CDB1B0222EC86E2400697867 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CDB1B0212EC86E2400697867 /* Assets.xcassets */; };
+		CDB1B0252EC86E2400697867 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CDB1B0242EC86E2400697867 /* Preview Assets.xcassets */; };
+		CDB1B02F2EC86E2400697867 /* Sphere3DTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDB1B02E2EC86E2400697867 /* Sphere3DTests.swift */; };
+		CDB1B0392EC86E2400697867 /* Sphere3DUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDB1B0382EC86E2400697867 /* Sphere3DUITests.swift */; };
+		CDB1B03B2EC86E2400697867 /* Sphere3DUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDB1B03A2EC86E2400697867 /* Sphere3DUITestsLaunchTests.swift */; };
+		CDB1B0492EC88E0200697867 /* SphereView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDB1B0472EC88E0200697867 /* SphereView.swift */; };
+		CDB1B04A2EC88E0200697867 /* SphereScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDB1B0482EC88E0200697867 /* SphereScene.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		CDB1B02B2EC86E2400697867 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CDB1B0122EC86E2300697867 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CDB1B0192EC86E2300697867;
+			remoteInfo = Sphere3D;
+		};
+		CDB1B0352EC86E2400697867 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CDB1B0122EC86E2300697867 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CDB1B0192EC86E2300697867;
+			remoteInfo = Sphere3D;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		CDB1B01A2EC86E2300697867 /* Sphere3D.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sphere3D.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CDB1B01D2EC86E2300697867 /* Sphere3DApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sphere3DApp.swift; sourceTree = "<group>"; };
+		CDB1B0212EC86E2400697867 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CDB1B0242EC86E2400697867 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		CDB1B02A2EC86E2400697867 /* Sphere3DTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Sphere3DTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CDB1B02E2EC86E2400697867 /* Sphere3DTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sphere3DTests.swift; sourceTree = "<group>"; };
+		CDB1B0342EC86E2400697867 /* Sphere3DUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Sphere3DUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CDB1B0382EC86E2400697867 /* Sphere3DUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sphere3DUITests.swift; sourceTree = "<group>"; };
+		CDB1B03A2EC86E2400697867 /* Sphere3DUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sphere3DUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		CDB1B0472EC88E0200697867 /* SphereView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SphereView.swift; path = Sphere3D/SphereView.swift; sourceTree = "<group>"; };
+		CDB1B0482EC88E0200697867 /* SphereScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SphereScene.swift; path = Sphere3D/SphereScene.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CDB1B0172EC86E2300697867 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CDB1B0272EC86E2400697867 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CDB1B0312EC86E2400697867 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CDB1B0112EC86E2300697867 = {
+			isa = PBXGroup;
+			children = (
+				CDB1B0482EC88E0200697867 /* SphereScene.swift */,
+				CDB1B0472EC88E0200697867 /* SphereView.swift */,
+				CDB1B01C2EC86E2300697867 /* Sphere3D */,
+				CDB1B02D2EC86E2400697867 /* Sphere3DTests */,
+				CDB1B0372EC86E2400697867 /* Sphere3DUITests */,
+				CDB1B01B2EC86E2300697867 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CDB1B01B2EC86E2300697867 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CDB1B01A2EC86E2300697867 /* Sphere3D.app */,
+				CDB1B02A2EC86E2400697867 /* Sphere3DTests.xctest */,
+				CDB1B0342EC86E2400697867 /* Sphere3DUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CDB1B01C2EC86E2300697867 /* Sphere3D */ = {
+			isa = PBXGroup;
+			children = (
+				CDB1B01D2EC86E2300697867 /* Sphere3DApp.swift */,
+				CDB1B0212EC86E2400697867 /* Assets.xcassets */,
+				CDB1B0232EC86E2400697867 /* Preview Content */,
+			);
+			path = Sphere3D;
+			sourceTree = "<group>";
+		};
+		CDB1B0232EC86E2400697867 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				CDB1B0242EC86E2400697867 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		CDB1B02D2EC86E2400697867 /* Sphere3DTests */ = {
+			isa = PBXGroup;
+			children = (
+				CDB1B02E2EC86E2400697867 /* Sphere3DTests.swift */,
+			);
+			path = Sphere3DTests;
+			sourceTree = "<group>";
+		};
+		CDB1B0372EC86E2400697867 /* Sphere3DUITests */ = {
+			isa = PBXGroup;
+			children = (
+				CDB1B0382EC86E2400697867 /* Sphere3DUITests.swift */,
+				CDB1B03A2EC86E2400697867 /* Sphere3DUITestsLaunchTests.swift */,
+			);
+			path = Sphere3DUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CDB1B0192EC86E2300697867 /* Sphere3D */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CDB1B03E2EC86E2400697867 /* Build configuration list for PBXNativeTarget "Sphere3D" */;
+			buildPhases = (
+				CDB1B0162EC86E2300697867 /* Sources */,
+				CDB1B0172EC86E2300697867 /* Frameworks */,
+				CDB1B0182EC86E2300697867 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Sphere3D;
+			productName = Sphere3D;
+			productReference = CDB1B01A2EC86E2300697867 /* Sphere3D.app */;
+			productType = "com.apple.product-type.application";
+		};
+		CDB1B0292EC86E2400697867 /* Sphere3DTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CDB1B0412EC86E2400697867 /* Build configuration list for PBXNativeTarget "Sphere3DTests" */;
+			buildPhases = (
+				CDB1B0262EC86E2400697867 /* Sources */,
+				CDB1B0272EC86E2400697867 /* Frameworks */,
+				CDB1B0282EC86E2400697867 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CDB1B02C2EC86E2400697867 /* PBXTargetDependency */,
+			);
+			name = Sphere3DTests;
+			productName = Sphere3DTests;
+			productReference = CDB1B02A2EC86E2400697867 /* Sphere3DTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		CDB1B0332EC86E2400697867 /* Sphere3DUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CDB1B0442EC86E2400697867 /* Build configuration list for PBXNativeTarget "Sphere3DUITests" */;
+			buildPhases = (
+				CDB1B0302EC86E2400697867 /* Sources */,
+				CDB1B0312EC86E2400697867 /* Frameworks */,
+				CDB1B0322EC86E2400697867 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CDB1B0362EC86E2400697867 /* PBXTargetDependency */,
+			);
+			name = Sphere3DUITests;
+			productName = Sphere3DUITests;
+			productReference = CDB1B0342EC86E2400697867 /* Sphere3DUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CDB1B0122EC86E2300697867 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1520;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					CDB1B0192EC86E2300697867 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+					CDB1B0292EC86E2400697867 = {
+						CreatedOnToolsVersion = 15.2;
+						TestTargetID = CDB1B0192EC86E2300697867;
+					};
+					CDB1B0332EC86E2400697867 = {
+						CreatedOnToolsVersion = 15.2;
+						TestTargetID = CDB1B0192EC86E2300697867;
+					};
+				};
+			};
+			buildConfigurationList = CDB1B0152EC86E2300697867 /* Build configuration list for PBXProject "Sphere3D" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = CDB1B0112EC86E2300697867;
+			productRefGroup = CDB1B01B2EC86E2300697867 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CDB1B0192EC86E2300697867 /* Sphere3D */,
+				CDB1B0292EC86E2400697867 /* Sphere3DTests */,
+				CDB1B0332EC86E2400697867 /* Sphere3DUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CDB1B0182EC86E2300697867 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CDB1B0252EC86E2400697867 /* Preview Assets.xcassets in Resources */,
+				CDB1B0222EC86E2400697867 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CDB1B0282EC86E2400697867 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CDB1B0322EC86E2400697867 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CDB1B0162EC86E2300697867 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CDB1B04A2EC88E0200697867 /* SphereScene.swift in Sources */,
+				CDB1B01E2EC86E2300697867 /* Sphere3DApp.swift in Sources */,
+				CDB1B0492EC88E0200697867 /* SphereView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CDB1B0262EC86E2400697867 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CDB1B02F2EC86E2400697867 /* Sphere3DTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CDB1B0302EC86E2400697867 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CDB1B03B2EC86E2400697867 /* Sphere3DUITestsLaunchTests.swift in Sources */,
+				CDB1B0392EC86E2400697867 /* Sphere3DUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CDB1B02C2EC86E2400697867 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CDB1B0192EC86E2300697867 /* Sphere3D */;
+			targetProxy = CDB1B02B2EC86E2400697867 /* PBXContainerItemProxy */;
+		};
+		CDB1B0362EC86E2400697867 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CDB1B0192EC86E2300697867 /* Sphere3D */;
+			targetProxy = CDB1B0352EC86E2400697867 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		CDB1B03C2EC86E2400697867 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		CDB1B03D2EC86E2400697867 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		CDB1B03F2EC86E2400697867 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Sphere3D/Preview Content\"";
+				DEVELOPMENT_TEAM = 2YUS3FZ83J;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TR.Sphere3D;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CDB1B0402EC86E2400697867 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Sphere3D/Preview Content\"";
+				DEVELOPMENT_TEAM = 2YUS3FZ83J;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TR.Sphere3D;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CDB1B0422EC86E2400697867 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2YUS3FZ83J;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TR.Sphere3DTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Sphere3D.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Sphere3D";
+			};
+			name = Debug;
+		};
+		CDB1B0432EC86E2400697867 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2YUS3FZ83J;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TR.Sphere3DTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Sphere3D.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Sphere3D";
+			};
+			name = Release;
+		};
+		CDB1B0452EC86E2400697867 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2YUS3FZ83J;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TR.Sphere3DUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Sphere3D;
+			};
+			name = Debug;
+		};
+		CDB1B0462EC86E2400697867 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2YUS3FZ83J;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.TR.Sphere3DUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Sphere3D;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CDB1B0152EC86E2300697867 /* Build configuration list for PBXProject "Sphere3D" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CDB1B03C2EC86E2400697867 /* Debug */,
+				CDB1B03D2EC86E2400697867 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CDB1B03E2EC86E2400697867 /* Build configuration list for PBXNativeTarget "Sphere3D" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CDB1B03F2EC86E2400697867 /* Debug */,
+				CDB1B0402EC86E2400697867 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CDB1B0412EC86E2400697867 /* Build configuration list for PBXNativeTarget "Sphere3DTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CDB1B0422EC86E2400697867 /* Debug */,
+				CDB1B0432EC86E2400697867 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CDB1B0442EC86E2400697867 /* Build configuration list for PBXNativeTarget "Sphere3DUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CDB1B0452EC86E2400697867 /* Debug */,
+				CDB1B0462EC86E2400697867 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CDB1B0122EC86E2300697867 /* Project object */;
+}
