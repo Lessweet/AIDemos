@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Voice Interface - Airy Wind Effect</title>
+    <style>
+        :root {
+            --gold-color: #b48c50;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --btn-bg: #f2f2f2;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overscroll-behavior: none;
+        }
+
+        .phone-container {
+            width: 375px;
+            height: 812px;
+            background-color: var(--bg-color);
+            border-radius: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-bar {
+            height: 44px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 15px;
+            font-weight: 600;
+            z-index: 10;
+            user-select: none;
+        }
+
+        .dynamic-island {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 35px;
+            background-color: black;
+            border-radius: 20px;
+            z-index: 11;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .settings-icon {
+            position: absolute;
+            top: 60px;
+            right: 24px;
+            color: #666;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .canvas-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        .bottom-bar {
+            height: 120px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px 20px 40px;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        .btn-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--btn-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-circle:active {
+            background-color: #e0e0e0;
+        }
+
+        .prompt-text {
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        <div class="dynamic-island"></div>
+
+        <div class="status-bar">
+            <span id="clock">23:11</span>
+            <div class="status-icons">
+                <svg width="18" height="12" viewBox="0 0 18 12" fill="black"><path d="M1 10h3v-2H1v2zm5 0h3V5H6v5zm5 0h3V2h-3v8zm5 0h3V0h-3v10z"/></svg>
+                <svg width="18" height="12" viewBox="0 0 18 12" fill="black"><path d="M9 11l-8-9h16l-8 9z"/></svg>
+                <svg width="22" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="20" height="10" rx="2.5" stroke="black"/><rect x="2" y="2" width="17" height="7" rx="1.5" fill="black"/><path d="M23 4v4" stroke="black" stroke-linecap="round"/></svg>
+            </div>
+        </div>
+
+        <div class="settings-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+
+        <div class="canvas-wrapper" id="canvas-container">
+            <canvas id="particleCanvas"></canvas>
+        </div>
+
+        <div class="bottom-bar">
+            <div class="btn-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </div>
+            <div class="prompt-text">说点什么...</div>
+            <div class="btn-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+        
+        let width, height;
+        const particleCount = 850; 
+        const radius = 130; 
+        let angleX = 0;
+        let angleY = 0;
+
+        const mouse = { x: -9999, y: -9999, active: false };
+        const particles = [];
+
+        function resize() {
+            width = container.clientWidth;
+            height = container.clientHeight;
+            canvas.width = width * 2; 
+            canvas.height = height * 2;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            ctx.scale(2, 2);
+        }
+
+        // 鼠标位置更新
+        function updateMouse(x, y) {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = x - rect.left;
+            mouse.y = y - rect.top;
+            mouse.active = true;
+        }
+
+        // 事件监听
+        container.addEventListener('mousemove', e => updateMouse(e.clientX, e.clientY));
+        container.addEventListener('mouseleave', () => { mouse.active = false; mouse.x = -9999; mouse.y = -9999; });
+
+        container.addEventListener('touchmove', e => {
+            e.preventDefault(); 
+            const touch = e.touches[0];
+            updateMouse(touch.clientX, touch.clientY);
+        }, { passive: false });
+        
+        container.addEventListener('touchstart', e => {
+            const touch = e.touches[0];
+            updateMouse(touch.clientX, touch.clientY);
+        }, { passive: false });
+
+        container.addEventListener('touchend', () => {
+            mouse.active = false;
+        });
+
+        // 初始化粒子
+        function initParticles() {
+            const phi = Math.PI * (3 - Math.sqrt(5)); 
+
+            for (let i = 0; i < particleCount; i++) {
+                const y = 1 - (i / (particleCount - 1)) * 2; 
+                const r = Math.sqrt(1 - y * y); 
+                const theta = phi * i; 
+
+                const x = Math.cos(theta) * r;
+                const z = Math.sin(theta) * r;
+
+                particles.push({
+                    // 目标球体坐标
+                    baseX: x * radius,
+                    baseY: y * radius,
+                    baseZ: z * radius,
+                    
+                    // 当前位移量 (相对于旋转后的球体表面位置)
+                    dx: 0, 
+                    dy: 0, 
+                    dz: 0,
+                    
+                    // 速度 (用于实现惯性飘动)
+                    vx: 0,
+                    vy: 0,
+                    vz: 0,
+                    
+                    // 物理参数：每个粒子略有不同，增加自然感
+                    friction: 0.94 + Math.random() * 0.02, // 阻力，越接近1飘得越远
+                    returnSpeed: 0.01 + Math.random() * 0.01 // 回归速度，非常小，实现慢动作回归
+                });
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            // 保持慢速自转
+            angleX += 0.0015; 
+            angleY += 0.0025; 
+
+            const cx = width / 2;
+            const cy = height / 2;
+            const fov = 400; 
+
+            particles.forEach(p => {
+                // 1. 计算粒子在球体表面的目标位置（自转中）
+                let xRot = p.baseX * Math.cos(angleY) - p.baseZ * Math.sin(angleY);
+                let z1 = p.baseZ * Math.cos(angleY) + p.baseX * Math.sin(angleY);
+                let yRot = p.baseY * Math.cos(angleX) - z1 * Math.sin(angleX);
+                let zRot = z1 * Math.cos(angleX) + p.baseY * Math.sin(angleX);
+
+                // 2. 交互逻辑 (Wind Force)
+                // 计算当前粒子在屏幕上的临时位置
+                const tempScale = fov / (fov + zRot);
+                const screenX = (xRot + p.dx) * tempScale + cx;
+                const screenY = (yRot + p.dy) * tempScale + cy;
+
+                if (mouse.active) {
+                    const dx = screenX - mouse.x;
+                    const dy = screenY - mouse.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const interactRadius = 140; // 加大感应范围，模拟气流
+
+                    if (distance < interactRadius) {
+                        const force = (interactRadius - distance) / interactRadius;
+                        const angle = Math.atan2(dy, dx);
+                        
+                        // 斥力：大大增加推力，制造"被吹飞"的效果
+                        // 加入随机扰动 (Turbulence)，让飞行轨迹不那么死板
+                        const pushForce = 3.5; 
+                        
+                        p.vx += Math.cos(angle) * force * pushForce;
+                        p.vy += Math.sin(angle) * force * pushForce;
+                        p.vz += (Math.random() - 0.5) * force * pushForce * 2; // Z轴也随机扩散
+                    }
+                }
+
+                // 3. 物理引擎更新 (Inertia & Drag)
+                
+                // 空气阻力：让速度慢慢降下来
+                p.vx *= p.friction;
+                p.vy *= p.friction;
+                p.vz *= p.friction;
+
+                // 归位力 (Soft Return)：像引力一样把它们慢慢拉回 dx=0, dy=0
+                // 这种力与当前的位移成正比，但系数很小
+                p.vx -= p.dx * p.returnSpeed;
+                p.vy -= p.dy * p.returnSpeed;
+                p.vz -= p.dz * p.returnSpeed;
+
+                // 更新位移
+                p.dx += p.vx;
+                p.dy += p.vy;
+                p.dz += p.vz;
+
+                // 4. 最终渲染
+                const finalX = xRot + p.dx;
+                const finalY = yRot + p.dy;
+                const finalZ = zRot + p.dz;
+
+                const scale = fov / (fov + finalZ);
+                const x2d = finalX * scale + cx;
+                const y2d = finalY * scale + cy;
+
+                // 深度透明度
+                // 当粒子飞散得很远时，透明度稍微降低，制造"消散"感
+                let alpha = (scale - 0.4) * 1.5;
+                
+                // 如果位移很大，让它更轻盈透明
+                const displacementMag = Math.sqrt(p.dx*p.dx + p.dy*p.dy + p.dz*p.dz);
+                if(displacementMag > 50) {
+                     alpha *= Math.max(0.3, 1 - displacementMag / 300);
+                }
+
+                const size = scale * 1.3;
+
+                if (alpha > 0) {
+                    ctx.fillStyle = `rgba(197, 160, 101, ${alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(x2d, y2d, size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        initParticles();
+        animate();
+
+    </script>
+</body>
+</html>

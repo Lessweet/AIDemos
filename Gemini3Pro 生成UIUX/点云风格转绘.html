@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Liquid Glass Point Cloud Art</title>
+    <style>
+        /* --- 基础重置 --- */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000; /* 深邃黑背景，突出玻璃感 */
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+            color: white;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+        }
+
+        /* --- 装饰性背景光斑 (让玻璃效果更明显) --- */
+        .ambient-light {
+            position: absolute;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: -1;
+            animation: float 10s infinite ease-in-out;
+        }
+        .light-1 { top: -100px; left: -100px; background: radial-gradient(circle, #4f29cd, #000); }
+        .light-2 { bottom: -100px; right: -100px; background: radial-gradient(circle, #00d2ff, #000); animation-delay: -5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, 20px); }
+        }
+
+        /* --- iOS Liquid Glass 面板 --- */
+        #ui-container {
+            position: absolute;
+            top: 50%; left: 40px;
+            transform: translateY(-50%);
+            width: 320px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .glass-panel {
+            background: rgba(30, 30, 30, 0.4); /* 深色玻璃基底 */
+            backdrop-filter: blur(25px) saturate(180%); /* iOS 特有的模糊+饱和度提升 */
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.12); /* 玻璃边缘反光 */
+            box-shadow: 
+                0 8px 32px 0 rgba(0, 0, 0, 0.3),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05); /* 内发光 */
+            padding: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+            background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* --- 上传区域 --- */
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .upload-icon { font-size: 24px; margin-bottom: 8px; display: block; }
+        .upload-text { font-size: 13px; color: rgba(255,255,255,0.8); }
+        #fileInput { display: none; }
+
+        /* --- iOS 风格滑杆 (Custom Range Slider) --- */
+        .control-group {
+            margin-bottom: 12px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 6px;
+        }
+        .val-display { font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, 0.6); }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]:focus { outline: none; }
+
+        /* 滑轨 */
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            border: 0.5px solid rgba(255,255,255,0.05);
+        }
+
+        /* 滑块 (Thumb) - iOS 风格 */
+        input[type=range]::-webkit-slider-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -7px; /* 垂直居中 */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+
+        input[type=range]:hover::-webkit-slider-thumb {
+            transform: scale(1.2);
+        }
+
+        /* --- 状态栏 --- */
+        #status-bar {
+            margin-top: 10px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 背景光斑 (营造氛围) -->
+    <div class="ambient-light light-1"></div>
+    <div class="ambient-light light-2"></div>
+
+    <!-- UI 容器 -->
+    <div id="ui-container">
+        <div class="glass-panel">
+            <h2>Point Cloud Art</h2>
+            
+            <!-- 上传组件 -->
+            <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                <span class="upload-icon">☁️</span>
+                <span class="upload-text">Tap to Upload Image</span>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
+
+            <!-- 几何生成参数 -->
+            <div class="section-title">Geometry (Rebuild)</div>
+            
+            <div class="control-group">
+                <div class="label-row"><span>Density</span> <span id="val-density" class="val-display">4</span></div>
+                <input type="range" id="density" min="1" max="10" step="1" value="4">
+            </div>
+
+            <div class="control-group">
+                <div class="label-row"><span>Threshold</span> <span id="val-threshold" class="val-display">10</span></div>
+                <input type="range" id="threshold" min="0" max="100" value="10">
+            </div>
+
+            <!-- 视觉参数 -->
+            <div class="section-title">Visuals (Realtime)</div>
+
+            <div class="control-group">
+                <div class="label-row"><span>Size</span> <span id="val-size" class="val-display">2.5</span></div>
+                <input type="range" id="size" min="0.1" max="10" step="0.1" value="2.5">
+            </div>
+
+            <div class="control-group">
+                <div class="label-row"><span>Depth</span> <span id="val-depth" class="val-display">100</span></div>
+                <input type="range" id="depth" min="0" max="500" value="100">
+            </div>
+
+            <div class="control-group">
+                <div class="label-row"><span>Noise</span> <span id="val-noise" class="val-display">0</span></div>
+                <input type="range" id="noise" min="0" max="50" value="0">
+            </div>
+
+            <div class="control-group">
+                <div class="label-row"><span>Opacity</span> <span id="val-opacity" class="val-display">0.8</span></div>
+                <input type="range" id="opacity" min="0.1" max="1.0" step="0.1" value="0.8">
+            </div>
+
+            <div id="status-bar">Ready to render</div>
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // --- 核心变量 ---
+        let scene, camera, renderer, controls;
+        let particles;
+        let imgData = null, imgWidth, imgHeight;
+        
+        // 参数状态
+        const params = {
+            density: 4,
+            threshold: 10,
+            size: 2.5,
+            depth: 100,
+            noise: 0,
+            opacity: 0.8
+        };
+
+        init();
+        animate();
+        initUI(); // 初始化 UI 事件绑定
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            // 场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.001); // 纯黑雾气
+
+            // 相机
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 5000);
+            camera.position.set(0, 0, 600);
+
+            // 渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // 开启 alpha 允许背景穿透
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // 控制器
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // --- UI 逻辑绑定 ---
+        function initUI() {
+            // 辅助函数：绑定 Input 和 显示数值
+            function bindInput(id, paramKey, isRebuild = false) {
+                const el = document.getElementById(id);
+                const display = document.getElementById('val-' + id);
+                
+                el.addEventListener('input', (e) => {
+                    const val = parseFloat(e.target.value);
+                    params[paramKey] = val;
+                    display.innerText = val;
+                    
+                    if (!isRebuild) {
+                        // 实时更新 (Position / Material)
+                        if (id === 'size' || id === 'opacity') updateMaterial();
+                        else updatePositions();
+                    }
+                });
+
+                // 如果需要重建几何体，只在松开鼠标时触发 (性能优化)
+                if (isRebuild) {
+                    el.addEventListener('change', () => {
+                        buildParticles();
+                    });
+                }
+            }
+
+            // 绑定控件
+            bindInput('density', 'density', true);
+            bindInput('threshold', 'threshold', true);
+            
+            bindInput('size', 'size');
+            bindInput('depth', 'depth');
+            bindInput('noise', 'noise');
+            bindInput('opacity', 'opacity');
+
+            // 文件上传处理
+            const fileInput = document.getElementById('fileInput');
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) handleFile(e.target.files[0]);
+            });
+
+            // 拖拽效果
+            const dropZone = document.getElementById('dropZone');
+            dropZone.addEventListener('dragover', (e) => { 
+                e.preventDefault(); 
+                dropZone.style.background = 'rgba(255,255,255,0.2)';
+            });
+            dropZone.addEventListener('dragleave', (e) => { 
+                e.preventDefault(); 
+                dropZone.style.background = '';
+            });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.style.background = '';
+                if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+            });
+        }
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            document.getElementById('status-bar').innerText = "Processing image...";
+            
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    processImage(img);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function processImage(img) {
+            const canvas = document.createElement('canvas');
+            const maxSize = 800; 
+            let w = img.width;
+            let h = img.height;
+            
+            if (w > h && w > maxSize) { h *= maxSize / w; w = maxSize; }
+            else if (h > maxSize) { w *= maxSize / h; h = maxSize; }
+
+            canvas.width = w;
+            canvas.height = h;
+            imgWidth = w;
+            imgHeight = h;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            imgData = ctx.getImageData(0, 0, w, h).data;
+            
+            buildParticles();
+        }
+
+        function buildParticles() {
+            if (!imgData) return;
+            if (particles) scene.remove(particles);
+
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+            const basePositions = []; 
+
+            const step = params.density; 
+            const threshold = params.threshold;
+            const offsetX = imgWidth / 2;
+            const offsetY = imgHeight / 2;
+
+            for (let y = 0; y < imgHeight; y += step) {
+                for (let x = 0; x < imgWidth; x += step) {
+                    const index = (y * imgWidth + x) * 4;
+                    const r = imgData[index];
+                    const g = imgData[index + 1];
+                    const b = imgData[index + 2];
+                    const a = imgData[index + 3];
+                    const brightness = (r + g + b) / 3;
+
+                    if (a < 20 || brightness < threshold) continue;
+
+                    const posX = x - offsetX;
+                    const posY = -(y - offsetY); 
+                    
+                    positions.push(posX, posY, 0);
+                    basePositions.push(posX, posY, brightness / 255);
+                    colors.push(r / 255, g / 255, b / 255);
+                }
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.userData = { base: basePositions };
+
+            const sprite = new THREE.TextureLoader().load('https://threejs.org/examples/textures/sprites/disc.png');
+
+            const material = new THREE.PointsMaterial({
+                size: params.size,
+                color: 0xffffff,
+                map: sprite,
+                vertexColors: true,
+                transparent: true,
+                opacity: params.opacity,
+                sizeAttenuation: true,
+                alphaTest: 0.01,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+            updatePositions();
+            
+            document.getElementById('status-bar').innerText = `Rendered ${positions.length / 3} particles`;
+        }
+
+        function updatePositions() {
+            if (!particles) return;
+            const positions = particles.geometry.attributes.position.array;
+            const base = particles.geometry.userData.base;
+            const count = base.length / 3;
+
+            for (let i = 0; i < count; i++) {
+                const i3 = i * 3;
+                const x = base[i3];
+                const y = base[i3 + 1];
+                const brightness = base[i3 + 2];
+
+                const noiseX = (Math.random() - 0.5) * params.noise;
+                const noiseY = (Math.random() - 0.5) * params.noise;
+                const noiseZ = (Math.random() - 0.5) * params.noise;
+
+                positions[i3] = x + noiseX;
+                positions[i3 + 1] = y + noiseY;
+                positions[i3 + 2] = (brightness * params.depth) + noiseZ;
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+        }
+
+        function updateMaterial() {
+            if (!particles) return;
+            particles.material.size = params.size;
+            particles.material.opacity = params.opacity;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

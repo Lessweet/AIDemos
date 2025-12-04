@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Interactive Particles</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; /* 防止滚动条 */
+            background-color: #050505; /*以此背景色为主 */
+            font-family: sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #instructions {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="instructions">移动鼠标以交互</div>
+
+    <!-- 引入 Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        let scene, camera, renderer;
+        let particles, particleGeo;
+        let count = 5000; // 粒子数量
+
+        // 鼠标坐标
+        let mouseX = 0;
+        let mouseY = 0;
+        
+        // 目标旋转角度（用于平滑过渡）
+        let targetX = 0;
+        let targetY = 0;
+
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        init();
+        animate();
+
+        function init() {
+            // 1. 创建场景
+            scene = new THREE.Scene();
+            // 添加一点迷雾效果，让远处的粒子淡出
+            scene.fog = new THREE.FogExp2(0x050505, 0.002);
+
+            // 2. 创建摄像机
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 3000);
+            camera.position.z = 1000;
+
+            // 3. 创建粒子几何体 (BufferGeometry 性能更好)
+            particleGeo = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3); // 每个粒子有 x, y, z
+            const scales = new Float32Array(count); // 每个粒子的大小不一
+
+            let i = 0, j = 0;
+            for (let ix = 0; ix < count; ix++) {
+                // 随机分布粒子 X, Y, Z
+                // 这里我们将它们主要分布在一个水平面上
+                const x = (Math.random() * 2 - 1) * 1000;
+                const y = (Math.random() * 2 - 1) * 1000;
+                const z = (Math.random() * 2 - 1) * 1000;
+
+                positions[i] = x;
+                positions[i + 1] = y;
+                positions[i + 2] = z;
+
+                scales[j] = 1;
+
+                i += 3;
+                j++;
+            }
+
+            // 将属性添加到几何体
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particleGeo.setAttribute('scale', new THREE.BufferAttribute(scales, 1));
+
+            // 4. 创建材质 (使用圆形纹理或简单的点)
+            const material = new THREE.PointsMaterial({
+                color: 0x00ffff, // 青色
+                size: 3,
+                sizeAttenuation: true, // 远小近大
+                transparent: true,
+                opacity: 0.8
+            });
+
+            // 5. 创建粒子系统网格
+            particles = new THREE.Points(particleGeo, material);
+            scene.add(particles);
+
+            // 6. 渲染器设置
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // 7. 事件监听
+            document.addEventListener('mousemove', onDocumentMouseMove);
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onDocumentMouseMove(event) {
+            // 归一化鼠标位置 (-1 到 1)
+            mouseX = event.clientX - windowHalfX;
+            mouseY = event.clientY - windowHalfY;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+        }
+
+        function render() {
+            const time = Date.now() * 0.00005;
+
+            // --- 交互逻辑：摄像机跟随鼠标，但有延迟平滑效果 ---
+            targetX = mouseX * 0.001;
+            targetY = mouseY * 0.001;
+
+            // 粒子整体旋转
+            particles.rotation.y += 0.002; 
+            
+            // 根据鼠标位置微调粒子系统的倾斜角度
+            particles.rotation.x += 0.05 * (targetY - particles.rotation.x);
+            particles.rotation.z += 0.05 * (targetX - particles.rotation.z);
+
+            // --- 动画逻辑：波浪效果 ---
+            // 获取位置数组
+            const positions = particleGeo.attributes.position.array;
+            
+            // 遍历所有粒子，改变 Y 轴高度形成波浪
+            for (let i = 0; i < count; i++) {
+                // i * 3 + 1 是 Y 轴的索引
+                // 使用正弦函数，结合 x 坐标和时间，创造波浪
+                const x = positions[i * 3];
+                
+                // 这是一个简单的波浪公式
+                positions[i * 3 + 1] = (Math.sin((x * 0.005) + (time * 100)) * 50) 
+                                       + (Math.cos((positions[i*3+2] * 0.003) + time * 50) * 50);
+            }
+
+            // 告诉 Three.js 位置数据已更新，需要重新渲染
+            particleGeo.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
