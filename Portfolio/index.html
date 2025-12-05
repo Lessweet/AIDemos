@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设计作品集</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <span class="name">你好，我是 <strong>UI 设计师</strong></span>
+            <span class="title">专注于移动产品设计与开发</span>
+        </div>
+        <div class="header-center">
+            <a href="#" class="header-link">作品集</a>
+        </div>
+        <div class="header-right">
+            <a href="#" class="header-link">小红书</a>
+            <span class="separator">,</span>
+            <a href="#" class="header-link">公众号</a>
+        </div>
+    </header>
+
+    <!-- Info Section -->
+    <section class="info-section">
+        <div class="info-left">
+            <span class="info-label">邮箱</span>
+            <a href="mailto:1270964627@qq.com" class="info-email">1270964627@qq.com</a>
+        </div>
+        <div class="info-right">
+            <p class="info-text">欢迎来到我的 Vibe Coding 空间，这里展示我的作品、创作过程、动效设计，以及我正在探索的各种有趣事物。</p>
+        </div>
+    </section>
+
+    <!-- Masonry Grid -->
+    <section class="work-section">
+        <div class="masonry-grid">
+
+            <!-- Project 0: Interactive Character Demo - Full Width -->
+            <article class="card card-full-demo" data-delay="0">
+                <div class="card-header">
+                    <span class="card-label">眼神跟随</span>
+                    <button class="card-arrow" onclick="window.open('../multi-scene-character-demo/multi-scene-character-demo.html', '_blank')">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M1 13L13 1M13 1H3M13 1V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-iframe-container">
+                    <iframe src="../multi-scene-character-demo/multi-scene-character-demo.html" class="card-iframe" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </article>
+
+            <!-- Project 1: 3D Card - Tall -->
+            <article class="card card-tall" data-delay="0">
+                <div class="card-header">
+                    <span class="card-label">3D 卡片</span>
+                    <button class="card-arrow">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M1 13L13 1M13 1H3M13 1V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-visual">
+                    <div class="iphone-frame">
+                        <div class="iphone-notch"></div>
+                        <div class="iphone-screen screen-3dcard">
+                            <div class="demo-card">
+                                <div class="demo-card-inner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Project 2: Glass Balls - Tall -->
+            <article class="card card-tall" data-delay="100">
+                <div class="card-header">
+                    <span class="card-label">玻璃球</span>
+                    <button class="card-arrow">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M1 13L13 1M13 1H3M13 1V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-visual">
+                    <div class="iphone-frame">
+                        <div class="iphone-notch"></div>
+                        <div class="iphone-screen screen-balls">
+                            <div class="ball b1"></div>
+                            <div class="ball b2"></div>
+                            <div class="ball b3"></div>
+                            <div class="ball b4"></div>
+                            <div class="ball b5"></div>
+                            <div class="ball b6"></div>
+                            <div class="ball b7"></div>
+                            <div class="ball b8"></div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Project 3: 3D Sphere - Medium -->
+            <article class="card card-medium" data-delay="200">
+                <div class="card-header">
+                    <span class="card-label">3D 球体</span>
+                    <button class="card-arrow">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M1 13L13 1M13 1H3M13 1V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-visual">
+                    <div class="iphone-frame iphone-small">
+                        <div class="iphone-notch"></div>
+                        <div class="iphone-screen screen-sphere">
+                            <div class="sphere-demo">
+                                <div class="sphere-highlight"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-caption">交互式 3D 球体</div>
+            </article>
+
+            <!-- Feature: Physics -->
+            <article class="card card-short" data-delay="300">
+                <div class="card-header">
+                    <span class="card-label">物理引擎</span>
+                    <button class="card-arrow">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M1 13L13 1M13 1H3M13 1V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-visual visual-physics">
+                    <div class="physics-ball pb1"></div>
+                    <div class="physics-ball pb2"></div>
+                    <div class="physics-ball pb3"></div>
+                    <div class="physics-ground"></div>
+                </div>
+            </article>
+
+            <!-- Feature: Gyroscope -->
+            <article class="card card-medium" data-delay="400">
+                <div class="card-header">
+                    <span class="card-label">陀螺仪</span>
+                    <button class="card-arrow">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M1 13L13 1M13 1H3M13 1V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-visual">
+                    <div class="iphone-frame iphone-small iphone-tilted">
+                        <div class="iphone-notch"></div>
+                        <div class="iphone-screen screen-gyro">
+                            <div class="gyro-indicator"></div>
+                            <div class="gyro-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Tech Stack -->
+            <article class="card card-short" data-delay="500">
+                <div class="card-header">
+                    <span class="card-label">技术栈</span>
+                    <button class="card-arrow">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M1 13L13 1M13 1H3M13 1V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-visual visual-stack">
+                    <div class="stack-list">
+                        <div class="stack-row">
+                            <span class="stack-num">01</span>
+                            <span class="stack-name">SwiftUI</span>
+                            <span class="stack-num">02</span>
+                            <span class="stack-name">SceneKit</span>
+                        </div>
+                        <div class="stack-row">
+                            <span class="stack-num">03</span>
+                            <span class="stack-name">SpriteKit</span>
+                            <span class="stack-num">04</span>
+                            <span class="stack-name">CoreMotion</span>
+                        </div>
+                        <div class="stack-row">
+                            <span class="stack-num">05</span>
+                            <span class="stack-name">Swift 5.9</span>
+                            <span class="stack-num">06</span>
+                            <span class="stack-name">iOS 15+</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Gesture -->
+            <article class="card card-tall" data-delay="600">
+                <div class="card-header">
+                    <span class="card-label">手势交互</span>
+                    <button class="card-arrow">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M1 13L13 1M13 1H3M13 1V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-visual">
+                    <div class="iphone-frame">
+                        <div class="iphone-notch"></div>
+                        <div class="iphone-screen screen-gesture">
+                            <div class="gesture-card">
+                                <div class="gesture-finger"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-text">使用 SwiftUI 设计与开发</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
