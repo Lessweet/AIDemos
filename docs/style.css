@@ -449,25 +449,28 @@ a {
 @media (max-width: 768px) {
     .header {
         padding: 24px 24px;
-        flex-direction: column;
+        flex-wrap: wrap;
         gap: 16px;
     }
 
     .header-left {
-        order: 2;
+        order: 3;
         width: 100%;
+        flex-basis: 100%;
     }
 
     .header-center {
         position: static;
         transform: none;
         order: 1;
+        flex: 0 0 auto;
     }
 
     .header-right {
-        position: absolute;
-        right: 24px;
-        top: 24px;
+        order: 2;
+        flex: 1;
+        display: flex;
+        justify-content: flex-end;
     }
 }
 
