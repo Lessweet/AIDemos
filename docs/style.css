@@ -448,29 +448,30 @@ a {
 
 @media (max-width: 768px) {
     .header {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
         padding: 24px 24px;
-        flex-wrap: wrap;
         gap: 16px;
-    }
-
-    .header-left {
-        order: 3;
-        width: 100%;
-        flex-basis: 100%;
     }
 
     .header-center {
         position: static;
         transform: none;
-        order: 1;
-        flex: 0 0 auto;
+        grid-column: 1;
+        grid-row: 1;
     }
 
     .header-right {
-        order: 2;
-        flex: 1;
+        grid-column: 2;
+        grid-row: 1;
         display: flex;
         justify-content: flex-end;
+    }
+
+    .header-left {
+        grid-column: 1 / -1;
+        grid-row: 2;
     }
 }
 
