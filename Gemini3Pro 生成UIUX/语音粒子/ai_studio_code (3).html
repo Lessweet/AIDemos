@@ -19,7 +19,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #e0e0e0;
+            background-color: #F2F2F7;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overscroll-behavior: none;
         }
@@ -145,25 +145,11 @@
             transform: scale(0.95);
         }
 
-        /* 手机端：隐藏模拟器边框，全屏展示 */
-        @media (max-width: 500px) {
-            body {
-                background-color: var(--bg-color);
-            }
-
+        /* 手机端：缩放手机模型以适应小屏幕 */
+        @media (max-width: 420px) {
             .phone-container {
-                width: 100%;
-                height: 100vh;
-                border-radius: 0;
-                box-shadow: none;
-            }
-
-            .dynamic-island {
-                display: none;
-            }
-
-            .status-bar {
-                display: none;
+                transform: scale(0.85);
+                transform-origin: center center;
             }
         }
     </style>

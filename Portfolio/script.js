@@ -77,3 +77,26 @@ window.addEventListener('scroll', () => {
 
     lastScrollY = currentScrollY;
 }, { passive: true });
+
+/**
+ * QR Code Modal
+ */
+const qrcodeModal = document.getElementById('qrcodeModal');
+const gzhLink = document.getElementById('gzhLink');
+const qrcodeClose = document.getElementById('qrcodeClose');
+
+if (gzhLink && qrcodeModal) {
+    gzhLink.addEventListener('click', () => {
+        qrcodeModal.classList.add('show');
+    });
+
+    qrcodeClose.addEventListener('click', () => {
+        qrcodeModal.classList.remove('show');
+    });
+
+    qrcodeModal.addEventListener('click', (e) => {
+        if (e.target === qrcodeModal) {
+            qrcodeModal.classList.remove('show');
+        }
+    });
+}

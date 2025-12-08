@@ -68,6 +68,8 @@ body {
   font-size: 14px;
   cursor: pointer;
   font-family: inherit;
+  min-width: 100px;
+  height: 40px;
 }
 
 .dev-toolbar select {
@@ -107,15 +109,43 @@ body {
   z-index: 100;
   transform: translateX(100%);
   transition: transform 0.3s ease;
-  box-shadow: -4px 0 16px rgba(0,0,0,.08);
+  box-shadow: none;
+  display: none;
 }
 
 .dev-panel.open {
+  display: block;
   transform: translateX(0);
 }
 
+.dev-panel-close {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #EDEFF3;
+  border-radius: 8px;
+  background: white;
+  color: #666;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.dev-panel-close:hover {
+  background: #f8f8f8;
+  color: #333;
+  border-color: #d0d0d0;
+}
+
 .dev-panel-content {
-  padding: 20px;
+  padding: 56px 20px 20px;
   display: grid;
   grid-template-columns: repeat(2, minmax(160px, 1fr));
   gap: 16px;
@@ -226,9 +256,11 @@ body {
   background: white;
   width: 375px;
   height: 812px;
+  aspect-ratio: 375 / 812;
   padding: 60px 40px 40px;
-  border-radius: 24px;
+  border-radius: 40px;
   border: 1px solid #EDEFF3;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.1);
   text-align: center;
   position: relative;
   transition: transform 0.3s ease;
@@ -572,7 +604,8 @@ body {
   .scene-card {
     width: 100%;
     max-width: 375px;
-    height: 812px;
+    height: auto;
+    aspect-ratio: 375 / 812;
     padding: 40px 30px 30px;
   }
   .character {
@@ -587,9 +620,11 @@ body {
     bottom: 0;
     height: 50vh;
     transform: translateY(100%);
-    box-shadow: 0 -4px 16px rgba(0,0,0,.08);
+    box-shadow: none;
+    display: none;
   }
   .dev-panel.open {
+    display: block;
     transform: translateY(0);
   }
   .dev-panel-content {
@@ -763,14 +798,11 @@ body {
     <option value="locked">账户锁定</option>
     <option value="success">成功</option>
   </select>
-  <select id="langSelector" aria-label="语言选择">
-    <option value="zh">中文</option>
-    <option value="en">English</option>
-  </select>
-  <button id="devPanelToggle">开发面板</button>
+  <button id="devPanelToggle">参数</button>
 </div>
 
 <div class="dev-panel" id="devPanel">
+  <button class="dev-panel-close" id="devPanelClose">&times;</button>
   <div class="dev-panel-content" id="devPanelContent"></div>
 </div>
 
@@ -1732,12 +1764,11 @@ function updateDevPanel(props) {
 
 // ========== 初始化 ==========
 document.getElementById('sceneSelector').addEventListener('change', e => navigate(e.target.value));
-document.getElementById('langSelector').addEventListener('change', e => {
-  currentLang = e.target.value;
-  renderScene(currentScene);
-});
 document.getElementById('devPanelToggle').addEventListener('click', () => {
   document.getElementById('devPanel').classList.toggle('open');
+});
+document.getElementById('devPanelClose').addEventListener('click', () => {
+  document.getElementById('devPanel').classList.remove('open');
 });
 
 window.addEventListener('hashchange', () => {

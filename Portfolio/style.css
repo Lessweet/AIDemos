@@ -54,6 +54,7 @@ a {
     padding: 32px 48px;
     gap: 24px;
     flex-wrap: wrap;
+    position: relative;
 }
 
 .header-left {
@@ -77,7 +78,9 @@ a {
 }
 
 .header-center {
-    flex: 1;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     text-align: center;
 }
 
@@ -92,8 +95,74 @@ a {
 }
 
 .separator {
+    color: var(--gray-400);
+    margin: 0 12px;
+    position: relative;
+    top: -1px;
+}
+
+/* ========================================
+   QR Code Modal
+   ======================================== */
+.qrcode-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.qrcode-modal.show {
+    display: flex;
+}
+
+.qrcode-modal-content {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    text-align: center;
+    max-width: 320px;
+}
+
+.qrcode-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.qrcode-modal-close:hover {
+    background: var(--gray-200);
     color: var(--gray-900);
-    margin: 0 2px;
+}
+
+.qrcode-img {
+    width: 200px;
+    height: 200px;
+    border-radius: 8px;
+}
+
+.qrcode-tip {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--gray-500);
 }
 
 .header-right {
@@ -157,7 +226,7 @@ a {
 
 .masonry-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 16px;
     grid-auto-rows: 160px;
 }
@@ -243,7 +312,7 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 0;
     position: relative;
 }
 
@@ -252,6 +321,37 @@ a {
     color: var(--gray-500);
     text-align: center;
     padding: 12px 20px 20px;
+}
+
+/* Card Video */
+.card-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0 0 16px 16px;
+}
+
+/* Card with full video (no header gap) */
+.card-video-full {
+    overflow: hidden;
+}
+
+.card-video-full .card-visual {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+}
+
+.card-video-full .card-video {
+    border-radius: 16px;
+}
+
+.card-video-full .card-header {
+    position: relative;
+    z-index: 1;
 }
 
 /* ========================================
@@ -309,6 +409,12 @@ a {
 
 .iphone-small .iphone-screen {
     border-radius: 22px;
+}
+
+.iphone-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* ========================================
@@ -552,6 +658,22 @@ a {
     justify-content: flex-start;
 }
 
+/* Footer Card Style */
+.card-footer {
+    background: #F2F2F7;
+    grid-row: span 2;
+}
+
+.card-footer .card-visual {
+    background: #F2F2F7;
+    border-radius: 0 0 16px 16px;
+    padding: 20px;
+}
+
+.card-footer .visual-stack {
+    background: transparent;
+}
+
 .stack-list {
     width: 100%;
 }
@@ -643,7 +765,7 @@ a {
    ======================================== */
 @media (max-width: 1200px) {
     .masonry-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
     }
 }
 
@@ -667,19 +789,33 @@ a {
     }
 
     .masonry-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 
 @media (max-width: 600px) {
     .header {
         padding: 20px 16px;
-        gap: 16px;
+        gap: 12px;
+        flex-wrap: wrap;
     }
 
-    .header-center,
+    .header-left {
+        width: 100%;
+        order: 2;
+        align-items: flex-start;
+    }
+
+    .header-center {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 20px;
+    }
+
     .header-right {
-        display: none;
+        flex: none;
+        order: 1;
     }
 
     .info-section {
