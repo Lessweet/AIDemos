@@ -448,30 +448,25 @@ a {
 
 @media (max-width: 768px) {
     .header {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        grid-template-rows: auto auto;
+        display: flex;
+        flex-wrap: wrap;
         padding: 24px 24px;
-        gap: 16px;
+        gap: 12px 24px;
+        align-items: center;
     }
 
     .header-center {
         position: static;
         transform: none;
-        grid-column: 1;
-        grid-row: 1;
     }
 
     .header-right {
-        grid-column: 2;
-        grid-row: 1;
-        display: flex;
-        justify-content: flex-end;
+        margin-left: auto;
     }
 
     .header-left {
-        grid-column: 1 / -1;
-        grid-row: 2;
+        width: 100%;
+        order: 3;
     }
 }
 
