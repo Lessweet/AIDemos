@@ -467,7 +467,7 @@ a {
     justify-content: center;
 }
 
-.card-visual-padded .card-img {
+.card-wide .card-visual-padded .card-img {
     width: 85%;
     height: auto;
     max-height: 100%;
