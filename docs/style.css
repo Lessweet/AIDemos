@@ -476,6 +476,13 @@ a {
     transform: translateY(-12px);
 }
 
+@media (max-width: 1200px) {
+    .card-wide {
+        grid-column: span 3;
+        grid-row: span 3;
+    }
+}
+
 @media (max-width: 900px) {
     .card-wide {
         grid-column: span 2;
