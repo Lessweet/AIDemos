@@ -2171,11 +2171,9 @@ body.reading-page .header.home-nav::after {
 @media (max-width: 600px) {
     :root { --nav-content-gap: 96px; }
 }
-/* 首页例外:顶栏下留白(2026-07-22 用户两轮减半,桌面 60 / 手机 24;Blog/Archive 仍用共享值) */
-body.home-v2.home-landing { --nav-content-gap: 60px; }
-@media (max-width: 600px) {
-    body.home-v2.home-landing { --nav-content-gap: 24px; }
-}
+/* 首页例外:顶栏下留白统一 24px(2026-07-26 用户要求跨断点一致,取原桌面 60 / 手机 24
+   里的小值;Blog/Archive 仍用共享值)。无 media query —— 所有宽度同一间距。 */
+body.home-v2.home-landing { --nav-content-gap: 24px; }
 /* 三页统一背景 + 统一顶栏下留白(home-landing 的 min-height 同步用该 gap 扣减)。
    选择器带上 .home-v2 提一档特异性(0,3,1):文件后面的 body.no-banner .design-layout
    (0,2,1,+32px)才压不过来 —— 之前特异性同级、后者靠顺序赢,240px 一直没生效。 */
@@ -2332,12 +2330,22 @@ body.theme-dark .design-content .category-section .section-divider {
 /* ============ 首页 landing(body.home-landing,仅 index.html) ============
    整页只有一屏:hero(左对齐)垂直居中吃掉剩余高度,下方是 Blog/Archive/Contact
    三行大字索引(大字 + 细分割线 + 箭头),文章网格已移除(列表在 blog.html)。 */
-/* 一屏限制已取消(2026-07-21):240px 顶部留白下强行压一屏会把署名与索引行挤死,
-   改为自然流式 —— hero 在上、索引行随后,页面可滚动。 */
+/* 一屏(2026-07-26 恢复):design-layout 撑满视口高、纵向 flex —— hero 内容顶部对齐,
+   用 flex 弹性吃掉剩余高度,把 Blog/Archive/Contact 三行索引压到视口底部,整页正好一屏、
+   不滚动。2026-07-21 曾因顶部留白 240px 压不下而放弃;现 home 顶距已收到 24px,空间足够。
+   顶部留白(padding-top)仍由 body.home-v2.home-landing .design-layout 负责,这里不动。 */
+body.home-landing .design-layout {
+    min-height: 100vh;                 /* 兜底 */
+    min-height: 100dvh;                /* 移动端按可视高度铺满,避免地址栏伸缩露白 */
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 40px;              /* 索引 → 视口底的呼吸(原 96) */
+}
 body.home-landing .home-hero {
+    flex: 1 1 auto;            /* 撑开剩余高度,把索引推到底部 */
     align-items: flex-start;   /* hero 左对齐,与顶栏 logo 同一左缘 */
     text-align: left;
-    padding: 0 0 180px;        /* 署名 → 第一条分割线的呼吸(120 → 180) */
+    padding: 0 0 40px;         /* 署名 → 第一条分割线的最小呼吸(余量交给 flex 撑) */
 }
 body.home-landing .hero-byline { justify-content: flex-start; }
 
@@ -2658,6 +2666,15 @@ html.hero-ready .hero-role { animation-delay: calc(var(--d, 0ms) + 180ms); }
        系数由实测得出:第二行(Kaushan 1.2em)自然宽约 9.6×字号,减掉左右各 24px 页面内边距,
        再留一点余量 → 390px 上约 34px,320px 窄屏也不折行。下限兜底 26px。 */
     .hero-headline { font-size: clamp(24px, calc(8.6vw - 4px), 34px); }
+}
+
+/* 矮视口(≤820px 高,如 13" 笔记本 1280×720 / 窗口化浏览器):固定成本(顶距 + 三行
+   索引 + 底距)在正常留白下会顶破一屏 —— 这里压缩索引行下距与署名间距,让 flex 仍有
+   余量把整页收进一屏。高屏(≥821)不受影响,留白维持宽松。 */
+@media (max-height: 820px) {
+    body.home-landing .home-index-row { padding: 9px 0 28px; }
+    body.home-landing .home-index { padding-bottom: 24px; }
+    body.home-landing .hero-byline { margin-top: 24px; }
 }
 
 /* ========================================
