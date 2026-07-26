@@ -1475,7 +1475,7 @@ body .home-nav .nav-cats .nav-cat.active {
         transform: none;
         border-top-color: transparent;
         transition:
-            border-top-color 1.05s var(--ease-soft) var(--row-d, 0s),
+            border-top-color var(--rise-fade-dur) var(--ease-soft) var(--row-d, 0s),
             color 0.42s ease;   /* hover 柔和过渡(2026-07-22) */
     }
     .home-v2 .header.home-nav.nav-open .nav-collapse .nav-cat,
@@ -2663,7 +2663,7 @@ body.home-landing .home-index-row .hi-arrow svg {
        行的 transition 必须整条重写 —— 只改 color 会把 border-top-color 那项一起丢掉。 */
     body.home-v2.home-landing .home-index-row:hover {
         color: var(--hl-paper);
-        transition: border-top-color 0.24s ease, color var(--hl-dur) ease;
+        transition: border-top-color var(--index-divider-dur) ease, color var(--hl-dur) ease;
     }
     body.home-v2.home-landing .home-index-row:hover::before {
         background-color: var(--hl-ink);
@@ -2689,13 +2689,13 @@ body.home-landing .home-index-row .hi-arrow svg {
 body.home-landing .home-index-row {
     border-top-color: transparent;
     transition:
-        border-top-color 1.05s var(--ease-soft) var(--row-d, 0s),
+        border-top-color var(--rise-fade-dur) var(--ease-soft) var(--row-d, 0s),
         color var(--hl-dur-out) ease;   /* 文字与黑块同一组时长,同进同出 */
 }
 html.hero-ready body.home-landing .home-index-row { border-top-color: rgba(0, 0, 0, 0.2); }
 /* 入场结束后(index.html 挂 entrance-done):分割线过渡换快速档 ——
    1.05s + 逐行延迟只属于入场,常驻会拖慢主题切换时的边框变色 */
-html.entrance-done body.home-landing .home-index-row { transition: border-top-color 0.24s ease, color var(--hl-dur-out) ease; }
+html.entrance-done body.home-landing .home-index-row { transition: border-top-color var(--index-divider-dur) ease, color var(--hl-dur-out) ease; }
 html.hero-ready body.home-landing .home-index-row .heading-rise-char {
     transform: translateY(0);
     opacity: 1;
@@ -2768,16 +2768,16 @@ html.hero-ready .hero-ch,
 html.hero-ready .hero-avatar,
 html.hero-ready .hero-by,
 html.hero-ready .hero-role {
-    animation: hero-soft-blur-in calc(648ms * var(--hero-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: hero-soft-blur-in calc(var(--hero-char-dur) * var(--hero-speed, 1)) var(--ease-soft) both;
     animation-delay: calc(var(--d, 0ms) * var(--hero-speed, 1));
 }
 /* 署名不再整块入场:头像、By Tongrong、UI Designer 三个单元在整组延迟(--d,
    由 index.html 切分脚本写在 .hero-byline 上、子元素继承)基础上再逐个错峰,
    每个都走同一条 hero-soft-blur-in,复刻 headline 逐字化开的节奏 */
-html.hero-ready .hero-by   { animation-delay: calc((var(--d, 0ms) + 90ms) * var(--hero-speed, 1)); }
-html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + 180ms) * var(--hero-speed, 1)); }
+html.hero-ready .hero-by   { animation-delay: calc((var(--d, 0ms) + var(--hero-byline-stagger)) * var(--hero-speed, 1)); }
+html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + var(--hero-byline-stagger) * 2) * var(--hero-speed, 1)); }
 @keyframes hero-soft-blur-in {
-    from { opacity: 0; transform: translate3d(0, 9.3px, 0); filter: blur(12px); }
+    from { opacity: 0; transform: translate3d(0, var(--hero-char-shift), 0); filter: blur(var(--hero-char-blur)); }
     to   { opacity: 1; transform: none; filter: blur(0); }
 }
 @media (prefers-reduced-motion: reduce) {

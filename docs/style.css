@@ -53,6 +53,26 @@
     /* 缓动统一用 --ease-soft */
 
     /* ============================================================
+       入场动画 —— 全站唯一规则。分两层:
+       · 这里(CSS)管「怎么动」:每段的时长 / 位移 / 模糊,缓动统一 --ease-soft。
+       · 错峰编排「何时开始」在 site/src/pages/home/HomePage.tsx 顶部常量
+         (HERO_STEP / BASE / ROW_STEP / CHAR_STEP):JS 逐元素算出 --d / --row-d
+         内联下发,CSS 读不到,故留 JS,改这里的时长时一并核对那组步长。
+       以后任何入场/升起交互,一律引用下面的变量,不要另写数值。
+       ============================================================ */
+    /* hero 逐字 soft-blur-in(index.html 拆字,html.hero-ready 放闸) */
+    --hero-char-dur: 648ms;         /* 每字化开时长(900×0.72) */
+    --hero-char-shift: 9.3px;       /* 每字起始下移(16×0.58) */
+    --hero-char-blur: 12px;         /* 每字起始模糊 */
+    --hero-byline-stagger: 90ms;    /* 署名三单元错峰步长:By +1×、Role +2× */
+    /* heading-rise 逐字升起(章节标题 + 首页索引行三大字,共用一套) */
+    --rise-char-dur: 1.26s;         /* 字符位移(translateY 110%→0)时长 */
+    --rise-fade-dur: 1.05s;         /* 字符/图标/分割线淡入时长(同一入场时刻) */
+    /* 首页索引行 / 全屏菜单行的分割线「快档」:入场结束(entrance-done)后与 hover 态
+       用,不带入场的逐行延迟。入场时的慢淡入走上面的 --rise-fade-dur。 */
+    --index-divider-dur: 0.24s;
+
+    /* ============================================================
        全站字号 scale —— 6 级,按 HTML 元素/角色命名,桌面/手机统一(只维护这一处)
        --fs-h1      36px  <h1> 大标题(文章/页面 hero)
        --fs-h2      24px  <h2> 小标题(章节)
@@ -604,8 +624,8 @@ a {
     opacity: 0;
     white-space: pre;        /* keep spaces */
     transition:
-        transform 1.26s var(--ease-soft) var(--d, 0s),
-        opacity 1.05s ease-out var(--d, 0s);
+        transform var(--rise-char-dur) var(--ease-soft) var(--d, 0s),
+        opacity var(--rise-fade-dur) ease-out var(--d, 0s);
     will-change: transform, opacity;
 }
 
@@ -617,7 +637,7 @@ a {
 /* 标题图标随逐字升起一起淡入,不要在文字出现前单独显示(否则页面只剩一个孤零零的图标) */
 .heading-rise .heading-icon {
     opacity: 0;
-    transition: opacity 1.05s var(--ease-soft);
+    transition: opacity var(--rise-fade-dur) var(--ease-soft);
 }
 .heading-rise.heading-rise-in .heading-icon {
     opacity: 1;
