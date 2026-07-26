@@ -51,6 +51,9 @@ const ROWS = [
 ];
 const ROW_STEP = 120;
 const CHAR_STEP = 35;
+/* = --rise-fade-dur(writing.css token):行内末字淡入完成即视为该行「已就位」,
+   逐行挂 .row-in 放开 hover 反色 —— 每行显示完立刻可交互,不等整段入场收尾 */
+const RISE_FADE = 1050;
 
 const ARROW = (
   <svg viewBox="0 0 24 24">
@@ -74,6 +77,8 @@ export default function HomePage() {
     if (!docEl.classList.contains('hero-ready')) return;
     docEl.classList.remove('hero-ready');
     docEl.classList.remove('entrance-done'); // 行分割线也按首载节奏重播
+    // 重播入场时逐行 hover 闸门一并复位,由下方计时重挂
+    document.querySelectorAll('.home-index-row.row-in').forEach((el) => el.classList.remove('row-in'));
     const els = Array.from(
       document.querySelectorAll<HTMLElement>('.heading-rise-char, .home-index-row'),
     );
@@ -89,9 +94,16 @@ export default function HomePage() {
   /* 入场收尾 2200ms 后给 html 挂 entrance-done(过渡换快速档);
      闸门 = html.hero-ready(loader 收尾/跳过时由入口脚本添加) */
   useEffect(() => {
-    let timer: number | undefined;
+    const timers: number[] = [];
     const markDone = () => {
-      timer = window.setTimeout(() => document.documentElement.classList.add('entrance-done'), entranceEnd);
+      /* 逐行放开 hover:各行末字(箭头)淡入完成的时刻挂 .row-in,该行立即可交互,
+         不陪最后一行等 entranceEnd。延迟公式与 JSX 里 --d 的错峰完全同源。 */
+      document.querySelectorAll<HTMLElement>('.home-index-row').forEach((el, r) => {
+        const chars = el.querySelectorAll('.heading-rise-char').length;
+        const readyAt = BASE + r * ROW_STEP + (chars - 1) * CHAR_STEP + RISE_FADE;
+        timers.push(window.setTimeout(() => el.classList.add('row-in'), readyAt));
+      });
+      timers.push(window.setTimeout(() => document.documentElement.classList.add('entrance-done'), entranceEnd));
     };
     let mo: MutationObserver | undefined;
     if (document.documentElement.classList.contains('hero-ready')) markDone();
@@ -105,7 +117,7 @@ export default function HomePage() {
       mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     }
     return () => {
-      clearTimeout(timer);
+      timers.forEach((t) => clearTimeout(t));
       mo?.disconnect();
     };
   }, []);

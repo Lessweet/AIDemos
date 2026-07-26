@@ -2636,24 +2636,27 @@ body.home-landing .home-index-row .hi-arrow svg {
 }
 /* hover 仅真悬停设备:触屏 tap 会粘住 :hover 导致颜色不恢复(2026-07-22 修复)。
    2026-07-26 起 hover 从「变灰」改为「黑底反色」——语义与顶栏 tab 统一为「点亮成块」。
-   特异性要压过上面深色主题那条 (0,4,1) 的 hover 变色,故带 body.home-v2 提到 (0,5,1)。 */
+   特异性要压过上面深色主题那条 (0,4,1) 的 hover 变色,故带 body.home-v2 提到 (0,5,1)。
+   闸门 .row-in(2026-07-26):入场没播完前行还是透明的,悬停就弹黑块会凭空出现
+   一条黑带 —— 反色 hover 按行放开:HomePage 在该行末字淡入完成的时刻挂 .row-in,
+   每行显示完立即可交互,不用陪最后一行等整段入场收尾(entrance-done)。 */
 @media (hover: hover) {
     /* hover 态声明「移入」时长:出现干脆(0.18s),消失留一口气(1s,见非 hover 态)。
        行的 transition 必须整条重写 —— 只改 color 会把 border-top-color 那项一起丢掉。 */
-    body.home-v2.home-landing .home-index-row:hover {
+    body.home-v2.home-landing .home-index-row.row-in:hover {
         color: var(--hl-paper);
         transition: border-top-color var(--index-divider-dur) ease, color var(--hl-dur) ease;
     }
-    body.home-v2.home-landing .home-index-row:hover::before {
+    body.home-v2.home-landing .home-index-row.row-in:hover::before {
         background-color: var(--hl-ink);
         transition: background-color var(--hl-dur) ease;
     }
     /* 文字右移、箭头左移,各自向中间收 —— 让文字在与内容区同宽的黑块里留出余地 */
-    body.home-v2.home-landing .home-index-row:hover .hi-label {
+    body.home-v2.home-landing .home-index-row.row-in:hover .hi-label {
         transform: translateX(var(--hl-shift));
         transition: transform var(--hl-shift-in) ease;
     }
-    body.home-v2.home-landing .home-index-row:hover .hi-arrow {
+    body.home-v2.home-landing .home-index-row.row-in:hover .hi-arrow {
         transform: translateX(calc(-1 * var(--hl-shift)));
         transition: transform var(--hl-shift-in) ease;
     }
