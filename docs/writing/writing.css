@@ -1245,8 +1245,10 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
 
 /* pillar 页(Writing + Design)共用顶栏:Writing/Design + 邮箱联系方式 全部靠右,统一胶囊样式
    导航 HTML 由 writing.js 的 initSiteNav() 生成,本就是同一个组件;这里只统一外观 */
-.design-page .home-nav { gap: 56px; }                /* 右侧三项成簇间距(nav-cats 组 ↔ Contact) */
-.design-page .home-nav .nav-cats { gap: 56px; }      /* Blog ↔ Cases 间距 */
+/* 走 --nav-tab-gap(style.css):hover/选中的黑块宽度是这个值的一半,两者必须联动,
+   否则改了间距就会在相邻黑块之间开出缝 */
+.design-page .home-nav { gap: var(--nav-tab-gap); }                /* 右侧三项成簇间距(nav-cats 组 ↔ Contact) */
+.design-page .home-nav .nav-cats { gap: var(--nav-tab-gap); }      /* Blog ↔ Cases 间距 */
 .design-page .home-nav .nav-cat,
 .design-page .home-nav .header-connect {
     padding: 7px 18px;
@@ -2178,7 +2180,7 @@ body.reading-page .header.home-nav::after {
        1. 背景色必须一致:全走 --site-bg,改这一处三页同步,禁止某页单独改值;
        2. 顶栏下留白必须一致:全走 --nav-content-gap,同样只改这一处。 */
     --site-bg: var(--gray-50, #f9f9f9);
-    --nav-content-gap: 240px;
+    --nav-content-gap: 120px;   /* 2026-07-26 用户要求减半(原 240px) */
     /* 首页索引行与手机端全屏菜单三项共用的字号(2026-07-21):两处必须一致。
        当前 = --fs-h2(24px,style.css 字号 scale) */
     --index-label-size: var(--fs-h2, 24px);
@@ -2186,7 +2188,7 @@ body.reading-page .header.home-nav::after {
 /* 手机端(≤600px):顶栏下留白收紧(240 → 96px)。桌面大留白在小屏上比例失衡
    (2026-07-22 用户圈出首页此间距)。仍走同一 token,三页同步。 */
 @media (max-width: 600px) {
-    :root { --nav-content-gap: 96px; }
+    :root { --nav-content-gap: 48px; }   /* 同步减半(原 96px) */
 }
 /* 首页例外:顶栏下留白统一 24px(2026-07-26 用户要求跨断点一致,取原桌面 60 / 手机 24
    里的小值;Blog/Archive 仍用共享值)。无 media query —— 所有宽度同一间距。 */
@@ -2297,7 +2299,8 @@ body.home-v2.design-page .header.home-nav .header-connect::before {
     content: "";
     position: absolute;
     z-index: -1;
-    inset: calc(-1 * var(--hl-pad-y)) calc(-1 * var(--hl-pad-x));
+    /* 左右用 tab 专用留白(= 相邻间距的一半),相邻两块正好贴合成一条连续的黑带 */
+    inset: calc(-1 * var(--hl-pad-y)) calc(-1 * var(--hl-pad-x-nav));
     border-radius: 0;   /* 直角 —— 与全站方头直角语言一致 */
     background-color: transparent;
     transition: background-color var(--hl-dur) ease;
@@ -2312,6 +2315,11 @@ body.home-v2.design-page .header.home-nav .header-connect::before {
         background-color: var(--hl-ink);
     }
 }
+/* 选中态(当前页)= 同一块黑底常驻(2026-07-26 用户要求)。
+   推翻了 2026-07-22 的「顶栏不做当前页高亮」——上面那几条 active 同色规则特异性
+   同为 (0,7,1),靠写在它们之后取胜。不放进 hover 媒体查询:这是常驻状态,触屏也要有。 */
+body.home-v2.design-page .header.home-nav .nav-cats .nav-cat.active { color: var(--hl-paper); }
+body.home-v2.design-page .header.home-nav .nav-cats .nav-cat.active::before { background-color: var(--hl-ink); }
 /* 文字在块里左右居中:桌面顶栏不显示箭头(它只在 ≤560px 的汉堡菜单里出现),
    但零宽的 .nav-arrow 仍是 flex 项,会让 gap 在文字右侧多留 6px(Contact 8px)——
    块就偏了。桌面直接把它摘出布局,<a> 的盒子回到紧贴文字。 */
@@ -2521,6 +2529,20 @@ body.home-landing.theme-dark .home-nav .theme-toggle:hover,
 body.blog-page.theme-dark .home-nav .theme-toggle:hover,
 body.works-page.theme-dark .home-nav .theme-toggle:hover { color: #fff; }
 
+/* 主题切换按钮 hover:圆底翻成墨色、图标翻成纸色 —— 与顶栏三个 tab 同一套
+   --hl-* 反色(2026-07-26 用户要求)。圆形保留,只换颜色。
+   必须写在上面那几条深浅主题 hover 之后:它们最高 (0,5,1),这里 (0,6,1) 稳压;
+   过渡也在这里补上 —— 基础规则只声明了 color 的过渡,底色会硬切。 */
+body.home-v2.design-page .header.home-nav .theme-toggle {
+    transition: color var(--hl-dur) ease, background-color var(--hl-dur) ease;
+}
+@media (hover: hover) {
+    body.home-v2.design-page .header.home-nav .theme-toggle:hover {
+        background: var(--hl-ink);
+        color: var(--hl-paper);
+    }
+}
+
 /* 手机端(汉堡可见的 Blog / Archive):太阳靠 margin-left:auto 顶右,汉堡不再自带 auto,
    两个 auto 会把太阳挤到中间。两按钮都带内边距(太阳 36px 盒装 20px 图标、汉堡 40px 盒),
    视觉间距 = 结构 gap + 两侧内边距;负 margin 把结构 gap 收到 4px,
@@ -2564,6 +2586,21 @@ body.home-landing .home-index-row {
     text-decoration: none;
     font-size: var(--index-label-size);   /* 与手机端全屏菜单三项同一 token */
     line-height: 1.15;
+    position: relative;
+    isolation: isolate;   /* 让下面的黑底只沉到本行文字之下 */
+}
+/* hover 黑底反色(2026-07-26 用户要求),与顶栏 tab 同一套 --hl-* token。
+   底块用伪元素:横向比行本身宽出 --hl-pad-x,文字不至于贴着黑边,
+   同时不动行的盒子 —— 直接给行加左右 padding 会把分割线一起撑宽。
+   inset 的上下取 0 = 盖住整行的内边距(文字上方 9px、下方 56px),
+   但盖不到 border-top,所以分割线在黑块之上仍然可见。 */
+body.home-landing .home-index-row::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0 calc(-1 * var(--hl-pad-x));
+    background-color: transparent;
+    transition: background-color var(--hl-dur) ease;
 }
 /* 三行大字字重:--fw-normal(regular 400)。保留这条高特异性规则作为唯一调节点
    (全局 * 规则本来就是 --fw-normal,但经它显式声明,以后换档只改这里) */
@@ -2586,9 +2623,12 @@ body.home-landing .home-index-row .hi-arrow svg {
     stroke-linecap: butt;
     stroke-linejoin: miter;
 }
-/* hover 仅真悬停设备:触屏 tap 会粘住 :hover 导致颜色不恢复(2026-07-22 修复) */
+/* hover 仅真悬停设备:触屏 tap 会粘住 :hover 导致颜色不恢复(2026-07-22 修复)。
+   2026-07-26 起 hover 从「变灰」改为「黑底反色」——语义与顶栏 tab 统一为「点亮成块」。
+   特异性要压过上面深色主题那条 (0,4,1) 的 hover 变色,故带 body.home-v2 提到 (0,5,1)。 */
 @media (hover: hover) {
-    body.home-landing .home-index-row:hover { color: var(--gray-500); }   /* 与 blog 卡 hover 同灰 */
+    body.home-v2.home-landing .home-index-row:hover { color: var(--hl-paper); }
+    body.home-v2.home-landing .home-index-row:hover::before { background-color: var(--hl-ink); }
 }
 /* hover 只变色,箭头不再位移(2026-07-22 用户要求) */
 
@@ -2772,7 +2812,7 @@ html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + 180ms) * var
    works-page 的 .design-layout 是 4 列网格,标题需通栏占满一行。 */
 body.blog-page .page-title,
 body.works-page .page-title {
-    margin: 0 0 40px;
+    margin: 0 0 20px;   /* 标题下间距 2026-07-26 用户要求减半(原 40px) */
     font-size: var(--fs-h1, 48px);   /* 定档 h1(2026-07-22 用户最终选择) */
     color: #181818;
 }
