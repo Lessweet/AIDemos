@@ -89,6 +89,54 @@
           多大,屏幕上的描边始终是 1.5px(否则会随 viewBox 缩放)。
        ============================================================ */
     --icon-stroke: 1.5px;
+
+    /* ============================================================
+       Feed 卡片文字 typewriter —— 全站唯一参数入口(2026-07-26)
+       规范来源:pixel-point/animate-text 的 typewriter
+       (逐字 steps(1,end) 阶跃显现;website-default 0.72 倍速)。
+       Blog / Archive 所有卡片的三组文字(标题 → 摘要 → meta)从上到下
+       依次打字:下一组的起点 = 前一组字数 × --tw-step + 组间停顿。
+       改这三个 token,处处同步;不要在别处另写数值。
+       ============================================================ */
+    --tw-dur: 173ms;        /* 单字显现时长(steps 阶跃:结束帧一跳到位) */
+    --tw-step: 33ms;        /* 字与字错峰(打字节奏) */
+    --tw-line-gap: 350ms;   /* 组与组之间的停顿(上一组打完 → 下一组起步) */
+}
+
+/* ── Feed 卡片 typewriter 规则(参数只认上方 :root 的 --tw-* token)──────
+   拆字单元 span.tw-ch 由 site/src/shared/Typewriter.tsx 生成(--tw-i = 字序);
+   组容器由页面组件写入 --tw-n1/--tw-n2(第 1/2 组字数),供后续组算起点;
+   闸门 = 卡片入场的 .visible(usePillarEntrance)。opacity 占位,布局零抖动。 */
+/* 基态可见(fail-open):打字期的隐藏由动画的 backwards fill(0% 帧)负责,
+   动画一旦异常,顶多提前显示、不会永久缺字。
+   阶跃不用 steps(1,end) 缓动 —— Chromium 对 finished 动画在结束边界取值时
+   偶发取到阶跃前的 0(实测约 2% 的字永久隐形),改用关键帧百分比自制阶跃:
+   0%~99% 隐藏、100% 显现,linear 下结束帧直接取最后一帧值,绕开缓动函数。 */
+.tw-ch { opacity: 1; }
+.card-wrapper.visible .tw-ch {
+    animation: tw-type var(--tw-dur) linear both;
+    animation-delay: calc(var(--tw-d, 0ms) + var(--tw-i, 0) * var(--tw-step));
+}
+@keyframes tw-type {
+    0%, 99% { opacity: 0; }
+    100% { opacity: 1; }
+}
+/* 组序 → 起点延迟:Blog 大卡(标题/摘要/meta)、Blog 列表(标题/摘要/日期)、
+   Archive 卡(标题/meta)。--tw-n* 缺省 0,不写就退化为同时起步。 */
+.writing-info .w-excerpt,
+.bl-text .bl-excerpt {
+    --tw-d: calc(var(--tw-n1, 0) * var(--tw-step) + var(--tw-line-gap));
+}
+.writing-info .w-meta,
+.bl-text .bl-date {
+    --tw-d: calc((var(--tw-n1, 0) + var(--tw-n2, 0)) * var(--tw-step) + 2 * var(--tw-line-gap));
+}
+.card-info .card-meta {
+    --tw-d: calc(var(--tw-n1, 0) * var(--tw-step) + var(--tw-line-gap));
+}
+@media (prefers-reduced-motion: reduce) {
+    .tw-ch { opacity: 1; }
+    .card-wrapper.visible .tw-ch { animation: none; }
 }
 
 html {
