@@ -4,7 +4,7 @@
  *      (与旧版 switchArticle 交换的单元完全一致,含 eyebrow/h1/byline/封面/正文含内联 <style>/页脚)
  *   2. <title> / body data-accent / data-tint → site/src/content/articleShell.ts
  *      (data-tint 缺失时按旧版 initPageTint 的 slug 哈希预计算,结果与运行时一致)
- *   3. site/writing/article-<slug>.html 入口 × 12(外壳模板 + 每篇的 title/accent/tint)
+ *   3. site/writing/article-<slug>.html 入口 × 13(外壳模板 + 每篇的 title/accent/tint)
  *
  * 一次性迁移工具,重跑安全(幂等覆盖)。以后新文章:手写 fragment + articleShell + 入口,
  * 或往 docs/writing/ 放一篇旧格式 HTML 再跑本脚本。
@@ -19,9 +19,9 @@ const FRAG_DIR = path.join(ROOT, 'site/src/content/fragments');
 const ENTRY_DIR = path.join(ROOT, 'site/writing');
 
 const SLUGS = [
-  'app-shape-for-ai', 'figma-agent', 'figma-config-2026', 'figma-make-designer-pr',
-  'figma-make-gpt-5-6', 'figma-shader-motion', 'figma-skills', 'genie',
-  'remove-ai-taste-in-design', 'review-ai-output', 'sparkle', 'voices',
+  'app-shape-for-ai', 'claude-code-verification-loops', 'figma-agent', 'figma-config-2026',
+  'figma-make-designer-pr', 'figma-make-gpt-5-6', 'figma-shader-motion', 'figma-skills',
+  'genie', 'remove-ai-taste-in-design', 'review-ai-output', 'sparkle', 'voices',
 ];
 
 /* 旧版 writing.js initPageTint 的稳定哈希(输入 = 'article-<slug>',与 pathname 推导一致) */
@@ -43,6 +43,30 @@ const report = [];
 for (const slug of SLUGS) {
   const file = path.join(SRC, `article-${slug}.html`);
   const html = fs.readFileSync(file, 'utf8');
+
+  /* 已迁移的文章:docs/ 里这篇早被 build 的 React 外壳覆盖(不再含 .article-reading),
+     原稿只剩上次提取出来的 fragment。复用它 + 入口里的 title/accent/tint,不重新提取。
+     所以本脚本可以随时重跑:只有新放进 docs/writing/ 的旧格式整页才会被提取。 */
+  if (!html.includes('<article class="article-reading">')) {
+    const fragFile = path.join(FRAG_DIR, `${slug}.reading.html`);
+    const entryFile = path.join(ENTRY_DIR, `article-${slug}.html`);
+    if (!fs.existsSync(fragFile) || !fs.existsSync(entryFile))
+      throw new Error(`${slug}: docs/ 里没有 .article-reading,也没有已提取的 fragment/入口可复用`);
+    const entry = fs.readFileSync(entryFile, 'utf8');
+    shellMeta[slug] = {
+      title: (entry.match(/<title>([\s\S]*?)<\/title>/) || [])[1],
+      accent: (entry.match(/data-accent="([^"]*)"/) || [])[1] || '',
+      tint: (entry.match(/data-tint="([^"]*)"/) || [])[1] || '',
+    };
+    report.push({
+      slug,
+      accent: shellMeta[slug].accent,
+      tint: `${shellMeta[slug].tint}(reuse)`,
+      bytes: fs.statSync(fragFile).size,
+      source: '已迁移,复用',
+    });
+    continue;
+  }
 
   const title = (html.match(/<title>([\s\S]*?)<\/title>/) || [])[1];
   if (!title) throw new Error(`${slug}: 缺 <title>`);

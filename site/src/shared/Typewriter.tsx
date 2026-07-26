@@ -13,10 +13,13 @@ export function twCounts(...texts: string[]): CSSProperties {
   return style as CSSProperties;
 }
 
+/* .tw-text 是整段文字唯一的行内容器:除了装拆字单元,也是 hover 反色高亮块的
+   附着点(见 writing.css「hover 反色高亮块」)—— 行内元素才能让底块贴着文字走、
+   折行时每行各自成块;挂在外层块级元素上会撑满整列。 */
 export default function Typewriter({ text }: { text: string }) {
   return (
     <span aria-label={text}>
-      <span aria-hidden="true">
+      <span className="tw-text" aria-hidden="true">
         {Array.from(text).map((ch, i) => (
           <span key={i} className="tw-ch" style={{ '--tw-i': i } as CSSProperties}>
             {ch}

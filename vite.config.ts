@@ -9,9 +9,10 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, 'site');
 const DOCS = resolve(__dirname, 'docs');
 
-/* 12 篇文章 slug(与 docs/writing/article-<slug>.html 一一对应) */
+/* 13 篇文章 slug(与 docs/writing/article-<slug>.html 一一对应) */
 const ARTICLE_SLUGS = [
   'app-shape-for-ai',
+  'claude-code-verification-loops',
   'figma-agent',
   'figma-config-2026',
   'figma-make-designer-pr',
@@ -25,7 +26,7 @@ const ARTICLE_SLUGS = [
   'voices',
 ];
 
-/* 15 个入口。按 site/ 里实际存在的文件过滤,迁移期间可逐页添加 */
+/* 16 个入口。按 site/ 里实际存在的文件过滤,迁移期间可逐页添加 */
 const ALL_ENTRIES: Record<string, string> = {
   index: resolve(ROOT, 'index.html'),
   blog: resolve(ROOT, 'blog.html'),
@@ -89,6 +90,9 @@ export default defineConfig({
   /* 关闭 publicDir:docs/ 里 399MB 静态资产绝不进构建管线;
      入口 HTML 里 /style.css 等根绝对引用因此解析不到 → Vite 原样透传(这正是要的) */
   publicDir: false,
+  /* 端口锁死:5173 被 design-gallery(--strictPort)长期占着,不锁的话本站会飘到 5174/5175。
+     strictPort = 被占就报错而不是悄悄换一个,本站预览地址永远是 localhost:5174。 */
+  server: { port: 5174, strictPort: true },
   plugins: [react(), docsStatic(), cleanBundles()],
   build: {
     outDir: DOCS,
