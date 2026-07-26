@@ -94,16 +94,13 @@
     --icon-stroke: 1.5px;
 
     /* ============================================================
-       Feed 卡片文字 typewriter —— 全站唯一参数入口(2026-07-26)
-       规范来源:pixel-point/animate-text 的 typewriter
-       (逐字 steps(1,end) 阶跃显现;website-default 0.72 倍速)。
-       Blog / Archive 所有卡片的三组文字(标题 → 摘要 → meta)从上到下
-       依次打字:下一组的起点 = 前一组字数 × --tw-step + 组间停顿。
-       改这三个 token,处处同步;不要在别处另写数值。
+       Feed 卡片三组文字依次淡入(2026-07-26)
+       标题 → 摘要 → meta,三段整体透明度 0 → 100%,按顺序错开。
+       不拆字(打字机效果已撤),所以与文案长短无关,长摘要不会拖慢后面那组。
+       闸门 = 卡片入场的 .visible;规则见下方「Feed 卡片文字依次淡入」。
        ============================================================ */
-    --tw-dur: 80ms;         /* 单字显现时长(阶跃:结束帧一跳到位),同时是全组统一的起手延迟 */
-    --tw-step: 13ms;        /* 字与字错峰(打字节奏) —— 摘要长,每字省 1ms 整句省几十 ms,是手感主控 */
-    --tw-line-gap: 150ms;   /* 组与组之间的停顿(上一组打完 → 下一组起步) */
+    --tf-dur: 0.55s;    /* 每组自己淡入的时长 */
+    --tf-step: 0.22s;   /* 组与组的起步间隔 */
 
     /* ============================================================
        hover 反色高亮块 —— 全站唯一参数入口(2026-07-26)
@@ -125,14 +122,21 @@
     --nav-tab-gap: 56px;
     --hl-pad-x-nav: calc(var(--nav-tab-gap) / 2);
     --hl-dur: 0.18s;        /* 移入:反色出现的时长(比常规 0.42s 变色快,hover 要跟手) */
-    /* 移出:反色消失的时长(2026-07-26 用户要求 1s)。移出比移入慢 —— 与全站 hover 放大
-       (--hover-zoom-in / --hover-zoom-out)同一手法:进场干脆、退场留一口气。
+    /* 移出:反色消失的时长(页面里的整行 0.8s,2026-07-26)。移出比移入慢 ——
+       与全站 hover 放大(--hover-zoom-in / --hover-zoom-out)同一手法:进场干脆、退场留一口气。
        底块与文字必须用同一组时长,否则会出现「块还黑着、字已变黑」的看不清的中间态。 */
-    --hl-dur-out: 1s;
+    --hl-dur-out: 0.8s;
+    /* 顶栏(三个 tab + 右上角两个圆按钮)单独一档:0.6s(2026-07-26 用户要求)。
+       导航要跟手,退场不宜像页面里的整行那样拖到 1s;右上角三者共用这一个值。 */
+    --hl-dur-out-nav: 0.6s;
     /* 整行黑块(首页索引行 / 全屏菜单)hover 时,左边文字右移、右边箭头左移各这么多,
        各自向中间收(2026-07-26 用户要求)。黑块与内容区同宽,文字紧贴块边会局促,
        靠位移让出呼吸,而不是把块撑宽 —— 撑宽就会和分割线错位。 */
-    --hl-shift: 24px;
+    --hl-shift: 12px;
+    /* 位移的进/出各一档(2026-07-26 用户要求):进场慢一些、更有推开的分量感,
+       归位快一些、不拖沓。都与黑块的淡入淡出解耦 —— 块进 0.18s / 出 1s。 */
+    --hl-shift-in: 0.5s;
+    --hl-shift-out: 0.3s;
 
     /* ============================================================
        首页 hero 入场速度总控(2026-07-26 用户要求「再慢点」)
@@ -150,63 +154,48 @@ body.theme-dark {
     --hl-paper: #0a0a0a;
 }
 
-/* ── Feed 卡片 typewriter 规则(参数只认上方 :root 的 --tw-* token)──────
-   拆字单元 span.tw-ch 由 site/src/shared/Typewriter.tsx 生成(--tw-i = 字序);
-   组容器由页面组件写入 --tw-n1/--tw-n2(第 1/2 组字数),供后续组算起点;
-   闸门 = 卡片入场的 .visible(usePillarEntrance)。opacity 占位,布局零抖动。 */
-/* 基态可见(fail-open):打字期的隐藏由动画的 backwards fill(0% 帧)负责,
-   动画一旦异常,顶多提前显示、不会永久缺字。
-   阶跃不用 steps(1,end) 缓动 —— Chromium 对 finished 动画在结束边界取值时
-   偶发取到阶跃前的 0(实测约 2% 的字永久隐形),改用关键帧百分比自制阶跃:
-   0%~99% 隐藏、100% 显现,linear 下结束帧直接取最后一帧值,绕开缓动函数。 */
-.tw-ch {
-    opacity: 1;
-    /* 取回本来的文字色 —— 摘要块把自己的文字填充设成了透明(为了藏省略号,见下),
-       这里用 currentColor 抵消:currentColor = 该字继承到的 color,深浅主题、
-       hover 反色都自动跟随,不用重复写一遍颜色。 */
-    -webkit-text-fill-color: currentColor;
+
+/* ── Feed 卡片文字依次淡入(参数只认上方 :root 的 --tf-* token)──────────────
+   三组 = 标题 / 摘要 / meta。Blog 大卡、Blog 列表、Archive 卡各自的三组都在这里列全,
+   靠 --tf-i(组序)算延迟,改 token 一处三处同步。
+   闸门是 .card-wrapper.visible(usePillarEntrance 在卡片进入视口时加)——
+   基态透明写在 .visible 之外,卡片没入场前不会先亮一下。 */
+.card-wrapper .writing-info .w-title,
+.card-wrapper .writing-info .w-excerpt,
+.card-wrapper .writing-info .w-meta,
+.card-wrapper .bl-text .bl-title,
+.card-wrapper .bl-text .bl-excerpt,
+.card-wrapper .bl-text .bl-date,
+.card-wrapper .card-info .card-title-row,
+.card-wrapper .card-info .card-meta {
+    opacity: 0;
 }
-.card-wrapper.visible .tw-ch {
-    animation: tw-type var(--tw-dur) linear both;
-    animation-delay: calc(var(--tw-d, 0ms) + var(--tw-i, 0) * var(--tw-step));
-}
-/* 截断省略号跟着最后一个字一起出现(2026-07-26 用户反馈:省略号一开始就在)。
-   省略号是浏览器按 -webkit-line-clamp 的截断位置画的,不是 .tw-ch,而全文从一开始
-   就在 DOM 里(只是字透明),所以打字还没到那儿它就先画出来了。
-   办法:让摘要块自身的文字填充色在「本组打完」的那一刻才从透明切回来 ——
-   块自己画的东西(省略号)受它管,字符单元有上面的 currentColor 不受影响。
-   时刻 = 标题字数 + 摘要字数 - 1 个字距 + 组间停顿(+ 动画自身的 dur)。 */
+.card-wrapper.visible .writing-info .w-title,
 .card-wrapper.visible .writing-info .w-excerpt,
-.card-wrapper.visible .bl-text .bl-excerpt {
-    animation: tw-ellipsis var(--tw-dur) linear both;
-    animation-delay: calc(
-        (var(--tw-n1, 0) + var(--tw-n2, 0) - 1) * var(--tw-step) + var(--tw-line-gap)
-    );
+.card-wrapper.visible .writing-info .w-meta,
+.card-wrapper.visible .bl-text .bl-title,
+.card-wrapper.visible .bl-text .bl-excerpt,
+.card-wrapper.visible .bl-text .bl-date,
+.card-wrapper.visible .card-info .card-title-row,
+.card-wrapper.visible .card-info .card-meta {
+    opacity: 1;
+    transition: opacity var(--tf-dur) ease calc(var(--tf-i, 0) * var(--tf-step));
 }
-@keyframes tw-ellipsis {
-    0%, 99% { -webkit-text-fill-color: transparent; }
-    100% { -webkit-text-fill-color: currentColor; }
-}
-@keyframes tw-type {
-    0%, 99% { opacity: 0; }
-    100% { opacity: 1; }
-}
-/* 组序 → 起点延迟:Blog 大卡(标题/摘要/meta)、Blog 列表(标题/摘要/日期)、
-   Archive 卡(标题/meta)。--tw-n* 缺省 0,不写就退化为同时起步。 */
-.writing-info .w-excerpt,
-.bl-text .bl-excerpt {
-    --tw-d: calc(var(--tw-n1, 0) * var(--tw-step) + var(--tw-line-gap));
-}
-.writing-info .w-meta,
-.bl-text .bl-date {
-    --tw-d: calc((var(--tw-n1, 0) + var(--tw-n2, 0)) * var(--tw-step) + 2 * var(--tw-line-gap));
-}
-.card-info .card-meta {
-    --tw-d: calc(var(--tw-n1, 0) * var(--tw-step) + var(--tw-line-gap));
-}
+/* 组序:第 1 组不延迟,后两组依次 +--tf-step */
+.card-wrapper .writing-info .w-excerpt,
+.card-wrapper .bl-text .bl-excerpt,
+.card-wrapper .card-info .card-meta { --tf-i: 1; }
+.card-wrapper .writing-info .w-meta,
+.card-wrapper .bl-text .bl-date { --tf-i: 2; }
 @media (prefers-reduced-motion: reduce) {
-    .tw-ch { opacity: 1; }
-    .card-wrapper.visible .tw-ch { animation: none; }
+    .card-wrapper .writing-info .w-title,
+    .card-wrapper .writing-info .w-excerpt,
+    .card-wrapper .writing-info .w-meta,
+    .card-wrapper .bl-text .bl-title,
+    .card-wrapper .bl-text .bl-excerpt,
+    .card-wrapper .bl-text .bl-date,
+    .card-wrapper .card-info .card-title-row,
+    .card-wrapper .card-info .card-meta { opacity: 1; transition: none; }
 }
 
 html {

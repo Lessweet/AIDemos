@@ -8,7 +8,6 @@ import { createPortal } from 'react-dom';
 import LikeButton from '../../shared/LikeButton';
 import HeadingRise from '../../shared/HeadingRise';
 import PageTitle from '../../shared/PageTitle';
-import Typewriter, { twCounts } from '../../shared/Typewriter';
 import { PIXEL_PATHS } from './pixelIcons';
 import {
   useStickyMenu,
@@ -40,26 +39,17 @@ const HeadingIcon = ({ d }: { d: string }) => (
   </span>
 );
 
-/* 卡片文字信息区:标题/tag/日期两组文字依次 typewriter(参数走 style.css --tw-* token)。
-   DOM 与原手写结构逐类名一致,只是文字换成拆字单元。 */
+/* 卡片文字信息区:DOM 与原手写结构逐类名一致,8 处重复收敛为一个组件 */
 function CardInfo(props: { label: string; tag?: string; date: string; likeId?: string }) {
   return (
-    <div className="card-info" style={twCounts(props.label)}>
+    <div className="card-info">
       <div className="card-title-row">
-        <span className="card-label">
-          <Typewriter text={props.label} />
-        </span>
+        <span className="card-label">{props.label}</span>
         {props.likeId && <LikeButton id={props.likeId} />}
       </div>
       <div className="card-meta">
-        {props.tag && (
-          <span className="card-tag">
-            <Typewriter text={props.tag} />
-          </span>
-        )}
-        <span className="card-date">
-          <Typewriter text={props.date} />
-        </span>
+        {props.tag && <span className="card-tag">{props.tag}</span>}
+        <span className="card-date">{props.date}</span>
       </div>
     </div>
   );

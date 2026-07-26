@@ -1415,7 +1415,10 @@ body .home-nav .nav-cats .nav-cat.active {
         height: 100dvh;                 /* 移动端按可视高度铺满 */
         flex-direction: column;
         align-items: flex-start;
-        gap: 36px;                      /* 三项统一行距(见下方 display:contents) */
+        /* 行距归 0:三项像首页索引行那样直接相邻(行距全部由行自身的下内边距给)。
+           留 flex gap 的话,那段空白不属于任何一行,hover 的黑块铺不过去 ——
+           就会在黑块底边与下一条分割线之间露出一段空白(2026-07-26 用户反馈)。 */
+        gap: 0;
         /* 顶部留白 = 顶栏高度 + 三页统一的 --nav-content-gap,与页面内容起点同规范;
            底色复用 --site-bg —— 首页/三页背景改 token 时,全屏菜单自动跟着变 */
         padding: calc(var(--design-menu-top, 76px) + var(--nav-content-gap)) 24px 40px;
@@ -1461,7 +1464,7 @@ body .home-nav .nav-cats .nav-cat.active {
         align-items: flex-start;
         justify-content: space-between;
         gap: 24px;
-        padding: 7px 0 80px;   /* 行高 +24px(2026-07-26 用户要求);加在下方,保留分割线→标签的既定间距 */
+        padding: 9px 0 80px;   /* 与首页索引行完全同值(2026-07-26 要求全屏菜单与首页一致) */
         border-top: 1px solid rgba(0, 0, 0, 0.2);
         text-align: left;
         font-size: var(--index-label-size) !important;   /* 与首页索引行同一 token;!important 压掉桌面 clamp/fs-body 档 */
@@ -1539,11 +1542,14 @@ body .home-nav .nav-cats .nav-cat.active {
     .home-v2 .header.home-nav .nav-collapse .nav-cat .heading-rise-mask,
     .home-v2 .header.home-nav .nav-collapse .header-connect .connect-label,
     .home-v2 .header.home-nav .nav-collapse .nav-arrow {
-        transition: transform var(--hl-dur-out) ease;
+        transition: transform var(--hl-shift-out) ease;   /* 归位比黑块淡出快 */
     }
     @media (hover: hover) {
-        .home-v2 .header.home-nav .nav-collapse .nav-cat:hover,
-        .home-v2 .header.home-nav .nav-collapse .header-connect:hover {
+        /* 特异性必须 ≥ 上面 .nav-cats .nav-cat.active 的 (0,7,0) —— 否则当前页那一项
+           hover 时字色被 active 规则压回深色,变成黑字贴黑底、整行读不出来。
+           带上 body 与 .nav-cats 提到 (0,7,1),稳压。 */
+        body.home-v2 .header.home-nav .nav-collapse .nav-cats .nav-cat:hover,
+        body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect:hover {
             color: var(--hl-paper);
             transition: color var(--hl-dur) ease;
         }
@@ -1555,12 +1561,12 @@ body .home-nav .nav-cats .nav-cat.active {
         .home-v2 .header.home-nav .nav-collapse .nav-cat:hover .heading-rise-mask,
         .home-v2 .header.home-nav .nav-collapse .header-connect:hover .connect-label {
             transform: translateX(var(--hl-shift));
-            transition: transform var(--hl-dur) ease;
+            transition: transform var(--hl-shift-in) ease;
         }
         .home-v2 .header.home-nav .nav-collapse .nav-cat:hover .nav-arrow,
         .home-v2 .header.home-nav .nav-collapse .header-connect:hover .nav-arrow {
             transform: translateX(calc(-1 * var(--hl-shift)));
-            transition: transform var(--hl-dur) ease;
+            transition: transform var(--hl-shift-in) ease;
         }
     }
     /* (原「hover 变灰 --gray-500」已删:它与上面的反色规则选择器完全相同、又写在后面,
@@ -2337,8 +2343,8 @@ body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active:hover { color: rgb
         /* 隔离出层叠上下文,让下面 z-index:-1 的块只沉到本 tab 的文字之下,
            不会掉到顶栏底色后面(那样块就整个看不见了) */
         isolation: isolate;
-        /* 非 hover 态声明的是「移出」时长(1s);移入的 0.18s 写在下面的 :hover 里 */
-        transition: color var(--hl-dur-out) ease;
+        /* 非 hover 态声明的是「移出」时长;移入的 0.18s 写在下面的 :hover 里 */
+        transition: color var(--hl-dur-out-nav) ease;
     }
     /* 块用伪元素而不是 box-shadow:shadow 的外扩只能四边同值,而 <a> 的盒子本身就比字
        高出一圈行高,四边同值会显得左右偏窄;伪元素能把上下、左右分开给(--hl-pad-*)。
@@ -2353,7 +2359,7 @@ body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active:hover { color: rgb
         inset: calc(-1 * var(--hl-pad-y)) calc(-1 * var(--hl-pad-x-nav));
         border-radius: 0;   /* 直角 —— 与全站方头直角语言一致 */
         background-color: transparent;
-        transition: background-color var(--hl-dur-out) ease;   /* 移出 1s */
+        transition: background-color var(--hl-dur-out-nav) ease;   /* 移出 0.6s */
     }
     @media (hover: hover) {
         body.home-v2.design-page .header.home-nav .nav-cats .nav-cat:hover,
@@ -2584,7 +2590,7 @@ body.works-page.theme-dark .home-nav .theme-toggle:hover { color: #fff; }
    必须写在上面那几条深浅主题 hover 之后:它们最高 (0,5,1),这里 (0,6,1) 稳压;
    过渡也在这里补上 —— 基础规则只声明了 color 的过渡,底色会硬切。 */
 body.home-v2.design-page .header.home-nav .theme-toggle {
-    transition: color var(--hl-dur-out) ease, background-color var(--hl-dur-out) ease;
+    transition: color var(--hl-dur-out-nav) ease, background-color var(--hl-dur-out-nav) ease;
 }
 @media (hover: hover) {
     body.home-v2.design-page .header.home-nav .theme-toggle:hover {
@@ -2603,7 +2609,7 @@ body.home-v2.design-page .header.home-nav .theme-toggle {
 }
 body.home-v2.design-page .header.home-nav .nav-toggle,
 body.home-v2.design-page .header.home-nav .nav-toggle span {
-    transition: background-color var(--hl-dur-out) ease;
+    transition: background-color var(--hl-dur-out-nav) ease;
 }
 
 /* 手机端(汉堡可见的 Blog / Archive):太阳靠 margin-left:auto 顶右,汉堡不再自带 auto,
@@ -2681,7 +2687,7 @@ body.design-page:not(.reading-page).home-landing .home-index-row * {
    非 hover 态声明的是「移出」时长,与黑块同一组节奏、一起进一起出。 */
 body.home-landing .home-index-row .hi-label,
 body.home-landing .home-index-row .hi-arrow {
-    transition: transform var(--hl-dur-out) ease;
+    transition: transform var(--hl-shift-out) ease;   /* 归位比黑块淡出快 */
 }
 /* 箭头:直角样式的内联 SVG(方头 butt + 尖角 miter),取代字体渲染的圆头「→」;
    随行内字号缩放,颜色跟 currentColor */
@@ -2712,11 +2718,11 @@ body.home-landing .home-index-row .hi-arrow svg {
     /* 文字右移、箭头左移,各自向中间收 —— 让文字在与内容区同宽的黑块里留出余地 */
     body.home-v2.home-landing .home-index-row:hover .hi-label {
         transform: translateX(var(--hl-shift));
-        transition: transform var(--hl-dur) ease;
+        transition: transform var(--hl-shift-in) ease;
     }
     body.home-v2.home-landing .home-index-row:hover .hi-arrow {
         transform: translateX(calc(-1 * var(--hl-shift)));
-        transition: transform var(--hl-dur) ease;
+        transition: transform var(--hl-shift-in) ease;
     }
 }
 /* hover 只变色,箭头不再位移(2026-07-22 用户要求) */

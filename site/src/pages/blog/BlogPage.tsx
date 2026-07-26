@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import { blogCards } from '../../content/articles';
 import { CatIcon } from '../../shared/catIcons';
 import PageTitle from '../../shared/PageTitle';
-import Typewriter, { twCounts } from '../../shared/Typewriter';
 import {
   useStickyMenu,
   useScrollProgress,
@@ -117,23 +116,14 @@ export default function BlogPage() {
                     />
                   )}
                 </a>
-                {/* 三组文字依次打字(typewriter):组字数经 twCounts 下发给 CSS 算起点 */}
-                <div className="card-info writing-info" style={twCounts(a.title, a.excerpt)}>
-                  <h3 className="w-title">
-                    <Typewriter text={a.title} />
-                  </h3>
-                  <div className="w-excerpt">
-                    <Typewriter text={a.excerpt} />
-                  </div>
+                <div className="card-info writing-info">
+                  <h3 className="w-title">{a.title}</h3>
+                  <div className="w-excerpt">{a.excerpt}</div>
                   <div className="w-meta">
                     <div className="w-tags">
-                      <span className="a-tag">
-                        <Typewriter text={a.blogTag ?? ''} />
-                      </span>
+                      <span className="a-tag">{a.blogTag}</span>
                     </div>
-                    <div className="w-date">
-                      <Typewriter text={a.date} />
-                    </div>
+                    <div className="w-date">{a.date}</div>
                   </div>
                 </div>
               </div>
@@ -155,16 +145,10 @@ export default function BlogPage() {
                     <span className="bl-thumb">
                       <img src={`writing/${a.listCover}`} alt="" loading="lazy" />
                     </span>
-                    <span className="bl-text" style={twCounts(a.title, a.excerpt)}>
-                      <h3 className="bl-title">
-                        <Typewriter text={a.title} />
-                      </h3>
-                      <p className="bl-excerpt">
-                        <Typewriter text={a.excerpt} />
-                      </p>
-                      <span className="bl-date">
-                        <Typewriter text={a.date} />
-                      </span>
+                    <span className="bl-text">
+                      <h3 className="bl-title">{a.title}</h3>
+                      <p className="bl-excerpt">{a.excerpt}</p>
+                      <span className="bl-date">{a.date}</span>
                     </span>
                   </a>
                 </div>
