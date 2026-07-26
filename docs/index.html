@@ -24,16 +24,49 @@
             position: fixed; inset: 0; z-index: 9999;
             background: #f9f9f9;   /* = --gray-50(--site-bg),与页面底同值(见上方首帧底色注释) */
             overflow: hidden;
-            transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
         }
-        #page-loader.done { transform: translateY(-100%); pointer-events: none; }
+        /* 离场(Sui 式揭幕,2026-07-26):灰底转透明 —— 切换瞬间视口整个被黑面盖着,
+           不可见;此后雾下露出的是页面本体。纯色底一次重绘,不碰动画图层 */
+        #page-loader.done { background: transparent; pointer-events: none; }
+        #page-loader.done .pl-num { opacity: 0; transition: opacity 0.3s ease; }
+        /* logo 淡出:上移触发后延迟 0.2s 开始,时长 0.4s(2026-07-26 用户定稿) */
+        #page-loader.done .pl-logo-tile { opacity: 0; transition: opacity 0.4s ease 0.2s; }
         /* 进度面动画只用 translateX(合成器线程):width 走主线程会掉帧,
            scaleX 大图层缩放右缘有反锯齿接缝、看起来像闪 */
+        /* 进度面 = 揭幕黑幕本体(Sui 式揭幕,2026-07-26):平面加高到 210svh,进度期
+           纯色实黑(= --black-fullscreen 同值)水平扫入;羽化底边不在此时上——径向渐变
+           的弧形衰减会让扫入过程中角落发灰,纯色才是原设计的「墨面」 */
         #page-loader .pl-fill {
-            position: absolute; inset: 0;
+            position: absolute; inset: 0 0 auto 0;
+            height: 210vh;
+            height: 210svh;
             transform: translateX(-100%);
-            background: #0a0a0a;   /* = style.css 的 --black-fullscreen;外部 CSS 未到达前取不到 var,写死同值 */
+            background: #0a0a0a;
             transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            will-change: transform;
+        }
+        /* 扫满 100% 的时刻换羽化底(fog):宽视口下羽化弧会掠进视口下方两角,直切黑↔雾
+           两角会突然发灰。所以 fog 分两步:①雾层 ::after 瞬时置为不透明 —— 此刻它压在
+           还不透明的实黑底上、同为 #0a0a0a,切换不可见;②实黑底色单独 0.5s 淡出,
+           角上从纯黑柔和过渡到雾的羽化灰。两层不能同时交叉淡变:各 50% 时叠加只有
+           约 75% 不透明,整屏会透底闪白。0.5s < HOLD_MS 550ms:溶解在上移起步前走完,
+           .done 覆盖 transition 时不会跳变;同样趁这段停顿把大图层(含 ::after)
+           光栅化做完,上移起步不掉帧 */
+        #page-loader .pl-fill::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(circle farthest-side at 50% 0, #0a0a0a 70%, rgba(10, 10, 10, 0));
+            opacity: 0;
+        }
+        #page-loader.fog .pl-fill {
+            background-color: transparent;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.5s ease;
+        }
+        #page-loader.fog .pl-fill::after { opacity: 1; }
+        /* 离场:黑雾 2s 上移,羽化底边扫过视口像雾被掀开;缓动 = sui.io 的 suiSmooth */
+        #page-loader.done .pl-fill {
+            transform: translateY(-100%);
+            transition: transform 2s cubic-bezier(0.4, 0, 0.05, 1);
         }
         /* 数字排版:大数字 + 小号 % 沉底对齐(下标感) */
         /* 进度数字暂不展示(2026-07-22 用户要求):引擎照常驱动(收尾时序不变),仅视觉隐藏 */
@@ -93,7 +126,7 @@
             width: 56px; height: 56px;   /* 方块 56 = 视频 40 + 边距 8×2 */
             padding: 8px;
             background: #e5e5ea;   /* 中性浅灰(主站 --gray-200,2026-07-22):黑面扫过时是灰磁贴而非近白 */
-            border-radius: 12px;
+            /* 直角磁贴(2026-07-26 用户要求):圆角摘掉;想恢复圆角加回 border-radius: 12px */
             transform: translate(-50%, -50%);
             pointer-events: none;
             isolation: isolate;    /* multiply 只对底板生效,不跟身后的黑色进度面混合 */
@@ -113,16 +146,16 @@
             transition: none !important;
         }
     </style>
-<link href="style.css?v=135" rel="stylesheet"/>
+<link href="style.css?v=136" rel="stylesheet"/>
 <!-- Kaushan Script:hero 强调词暂时改回无衬线,字体加载先注释掉,恢复手写体时一并放开
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&amp;display=swap" rel="stylesheet"/> -->
-<link href="writing/writing.css?v=423" rel="stylesheet"/>
+<link href="writing/writing.css?v=426" rel="stylesheet"/>
 <!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁 -->
 <script src="nav-boot.js?v=7"></script>
-  <script type="module" crossorigin src="/assets/index-Ch1w1Rzz.js"></script>
+  <script type="module" crossorigin src="/assets/index-BreC9AYh.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/index-JqYYXcKf.js">
-  <link rel="modulepreload" crossorigin href="/assets/hooks-DDIrEMwU.js">
+  <link rel="modulepreload" crossorigin href="/assets/hooks-DmLshUq3.js">
 </head>
 <!-- 复用 design-page 的 pillar 布局(左侧二级导航 + 右侧分模块),Writing 与 Design 页对称 -->
 <!-- home-landing:仅首页 —— 一屏白底 landing(writing.css);blog.html 不带。
@@ -298,8 +331,15 @@
                 docEl.style.background = document.body.classList.contains('theme-dark')
                     ? '#0a0a0a'    /* 深色主题:兜底 = --page-bg */
                     : '#f9f9f9';   /* 浅色主题:兜底 = --site-bg(--gray-50),防离场残色 */
-                docEl.classList.add('hero-ready');    /* 放闸:hero 开始 mask-reveal-up 入场 */
             }
+            /* 放闸:hero 大字开始逐字入场,索引行按各自 --row-d(620ms 起)跟在后面。
+               时机 = 黑雾掀过大字区的那一刻 —— 见 HERO_GATE_MS。 */
+            function openHeroGate() { docEl.classList.add('hero-ready'); }
+            /* 揭幕上移全程 2s(见 #page-loader.done .pl-fill),缓动 cubic-bezier(0.4,0,0.05,1)
+               是急起缓收:0.65s 时位移已走完约六成,黑雾的实黑边正好扫过大字顶部。
+               在这一刻放闸,大字从将散未散的雾里逐字浮出;更早会在实黑下空放一遍,
+               更晚(比如等雾散尽的 2s)整段入场就拖得太久。 */
+            var HERO_GATE_MS = 650;
             /* 最短展示时长:加载再快(缓存/本地),进度也要平滑扫到 100 再上滑,
                保证每次访问都有完整的 loading 过程且不生硬 */
             var MIN_MS = 3000;
@@ -335,19 +375,30 @@
                     setPct(from + (100 - from) * k);
                     if (k >= 1) {
                         clearInterval(sweep);
+                        /* 扫满全黑的此刻给黑面换羽化底(视口内不可见),趁 HOLD 停顿
+                           完成光栅化 —— 上移起步才不掉帧 */
+                        if (loader) loader.classList.add('fog');
                         whenAligned(function () {
                             var released = false;
-                            var release = function () {   /* 上滑完全离场后再放闸,Feed 依次入场 */
+                            var release = function () {   /* 黑雾完全离场:撤遮罩 */
                                 if (released) return;
                                 released = true;
                                 if (loader) loader.remove();
-                                cleanup();
                             };
-                            if (loader) {
-                                loader.classList.add('done');
-                                loader.addEventListener('transitionend', release, { once: true });
-                            }
-                            setTimeout(release, 800);   /* transitionend 兜底 */
+                            if (!loader) { cleanup(); openHeroGate(); return; }
+                            /* Sui 式揭幕:进度面自身就是羽化黑幕。清掉进度期的行内
+                               transform(translateX 已到 0),交给 .done 规则做 2s 上移 */
+                            if (fill) fill.style.transform = '';
+                            loader.classList.add('done');
+                            cleanup();
+                            /* 雾掀到大字区时放闸(不等它散尽),大字从雾里浮出来 */
+                            setTimeout(openHeroGate, HERO_GATE_MS);
+                            /* 只认黑幕自己的 transform 结束(pl-num/logo 的 opacity
+                               transitionend 会冒泡上来,不能用 once 一刀切) */
+                            loader.addEventListener('transitionend', function (e) {
+                                if (e.target === fill && e.propertyName === 'transform') release();
+                            });
+                            setTimeout(release, 2600);   /* transitionend 兜底 */
                         });   /* 等数字真正对齐、停一拍,再上滑 —— 见 whenAligned */
                     }
                 }, 40);
