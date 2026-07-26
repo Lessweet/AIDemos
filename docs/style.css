@@ -53,6 +53,22 @@
     /* 缓动统一用 --ease-soft */
 
     /* ============================================================
+       过渡时长的三档基准(2026-07-26 补 token —— 此前这三个值在两个 CSS
+       文件里散落写死几十处,注释还把 0.42s 称作「全站标准」却没有名字)。
+       新增交互一律从这三档里挑,不要另写数值:
+       ============================================================ */
+    /* 慢档:hover 变色。文字/底色由常态渐变到 hover 态,慢是有意的 ——
+       与 --hover-zoom 一样走「柔和」路线。反色高亮块比它快(--hl-dur 0.18s),
+       因为那是块的出现、要跟手,不是颜色的渐变。 */
+    --hover-color-dur: 0.42s;
+    /* 中档:通用 UI 控件过渡。按钮/圆钮/pill/icon/边框的常规 hover 与状态切换。 */
+    --ui-dur: 0.28s;
+    /* 慢档(位移类):卡片 hover 抬升 + 阴影。比变色更慢,让位移有重量感。 */
+    --card-lift-dur: 1.12s;
+    /* 小屏顶栏随滚动滑出/收回(走 top)。 */
+    --nav-slide-dur: 0.4s;
+
+    /* ============================================================
        入场动画 —— 全站唯一规则。分两层:
        · 这里(CSS)管「怎么动」:每段的时长 / 位移 / 模糊,缓动统一 --ease-soft。
        · 错峰编排「何时开始」在 site/src/pages/home/HomePage.tsx 顶部常量
@@ -141,7 +157,7 @@
        自动跟着走,不会又开出缝。tab 间距本身见 writing.css 的 .nav-cats / .home-nav。 */
     --nav-tab-gap: 56px;
     --hl-pad-x-nav: calc(var(--nav-tab-gap) / 2);
-    --hl-dur: 0.18s;        /* 移入:反色出现的时长(比常规 0.42s 变色快,hover 要跟手) */
+    --hl-dur: 0.18s;        /* 移入:反色出现的时长(比常规变色 --hover-color-dur 快,hover 要跟手) */
     /* 移出:反色消失的时长(页面里的整行 0.8s,2026-07-26)。移出比移入慢 ——
        与全站 hover 放大(--hover-zoom-in / --hover-zoom-out)同一手法:进场干脆、退场留一口气。
        底块与文字必须用同一组时长,否则会出现「块还黑着、字已变黑」的看不清的中间态。 */
@@ -167,6 +183,21 @@
        规则在 writing.css「hero 逐字入场」,只此一个调节点。
        ============================================================ */
     --hero-speed: 1.4;
+
+    /* ============================================================
+       不在这张表里的 token —— 去 writing.css 找(2026-07-26 补此指路牌)
+       本表覆盖:动效 / 字号 / 字重 / 颜色 / icon。
+       布局尺寸类的几个散落在 writing.css 的独立 :root 块里,按需求就近定义
+       (多带媒体查询覆盖,搬过来会打乱层叠顺序,故留在原处):
+         · --page-top-gap    writing.css:14   页面顶部留白(≤900px 有覆盖)
+         · --reading-col     writing.css:18   文章阅读栏宽 760px
+         · --cat-tab-size    writing.css:22   二级分类 tab 字号(≤600px 有覆盖)
+         · --page-bg / --card-bg / --site-bg / --nav-content-gap /
+           --index-label-size                 writing.css:2163 那块
+           ↑ 其中 --site-bg 与 --nav-content-gap 是首页/Blog/Archive
+             三页共享的背景色与顶栏下留白,改一处三页同步、禁止单页改值;
+             --nav-content-gap 在 writing.css:2181 有 ≤600px 覆盖。
+       ============================================================ */
 }
 /* 深色主题:墨纸对调 —— 白块 + 深字 */
 body.theme-dark {
@@ -209,8 +240,8 @@ body.theme-dark {
 .card-wrapper.visible .card-info .card-meta {
     opacity: 1;
     /* color 必须跟着列全:这条特异性(0,3,0)压过 .writing-info .w-title 等(0,2,0)
-       自带的 transition: color 0.42s,只写 opacity 会把 hover 变灰/恢复变成瞬切 */
-    transition: opacity var(--tf-dur) ease calc(var(--tf-i, 0) * var(--tf-step)), color 0.42s ease;
+       自带的 transition: color var(--hover-color-dur),只写 opacity 会把 hover 变灰/恢复变成瞬切 */
+    transition: opacity var(--tf-dur) ease calc(var(--tf-i, 0) * var(--tf-step)), color var(--hover-color-dur) ease;
 }
 /* 组序:封面 = 0(不写),其余依次 +1 */
 .card-wrapper .writing-info .w-title,
@@ -271,7 +302,7 @@ a {
     z-index: 100;
     background: var(--white);
     transform: translateY(0);
-    transition: transform 1.12s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 1.12s ease;
+    transition: transform var(--card-lift-dur) var(--ease-soft), box-shadow var(--card-lift-dur) ease;
 }
 
 .header.header-hidden {
@@ -400,7 +431,7 @@ a {
 .header-link {
     font-size: 14px;
     color: var(--gray-900);
-    transition: color 0.28s ease;
+    transition: color var(--ui-dur) ease;
     display: flex;
     align-items: center;
 }
@@ -464,7 +495,7 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.28s ease;
+    transition: all var(--ui-dur) ease;
 }
 
 .qrcode-modal-close:hover {
@@ -940,7 +971,7 @@ a {
     padding: 4px 8px;
     border-radius: 16px;
     color: var(--gray-600);
-    transition: all 0.28s ease;
+    transition: all var(--ui-dur) ease;
 }
 
 .card-like:hover {
@@ -958,7 +989,7 @@ a {
 }
 
 .card-like svg {
-    transition: all 0.28s ease;
+    transition: all var(--ui-dur) ease;
 }
 
 .like-count {
@@ -976,7 +1007,7 @@ a {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.28s ease;
+    transition: all var(--ui-dur) ease;
     color: var(--gray-900);
 }
 
@@ -1310,7 +1341,7 @@ a {
 .card-label,
 .card-date,
 .card-meta .card-tag {
-    transition: color 0.42s ease;
+    transition: color var(--hover-color-dur) ease;
 }
 
 .card-wrapper:hover .card-label {
@@ -1659,7 +1690,7 @@ a {
     border-radius: 999px;
     padding: 6px 14px;
     cursor: pointer;
-    transition: all 0.28s ease;
+    transition: all var(--ui-dur) ease;
     white-space: nowrap;
 }
 
@@ -1700,7 +1731,7 @@ a {
     border-radius: 999px;
     padding: 5px 12px;
     cursor: pointer;
-    transition: all 0.28s ease;
+    transition: all var(--ui-dur) ease;
     white-space: nowrap;
 }
 

@@ -40,7 +40,7 @@ body.design-page:not(.reading-page) :is(h1, h2, h3, .w-title, .card-label) { fon
     font-size: 15px;
     font-weight: 500;
     color: var(--gray-400);
-    transition: color 0.42s ease;   /* hover 变色缓慢过渡,与全站 hover 标准一致(2026-07-22) */
+    transition: color var(--hover-color-dur) ease;   /* hover 变色缓慢过渡,与全站 hover 标准一致(2026-07-22) */
 }
 
 .pillar-link:hover { color: var(--gray-900); }
@@ -103,7 +103,7 @@ body.design-page:not(.reading-page) :is(h1, h2, h3, .w-title, .card-label) { fon
     border-radius: 999px;
     padding: 5px 13px;
     cursor: pointer;
-    transition: all 0.28s ease;
+    transition: all var(--ui-dur) ease;
     white-space: nowrap;
 }
 
@@ -130,7 +130,7 @@ body.design-page:not(.reading-page) :is(h1, h2, h3, .w-title, .card-label) { fon
     border: 1px solid var(--gray-200);
     border-radius: 16px;
     background: var(--gray-50);
-    transition: border-color 0.28s ease, transform 0.28s ease;
+    transition: border-color var(--ui-dur) ease, transform var(--ui-dur) ease;
 }
 
 .collection-feature:hover {
@@ -170,7 +170,7 @@ body.design-page:not(.reading-page) :is(h1, h2, h3, .w-title, .card-label) { fon
     align-items: center;
     justify-content: center;
     color: var(--gray-900);
-    transition: all 0.28s ease;
+    transition: all var(--ui-dur) ease;
 }
 
 .collection-feature:hover .cf-arrow {
@@ -217,7 +217,7 @@ body.design-page:not(.reading-page) :is(h1, h2, h3, .w-title, .card-label) { fon
     font-weight: 600;
     color: var(--gray-900);
     line-height: 1.35;
-    transition: color 0.28s ease;
+    transition: color var(--ui-dur) ease;
 }
 
 .article-item:hover .a-title { color: var(--gray-600); }
@@ -299,7 +299,7 @@ body.design-page:not(.reading-page) :is(h1, h2, h3, .w-title, .card-label) { fon
 .design-page .design-banner-frame {
     opacity: 0;
     transform: translateY(16px);
-    transition: opacity 1.26s var(--ease-soft), transform 1.26s var(--ease-soft);
+    transition: opacity var(--rise-char-dur) var(--ease-soft), transform var(--rise-char-dur) var(--ease-soft);
 }
 .design-page .design-menu.visible,
 .design-page .design-banner-frame.visible {
@@ -351,7 +351,7 @@ body.works-page #app.app-ready { opacity: 1; }
     opacity: 0;
     transition:
         opacity 1.4s var(--ease-soft),
-        transform 1.26s cubic-bezier(0.22, 1, 0.36, 1);
+        transform var(--rise-char-dur) var(--ease-soft);
 }
 .home-v2 .card-video.cover-in,
 .home-v2 .icon-preview-frame.cover-in,
@@ -589,7 +589,7 @@ body.reading-page .reading-layout .reader-list { padding-top: 0; }
     padding: 16px;   /* 四边统一 16px,单个列表项内边距一致 */
     border-radius: 0;   /* 点击/hover 背景改直角,通到两侧竖线 */
     border-bottom: 1px solid var(--ink-08);   /* 项间分割线:全站统一 token */
-    transition: background-color 0.42s var(--ease);   /* 点击切换:上一项底色淡出、下一项淡入 */
+    transition: background-color var(--hover-color-dur) var(--ease);   /* 点击切换:上一项底色淡出、下一项淡入 */
 }
 .reader-item[hidden] { display: none; }
 .reader-item:last-child { border-bottom: none; }   /* 最后一项不留分割线 */
@@ -647,7 +647,7 @@ body.reading-page .reading-layout .reader-list { padding-top: 0; }
     cursor: pointer;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
-.reader-list-toggle svg { width: 14px; height: 14px; transition: transform 0.28s ease; }
+.reader-list-toggle svg { width: 14px; height: 14px; transition: transform var(--ui-dur) ease; }
 .reading-layout.reader-list-open .reader-list-toggle svg { transform: rotate(180deg); }
 
 .article-toc-title {
@@ -666,7 +666,7 @@ body.reading-page .reading-layout .reader-list { padding-top: 0; }
     line-height: 1.4;
     color: var(--gray-500);
     border-left: 2px solid var(--ink-08);
-    transition: color 0.28s ease, border-color 0.28s ease;
+    transition: color var(--ui-dur) ease, border-color var(--ui-dur) ease;
 }
 
 .article-toc a:hover { color: var(--gray-900); }
@@ -712,7 +712,7 @@ body.reading-page .article-eyebrow .a-tag,
     font-weight: 400;
     color: #1a1a1a;
     line-height: 1.2;
-    transition: color 0.42s ease, background-color 0.42s ease;
+    transition: color var(--hover-color-dur) ease, background-color var(--hover-color-dur) ease;
 }
 
 /* 文章详情页:tag 移到标题上方,纯文字加粗(不用胶囊底),与标题一起居中。
@@ -926,7 +926,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
     border: 1px solid var(--gray-200);
     border-radius: 12px;
     overflow: hidden;
-    transition: border-color 0.28s ease;
+    transition: border-color var(--ui-dur) ease;
 }
 .pn-link:hover { border-color: var(--gray-400); }
 .pn-link:hover .pn-title { color: var(--gray-600); }
@@ -956,7 +956,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
     font-weight: 600;
     color: var(--gray-900);
     line-height: 1.4;
-    transition: color 0.28s ease;
+    transition: color var(--ui-dur) ease;
 }
 
 .same-collection {
@@ -977,7 +977,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
     border-bottom: 1px solid var(--gray-100);
     font-size: var(--fs-caption);   /* 14px */
     color: var(--gray-700);
-    transition: color 0.28s ease;
+    transition: color var(--ui-dur) ease;
 }
 .same-collection a:hover { color: var(--gray-900); }
 .same-collection .sc-num {
@@ -1023,7 +1023,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
     font-size: var(--fs-caption);   /* 14px */
     font-weight: 500;
     color: var(--gray-500);
-    transition: color 0.28s ease;
+    transition: color var(--ui-dur) ease;
 }
 .back-link:hover { color: var(--gray-900); }
 .back-link svg { width: 16px; height: 16px; }
@@ -1094,7 +1094,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
     background: none;
     color: #000;
     white-space: nowrap;
-    transition: color 0.28s var(--ease);
+    transition: color var(--ui-dur) var(--ease);
 }
 .header-connect .connect-icon { width: 20px; height: 20px; flex: 0 0 auto; }
 
@@ -1233,7 +1233,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
     font-size: 15px;
     font-weight: 500;
     color: var(--gray-400);
-    transition: color 0.28s ease;
+    transition: color var(--ui-dur) ease;
 }
 .nav-cats .nav-cat .menu-icon svg { width: 16px; height: 16px; }
 /* 顶部导航两个分类暂时隐藏 Icon(JS 仍生成,保留以备日后启用):删掉下面这行即可恢复 */
@@ -1255,7 +1255,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
     font-weight: 500;
     color: var(--gray-900);                 /* 文字 + 图标统一黑色(顶栏透明叠在 banner 上,保证清晰) */
     background: transparent;
-    transition: color 0.28s ease, border-color 0.28s ease;
+    transition: color var(--ui-dur) ease, border-color var(--ui-dur) ease;
 }
 .design-page .home-nav .nav-cat.active {
     color: var(--gray-900);                 /* 选中:文字变黑 + 一圈描边 */
@@ -1311,7 +1311,7 @@ body .home-nav .nav-cats .nav-cat.active {
     background: transparent;
     color: rgba(0, 0, 0, 0.3);
     font-weight: 400;
-    transition: color 0.42s ease;   /* hover 柔和过渡(2026-07-22) */
+    transition: color var(--hover-color-dur) ease;   /* hover 柔和过渡(2026-07-22) */
 }
 .design-page .home-nav .nav-cats .nav-cat.active {
     color: #000;
@@ -1353,10 +1353,10 @@ body .home-nav .nav-cats .nav-cat.active {
     /* 清掉顶栏的 transform(原本用于上滑隐藏,已停用):transform 会让内部 position:fixed
        的模态以顶栏为包含块而非视口,导致模态高度被顶栏撑不开、只露第一项。清掉后模态铺满整屏。 */
     .home-v2 .header.home-nav { transform: none; }
-    /* 小屏顶栏滑出(2026-07-22,参考 order.design):0.4s ease-in-out,
+    /* 小屏顶栏滑出(2026-07-22,参考 order.design):--nav-slide-dur ease-in-out,
        方向切换立即响应(JS 4px 死区)。不能用 transform(会把全屏菜单的
-       包含块变成顶栏),用 top 滑出。桌面仍走 style.css 的 1.12s transform 版。 */
-    .home-v2 .header.home-nav { top: 0; transition: top 0.4s ease-in-out; }
+       包含块变成顶栏),用 top 滑出。桌面仍走 style.css 的 --card-lift-dur transform 版。 */
+    .home-v2 .header.home-nav { top: 0; transition: top var(--nav-slide-dur) ease-in-out; }
     .home-v2 .header.home-nav.header-hidden { top: -96px; }
 
     /* 汉堡按钮:三条黑色横线 */
@@ -1381,7 +1381,7 @@ body .home-nav .nav-cats .nav-cat.active {
         height: var(--icon-stroke, 1.5px);   /* icon 规范:描边 1.5px(style.css token) */
         background: #737373;                 /* 与太阳按钮同一不透明等效色(2026-07-22) */
         border-radius: 0;                    /* icon 规范:方头直角,不用圆头 */
-        transition: transform 0.35s var(--ease), opacity 0.28s var(--ease), background-color 0.42s ease;   /* hover 同上 */
+        transition: transform 0.35s var(--ease), opacity var(--ui-dur) var(--ease), background-color var(--hover-color-dur) ease;   /* hover 同上 */
     }
     /* X 态(两线交叉):切不透明等效色,避免半透明重叠叠亮 */
     .home-v2 .header.home-nav.nav-open .nav-toggle span { background: #737373; }
@@ -1477,7 +1477,7 @@ body .home-nav .nav-cats .nav-cat.active {
         border-top-color: transparent;
         transition:
             border-top-color var(--rise-fade-dur) var(--ease-soft) var(--row-d, 0s),
-            color 0.42s ease;   /* hover 柔和过渡(2026-07-22) */
+            color var(--hover-color-dur) ease;   /* hover 柔和过渡(2026-07-22) */
     }
     .home-v2 .header.home-nav.nav-open .nav-collapse .nav-cat,
     .home-v2 .header.home-nav.nav-open .nav-collapse .header-connect {
@@ -1675,7 +1675,7 @@ body.home-v2 .header-placeholder { height: 76px; }
     font-weight: var(--fw-bold);     /* 比正文重一档;Archive 的 .card-label 同值 */
     color: var(--gray-900);
     line-height: 1.4;
-    transition: color 0.42s ease;
+    transition: color var(--hover-color-dur) ease;
 }
 /* Design 页网格卡片小标题与 Writing 页(.w-title)字号/字重一致(桌面 + 手机统一) */
 .home-v2 .card-label {
@@ -1691,13 +1691,13 @@ body.home-v2 .header-placeholder { height: 76px; }
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    transition: color 0.42s ease;
+    transition: color var(--hover-color-dur) ease;
 }
 .writing-info .w-date {
     font-family: var(--font-mono);
     font-size: var(--fs-caption);   /* 14px */
     color: #969696;
-    transition: color 0.42s ease;
+    transition: color var(--hover-color-dur) ease;
 }
 /* Design 页作品卡片日期保持等宽(否则会被 body.home-v2 * 的 Helvetica 覆盖) */
 .home-v2 .card-date {
@@ -1773,7 +1773,7 @@ body.home-v2 .header-placeholder { height: 76px; }
     pointer-events: none;   /* 点击穿透到外层链接 */
     transform: scale(var(--hover-scale, 1));   /* hover 时随封面卡放大到 150% */
     transform-origin: center center;
-    transition: transform 1.26s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--rise-char-dur) var(--ease-soft);
 }
 
 /* Icon Library 模态层 — 点击封面在当前页打开完整图标库,不跳转 */
@@ -1831,7 +1831,7 @@ body.home-v2 .header-placeholder { height: 76px; }
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
-    transition: background 0.28s ease, transform 0.28s ease;
+    transition: background var(--ui-dur) ease, transform var(--ui-dur) ease;
 }
 .icon-modal-close:hover { background: #ffffff; transform: scale(1.06); }
 .icon-modal-close svg {
@@ -2208,14 +2208,14 @@ body.home-v2.works-page:not(.theme-dark) .header.home-nav { background: var(--si
 body.home-v2.home-landing .header.home-nav,
 body.home-v2.blog-page .header.home-nav,
 body.home-v2.works-page .header.home-nav {
-    transition: transform 1.12s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 1.12s ease;
+    transition: transform var(--card-lift-dur) var(--ease-soft), box-shadow var(--card-lift-dur) ease;
 }
-/* 小屏:顶栏滑出走 top(0.4s ease-in-out,参考 order.design)。
+/* 小屏:顶栏滑出走 top(--nav-slide-dur ease-in-out,参考 order.design)。
    上面那条(0,4,1)会覆写 transition,这里同特异性、后到先得再覆盖回来 */
 @media (max-width: 600px) {
     body.home-v2.home-landing .header.home-nav,
     body.home-v2.blog-page .header.home-nav,
-    body.home-v2.works-page .header.home-nav { transition: top 0.4s ease-in-out; }
+    body.home-v2.works-page .header.home-nav { transition: top var(--nav-slide-dur) ease-in-out; }
 }
 body.home-v2.theme-dark { background: var(--page-bg); }
 
@@ -2475,7 +2475,7 @@ body.works-page .home-nav .theme-toggle {
     color: #737373;   /* 55% 黑在白圆上的不透明等效色:全套图标统一(2026-07-22) */
     position: relative;
     z-index: 2;
-    transition: color 0.28s ease;
+    transition: color var(--ui-dur) ease;
 }
 body.home-landing .home-nav .theme-toggle:hover,
 body.blog-page .home-nav .theme-toggle:hover,
@@ -3040,20 +3040,20 @@ body.blog-page .bl-title {
     font-weight: 600;
     color: var(--gray-900);
     line-height: 1.4;
-    transition: color 0.42s ease;
+    transition: color var(--hover-color-dur) ease;
 }
 body.blog-page .bl-excerpt {
     margin: 0;
     font-size: var(--fs-caption, 14px);
     color: var(--gray-600);
     line-height: 1.6;
-    transition: color 0.42s ease;
+    transition: color var(--hover-color-dur) ease;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-body.blog-page .bl-date { font-size: var(--fs-caption, 14px); color: #969696; transition: color 0.42s ease; }
+body.blog-page .bl-date { font-size: var(--fs-caption, 14px); color: #969696; transition: color var(--hover-color-dur) ease; }
 @media (hover: hover) {
     body.blog-page .blog-list-item a:hover .bl-title { color: var(--gray-500); }
     body.blog-page .blog-list-item a:hover .bl-excerpt,
