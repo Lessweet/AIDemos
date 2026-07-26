@@ -1096,9 +1096,6 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
     transition: color 0.28s var(--ease);
 }
 .header-connect .connect-icon { width: 20px; height: 20px; flex: 0 0 auto; }
-.header-connect:hover {
-    color: var(--gray-600);
-}
 
 .site-title {
     display: inline-flex;
@@ -1240,7 +1237,6 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
 .nav-cats .nav-cat .menu-icon svg { width: 16px; height: 16px; }
 /* 顶部导航两个分类暂时隐藏 Icon(JS 仍生成,保留以备日后启用):删掉下面这行即可恢复 */
 .nav-cats .nav-cat .menu-icon { display: none; }
-.nav-cat:hover { color: var(--gray-900); }
 .nav-cat.active { color: var(--gray-900); font-weight: 600; }
 
 /* pillar 页(Writing + Design)共用顶栏:Writing/Design + 邮箱联系方式 全部靠右,统一胶囊样式
@@ -1259,10 +1255,6 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
     color: var(--gray-900);                 /* 文字 + 图标统一黑色(顶栏透明叠在 banner 上,保证清晰) */
     background: transparent;
     transition: color 0.28s ease, border-color 0.28s ease;
-}
-.design-page .home-nav .nav-cat:hover,
-.design-page .home-nav .header-connect:hover {
-    color: var(--gray-900);
 }
 .design-page .home-nav .nav-cat.active {
     color: var(--gray-900);                 /* 选中:文字变黑 + 一圈描边 */
@@ -1319,9 +1311,6 @@ body .home-nav .nav-cats .nav-cat.active {
     color: rgba(0, 0, 0, 0.3);
     font-weight: 400;
     transition: color 0.42s ease;   /* hover 柔和过渡(2026-07-22) */
-}
-.design-page .home-nav .nav-cats .nav-cat:hover {
-    color: var(--gray-500);   /* 与 blog 卡 hover 同灰(2026-07-22) */
 }
 .design-page .home-nav .nav-cats .nav-cat.active {
     color: #000;
@@ -1521,54 +1510,6 @@ body .home-nav .nav-cats .nav-cat.active {
        原来还有一条 .active:hover { color: --gray-500 } —— 它的 (0,7,0) 压过下面
        hover 反色的 (0,6,0),会让选中项 hover 时是灰字贴黑底,故删除。 */
     .home-v2 .header.home-nav .nav-collapse .nav-cats .nav-cat.active { color: #181818; }
-    /* ── 全屏菜单三项 = 与首页索引行同一套整行反色(2026-07-26 用户要求)──────
-       黑块与内容区同宽(左右 inset 0),上边 -1px 盖住分割线,相邻两行同时变暗时
-       不留亮缝;hover 时文字右移、箭头左移各 --hl-shift,向中间收出呼吸。
-       时长同样是「移入 --hl-dur / 移出 --hl-dur-out」,靠状态分别声明。 */
-    .home-v2 .header.home-nav .nav-collapse .nav-cat,
-    .home-v2 .header.home-nav .nav-collapse .header-connect {
-        position: relative;
-        isolation: isolate;
-    }
-    .home-v2 .header.home-nav .nav-collapse .nav-cat::before,
-    .home-v2 .header.home-nav .nav-collapse .header-connect::before {
-        content: "";
-        position: absolute;
-        z-index: -1;
-        inset: -1px 0 0 0;
-        background-color: transparent;
-        transition: background-color var(--hl-dur-out) ease;
-    }
-    .home-v2 .header.home-nav .nav-collapse .nav-cat .heading-rise-mask,
-    .home-v2 .header.home-nav .nav-collapse .header-connect .connect-label,
-    .home-v2 .header.home-nav .nav-collapse .nav-arrow {
-        transition: transform var(--hl-shift-out) ease;   /* 归位比黑块淡出快 */
-    }
-    @media (hover: hover) {
-        /* 特异性必须 ≥ 上面 .nav-cats .nav-cat.active 的 (0,7,0) —— 否则当前页那一项
-           hover 时字色被 active 规则压回深色,变成黑字贴黑底、整行读不出来。
-           带上 body 与 .nav-cats 提到 (0,7,1),稳压。 */
-        body.home-v2 .header.home-nav .nav-collapse .nav-cats .nav-cat:hover,
-        body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect:hover {
-            color: var(--hl-paper);
-            transition: color var(--hl-dur) ease;
-        }
-        .home-v2 .header.home-nav .nav-collapse .nav-cat:hover::before,
-        .home-v2 .header.home-nav .nav-collapse .header-connect:hover::before {
-            background-color: var(--hl-ink);
-            transition: background-color var(--hl-dur) ease;
-        }
-        .home-v2 .header.home-nav .nav-collapse .nav-cat:hover .heading-rise-mask,
-        .home-v2 .header.home-nav .nav-collapse .header-connect:hover .connect-label {
-            transform: translateX(var(--hl-shift));
-            transition: transform var(--hl-shift-in) ease;
-        }
-        .home-v2 .header.home-nav .nav-collapse .nav-cat:hover .nav-arrow,
-        .home-v2 .header.home-nav .nav-collapse .header-connect:hover .nav-arrow {
-            transform: translateX(calc(-1 * var(--hl-shift)));
-            transition: transform var(--hl-shift-in) ease;
-        }
-    }
     /* (原「hover 变灰 --gray-500」已删:它与上面的反色规则选择器完全相同、又写在后面,
        留着会把纸色字压回灰色。) */
     /* 行内的直角箭头(writing.js 注入,桌面端由下方规则隐藏):同 icon 规范 */
@@ -1729,16 +1670,16 @@ body.home-v2 .header-placeholder { height: 76px; }
     color: var(--gray-300);
 }
 .writing-info .w-title {
-    font-size: var(--fs-h3);         /* 卡片标题 16px(2026-07-26 由 20px 下调) */
-    font-weight: var(--fw-bold);     /* 500 = 比正文重一档(2026-07-26);Archive 的 .card-label 同值 */
+    font-size: var(--fs-h3);         /* 卡片标题 20px */
+    font-weight: var(--fw-bold);     /* 比正文重一档;Archive 的 .card-label 同值 */
     color: var(--gray-900);
     line-height: 1.4;
     transition: color 0.42s ease;
 }
 /* Design 页网格卡片小标题与 Writing 页(.w-title)字号/字重一致(桌面 + 手机统一) */
 .home-v2 .card-label {
-    font-size: var(--fs-h3);         /* 卡片标题 16px(2026-07-26 由 20px 下调) */
-    font-weight: var(--fw-bold);     /* 500 —— 与 .w-title 同步(2026-07-26) */
+    font-size: var(--fs-h3);         /* 卡片标题 20px */
+    font-weight: var(--fw-bold);     /* 与 .w-title 同步 */
     line-height: 1.4;
 }
 .writing-info .w-excerpt {
@@ -2311,16 +2252,15 @@ body.no-banner.theme-dark svg.site-logo { color: #fff; }
    .design-page .home-nav .nav-cats .nav-cat(0,4,0)的 30% 黑 —— 否则 Cases 会是黑字贴黑底、整个消失 */
 body.no-banner.theme-dark .home-nav .nav-cats .nav-cat,
 body.no-banner.theme-dark .home-nav .header-connect { color: rgba(255, 255, 255, 0.3); }
-body.no-banner.theme-dark .home-nav .nav-cats .nav-cat:hover,
-body.no-banner.theme-dark .home-nav .header-connect:hover { color: rgba(255, 255, 255, 0.6); }
 /* 顶栏不做当前页高亮(2026-07-22 用户要求):active 与其余项同色,仅 hover 提亮。
    浅色压过前面 (0,5,1) 的 active=#000,深色直接给统一值 */
 body.design-page .home-nav .nav-cats .nav-cat.active { color: rgba(0, 0, 0, 0.3); }
-body.design-page .home-nav .nav-cats .nav-cat.active:hover { color: var(--gray-500); }
 body.no-banner.theme-dark .home-nav .nav-cats .nav-cat,
 body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active { color: rgba(255, 255, 255, 0.3); }
-body.no-banner.theme-dark .home-nav .nav-cats .nav-cat:hover,
-body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active:hover { color: rgba(255, 255, 255, 0.6); }
+
+/* 注:顶栏 / 全屏菜单 / 首页索引行原有的各种 :hover 变色规则(浅灰、白、gray-500…)
+   已于 2026-07-26 统一删除 —— hover 一律走下面的「反色高亮块」。留着它们会在
+   某些主题×选中态的组合下把纸色字压回浅色,出现白字贴白块、整行读不出来。 */
 
 /* ── 顶栏三个 tab 的 hover 反色高亮块(2026-07-26 用户要求)────────────────
    hover 时 Blog / Archive / Contact 的文字身后出现一块直角矩形:底=墨色、字=纸色,
@@ -2428,8 +2368,6 @@ body.theme-dark .design-content .category-section .section-divider {
     body.menu-dark .header.home-nav .nav-collapse .header-connect {
         color: rgba(255, 255, 255, 0.85);   /* 再提亮(2026-07-22:0.5 仍偏灰) */
     }
-    body.menu-dark .header.home-nav .nav-collapse .nav-cat:hover,
-    body.menu-dark .header.home-nav .nav-collapse .header-connect:hover { color: #fff; }
     /* 深色菜单分割线:展开时从透明淡入到 20% 白(rise 入场同节奏) */
     body.menu-dark .header.home-nav .nav-collapse .nav-cat,
     body.menu-dark .header.home-nav .nav-collapse .header-connect { border-top-color: transparent; }
@@ -2437,7 +2375,6 @@ body.theme-dark .design-content .category-section .section-divider {
     body.menu-dark .header.home-nav.nav-open .nav-collapse .header-connect { border-top-color: rgba(255, 255, 255, 0.2); }
     /* 深色面板同理:active 不高亮(压过 theme-dark 顶栏 active 反白),hover 仍提亮 */
     body.menu-dark .header.home-nav .nav-collapse .nav-cats .nav-cat.active { color: rgba(255, 255, 255, 0.85); }
-    body.menu-dark .header.home-nav .nav-collapse .nav-cats .nav-cat.active:hover { color: #fff; }
     /* 展开后 X 与字标压在黑模态上,必须反白。只在 .nav-open 时 ——
        Cases 是白底页,未展开时反白会让汉堡 / 字标直接消失在白底 banner 里。
        (首页由 body.no-banner.theme-dark .site-wordmark 常驻反白,这条对它只是同值重复。) */
@@ -2631,7 +2568,6 @@ body.home-landing.theme-dark .hero-by b { color: #fff; }
 body.home-landing.theme-dark .hero-role { color: rgba(255, 255, 255, 0.5); }
 body.home-landing.theme-dark .home-index-row { color: #fff; }
 @media (hover: hover) {
-    body.home-landing.theme-dark .home-index-row:hover { color: rgba(255, 255, 255, 0.6); }
 }
 html.hero-ready body.home-landing.theme-dark .home-index-row { border-top-color: rgba(255, 255, 255, 0.22); }
 @media (prefers-reduced-motion: reduce) {
@@ -3246,3 +3182,59 @@ body.works-page .card-meta .card-tag::after { content: none; }
 body.works-page.theme-dark .card-label { color: #fff; }
 body.works-page.theme-dark .card-date,
 body.works-page.theme-dark .card-meta .card-tag { color: rgba(255, 255, 255, 0.4); }
+
+/* ══ 全屏菜单三项的整行反色 ══════════════════════════════════════════════
+   位置刻意放在文件最末:上面 body.menu-dark / body.no-banner.theme-dark 的菜单规则
+   与这里特异性相同(如 .nav-cats .nav-cat.active 同为 0,7,1),平手时后写的赢 ——
+   放在它们前面就会出现深色下白字贴白块、当前页那一项整行读不出来。
+   ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 560px) {
+/* ── 全屏菜单三项 = 与首页索引行同一套整行反色(2026-07-26 用户要求)──────
+   黑块与内容区同宽(左右 inset 0),上边 -1px 盖住分割线,相邻两行同时变暗时
+   不留亮缝;hover 时文字右移、箭头左移各 --hl-shift,向中间收出呼吸。
+   时长同样是「移入 --hl-dur / 移出 --hl-dur-out」,靠状态分别声明。 */
+.home-v2 .header.home-nav .nav-collapse .nav-cat,
+.home-v2 .header.home-nav .nav-collapse .header-connect {
+    position: relative;
+    isolation: isolate;
+}
+.home-v2 .header.home-nav .nav-collapse .nav-cat::before,
+.home-v2 .header.home-nav .nav-collapse .header-connect::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: -1px 0 0 0;
+    background-color: transparent;
+    transition: background-color var(--hl-dur-out) ease;
+}
+.home-v2 .header.home-nav .nav-collapse .nav-cat .heading-rise-mask,
+.home-v2 .header.home-nav .nav-collapse .header-connect .connect-label,
+.home-v2 .header.home-nav .nav-collapse .nav-arrow {
+    transition: transform var(--hl-shift-out) ease;   /* 归位比黑块淡出快 */
+}
+@media (hover: hover) {
+    /* 特异性必须 ≥ 上面 .nav-cats .nav-cat.active 的 (0,7,0) —— 否则当前页那一项
+       hover 时字色被 active 规则压回深色,变成黑字贴黑底、整行读不出来。
+       带上 body 与 .nav-cats 提到 (0,7,1),稳压。 */
+    body.home-v2 .header.home-nav .nav-collapse .nav-cats .nav-cat:hover,
+    body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect:hover {
+        color: var(--hl-paper);
+        transition: color var(--hl-dur) ease;
+    }
+    .home-v2 .header.home-nav .nav-collapse .nav-cat:hover::before,
+    .home-v2 .header.home-nav .nav-collapse .header-connect:hover::before {
+        background-color: var(--hl-ink);
+        transition: background-color var(--hl-dur) ease;
+    }
+    .home-v2 .header.home-nav .nav-collapse .nav-cat:hover .heading-rise-mask,
+    .home-v2 .header.home-nav .nav-collapse .header-connect:hover .connect-label {
+        transform: translateX(var(--hl-shift));
+        transition: transform var(--hl-shift-in) ease;
+    }
+    .home-v2 .header.home-nav .nav-collapse .nav-cat:hover .nav-arrow,
+    .home-v2 .header.home-nav .nav-collapse .header-connect:hover .nav-arrow {
+        transform: translateX(calc(-1 * var(--hl-shift)));
+        transition: transform var(--hl-shift-in) ease;
+    }
+}
+}
