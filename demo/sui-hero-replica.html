@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sui Hero Replica — 蓝色渐变入场动效复刻</title>
+<style>
+  /* ============ 基础 ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: 1.111vw; }               /* Webflow 同款：1em ≈ 视口宽度 1.111% */
+  @media (max-width: 768px) { html { font-size: 2.4vw; } }
+  body {
+    font-family: "Inter", "Helvetica Neue", Arial, sans-serif; /* 原站为 TWK Everett（商业字体），此处降级 */
+    background: #fff;
+    color: #010102;
+    overflow-x: clip;
+  }
+
+  /* ============ 导航（入场时从顶部滑下） ============ */
+  .navbar {
+    position: fixed; inset: 0 0 auto 0; z-index: 100;
+    transform: translateY(-150%);            /* 初始藏在顶部，时间线拉回 0% */
+  }
+  .nav-banner {
+    background: #298dff; color: #fff; text-align: center;
+    font-size: 1em; padding: .8em; letter-spacing: .01em;
+  }
+  .nav-bar {
+    margin: .5em; padding: 1.4em 2em;
+    background: #0a0b0d; color: #fff;
+    display: flex; align-items: center; gap: 3em;
+  }
+  .nav-logo { font-size: 1.6em; font-weight: 600; letter-spacing: -.02em; }
+  .nav-links { display: flex; gap: 2.6em; margin: 0 auto; font-size: 1.05em; color: #e8e8e8; }
+  .nav-links span { cursor: pointer; }
+  .nav-cta {
+    background: #298dff; color: #fff; border: 0; cursor: pointer;
+    font: inherit; font-size: .95em; padding: 1em 1.6em;
+  }
+  @media (max-width: 768px) { .nav-links { display: none; } }
+
+  /* ============ 渐变背景层组（与原站同构） ============ */
+  .gradient_background { isolation: isolate; position: relative; }
+
+  /* 统一色相层：mix-blend-mode: color 把下方所有内容“染”成蓝色系 */
+  .blue_overlay {
+    position: absolute; inset: 0; z-index: 10;
+    background: #298dff; opacity: .8;
+    mix-blend-mode: color; pointer-events: none;
+    transform: translateZ(0);
+  }
+
+  .hero_overlay {
+    position: absolute; inset: 0; z-index: 1;
+    background: #fff; overflow: hidden;
+  }
+
+  /* 黑幕：入场时整块向上抬走。底边是径向渐变羽化，抬起时像“黑雾散开” */
+  .background_intro {
+    position: absolute; inset: 0 auto auto 0; z-index: 2;
+    width: 100%; height: 157svh;
+    background-image: radial-gradient(circle farthest-side at 50% 0, #010102 70%, transparent);
+  }
+
+  /* 三个大模糊色球叠出蓝色渐变（黑→蓝→浅蓝→白） */
+  .stage { position: relative; z-index: -1; height: 100%; container-type: inline-size; }
+  .ball {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    border-radius: 50%;
+  }
+  .ball.lightblue {
+    background: #ebf4ff; width: 192.48%; height: 153.39%; top: -45.93%;
+    filter: blur(clamp(60px, 12cqw, 172px));
+  }
+  .ball.blue {
+    background: #298dff; width: 177.54%; height: 159.91%; top: -95.42%;
+    filter: blur(clamp(60px, 12cqw, 172px));
+  }
+  .ball.black {
+    background: #010102; width: 210.35%; height: 159.93%; top: -120.45%;
+    filter: blur(clamp(80px, 16cqw, 230px));
+  }
+  /* 底部白色“地平线”：模糊 SVG 曲线做遮罩 */
+  .cutout {
+    position: absolute; inset: 0; z-index: 2; background: #fff;
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 1433' preserveAspectRatio='none'><defs><filter id='b' x='-20%25' y='-20%25' width='140%25' height='140%25'><feGaussianBlur stdDeviation='40'/></filter></defs><path d='M-200 1144.65L559.764 1235.61C665.892 1252.86 774.108 1252.86 880.236 1235.61L1640 1144.65V1646.65H-200V1144.65Z' fill='black' filter='url(%23b)'/></svg>") no-repeat;
+    mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 1433' preserveAspectRatio='none'><defs><filter id='b' x='-20%25' y='-20%25' width='140%25' height='140%25'><feGaussianBlur stdDeviation='40'/></filter></defs><path d='M-200 1144.65L559.764 1235.61C665.892 1252.86 774.108 1252.86 880.236 1235.61L1640 1144.65V1646.65H-200V1144.65Z' fill='black' filter='url(%23b)'/></svg>") no-repeat;
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  }
+
+  /* 噪点颗粒：4 帧随机噪声循环播放，soft-light 叠加防止渐变色带 */
+  canvas.noise {
+    position: absolute; inset: 0; z-index: 2;
+    width: 100%; height: 100%;
+    opacity: .15; mix-blend-mode: soft-light; pointer-events: none;
+  }
+
+  /* ============ 首屏内容 ============ */
+  .hero-section {
+    position: relative;
+    display: flex; flex-flow: column; justify-content: flex-start;
+  }
+
+  /* 预加载进度条 */
+  .intro_holder {
+    position: absolute; inset: 0; z-index: 99;
+    display: flex; flex-flow: column; justify-content: center; align-items: center;
+    height: 100svh; padding: 0 5em;
+  }
+  .intro_map { width: 100%; position: relative; font-size: 1em; }
+  .line_progress { position: relative; width: fit-content; padding-top: 3.563em; }
+  .line_current {
+    width: 0; height: 1em; position: relative; overflow: hidden;
+    /* 原站此处是一张迷你渐变 AVIF 图，这里用同色系 CSS 渐变复刻 */
+    background: linear-gradient(90deg, #010102 0%, #0b3b7a 28%, #298dff 48%, #8ec4ff 66%, #ebf4ff 82%, #fff 100%);
+  }
+  .current_percent {
+    position: absolute; inset: 0 0 0 auto; width: 1.5px;
+    display: flex; align-items: flex-start;
+    background-image: repeating-linear-gradient(to bottom, #d9d9d9 0 4px, transparent 4px 9px);
+    background-size: 1px 100%; background-repeat: no-repeat;
+  }
+  .percent_wrapper {
+    display: flex; gap: .5em; align-items: center;
+    margin-left: .6em; white-space: nowrap;
+  }
+  .p-block { width: .9em; height: .9em; background: #298dff; flex: none; }
+  .p-num { color: #fff; font-size: 1.2em; line-height: 1; }
+
+  /* 大标题 + 副标题 + CTA */
+  .hero_first_section {
+    position: relative; z-index: 1;
+    min-height: 100svh;
+    display: flex; flex-flow: column; justify-content: center; align-items: center;
+    padding-bottom: 3.188em;
+    --mouse-x: 50%; --mouse-y: 50%;
+    transform: translateZ(0);
+  }
+  .text-layers {
+    width: 100%; height: 100%; padding: 5.5em 5em;
+    display: flex; opacity: 0;
+  }
+  .first_section_content { position: relative; width: 100%; margin-top: auto; }
+  .hero_heading {
+    text-align: center; font-weight: 400;
+    font-size: 11em; line-height: 1.1; letter-spacing: -.049em;
+    pointer-events: none;
+    /* 渐变填充文字：白色核心 → 蓝 → 透明，圆心跟随鼠标 */
+    --text-x: 50%; --text-y: 50%;
+    background-color: #298dff;
+    background-image: radial-gradient(circle at var(--text-x) var(--text-y),
+      #fff 0%, #fff 44%, #298dff 85%, rgba(41,141,255,.1) 95%);
+    background-size: 100% 100%; background-repeat: no-repeat;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transform: translateZ(0); will-change: background-image;
+  }
+  @media (max-width: 768px) { .hero_heading { font-size: 5.8em; letter-spacing: -.04em; } }
+
+  /* 渐进模糊层：backdrop-filter + 径向遮罩，鼠标附近保持清晰 */
+  .gradient-blur {
+    position: absolute; inset: 0; z-index: 5; pointer-events: none;
+    contain: layout style paint; transform: translateZ(0);
+  }
+  .gradient-blur > div { position: absolute; inset: 0; }
+  .gradient-blur > div:nth-of-type(1) {
+    backdrop-filter: blur(2.8px); -webkit-backdrop-filter: blur(2.8px);
+    mask: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 0%, transparent 14%, #000 20%);
+    -webkit-mask: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 0%, transparent 14%, #000 20%);
+  }
+  .gradient-blur > div:nth-of-type(2) {
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    mask: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 0%, transparent 16%, #000 38%);
+    -webkit-mask: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 0%, transparent 16%, #000 38%);
+  }
+  .gradient-blur > div:nth-of-type(3) {
+    backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+    mask: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 0%, transparent 18%, #000 50%);
+    -webkit-mask: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 0%, transparent 18%, #000 50%);
+  }
+
+  .first_section_content_2 {
+    position: relative; z-index: 11; isolation: isolate;
+    bottom: 3.188em; transform: translateY(-100%);
+    display: flex; flex-flow: column; align-items: center; gap: 3em;
+    opacity: 0;
+  }
+  .subhead { font-size: 1.575em; color: #fff; text-align: center; }
+  .splitLine-mask { display: block; overflow: clip; }
+  .splitLine { display: block; }
+  .cta-wrapper { display: grid; grid-template-columns: 1fr 1fr; min-height: 3em; opacity: 0; }
+  .cta-button {
+    display: flex; justify-content: center; align-items: center;
+    padding: 1em 1.875em; font-size: .875em; line-height: 1;
+    background: #000; color: #fff; text-decoration: none;
+    transition: all .2s;
+  }
+  .cta-button.is--alternative { background: #fff; color: #000; }
+
+  /* 首屏之后的占位内容，展示渐变底部融入白色 */
+  .after { padding: 8em 5em 12em; text-align: center; color: #67707e; font-size: 1.2em; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gradient-blur > div { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-banner">Register for Sui Basecamp 2026 »</div>
+  <div class="nav-bar">
+    <div class="nav-logo">◎ Sui</div>
+    <div class="nav-links">
+      <span>Platform</span><span>Solutions</span><span>Developers</span><span>Community</span><span>Resources</span>
+    </div>
+    <button class="nav-cta">Get started</button>
+  </div>
+</nav>
+
+<div class="gradient_background">
+  <div class="blue_overlay"></div>
+
+  <div class="hero_overlay">
+    <div class="background_intro"></div>
+    <div class="stage">
+      <div class="ball lightblue"></div>
+      <div class="ball blue"></div>
+      <div class="ball black"></div>
+      <div class="cutout"></div>
+    </div>
+    <canvas class="noise"></canvas>
+  </div>
+
+  <section class="hero-section">
+    <!-- 预加载进度条 -->
+    <div class="intro_holder">
+      <div class="intro_map">
+        <div class="line_progress">
+          <div class="current_percent">
+            <div class="percent_wrapper">
+              <div class="p-block"></div>
+              <div class="p-num">0%</div>
+            </div>
+          </div>
+          <div class="line_current"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 首屏主内容 -->
+    <div class="hero_first_section">
+      <div class="gradient-blur"><div></div><div></div><div></div></div>
+      <div class="text-layers">
+        <div class="first_section_content">
+          <h1 class="hero_heading">Build full stack</h1>
+        </div>
+      </div>
+    </div>
+
+    <div class="first_section_content_2">
+      <div class="subhead">
+        <div class="splitLine-mask"><div class="splitLine">Sui delivers the full stack for a new</div></div>
+        <div class="splitLine-mask"><div class="splitLine">global economy</div></div>
+      </div>
+      <div class="cta-wrapper">
+        <a class="cta-button" href="#">Go to docs</a>
+        <a class="cta-button is--alternative" href="#">Get a wallet</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="after">↓ 首屏结束，渐变经由白色「地平线」融入正文 ↓</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js"></script>
+<script>
+/* ============ 与原站一致的全局缓动 ============ */
+gsap.registerPlugin(CustomEase);
+CustomEase.create("suiSmooth", "0.4, 0, 0.05, 1");
+gsap.defaults({ ease: "suiSmooth", duration: 0.58 });
+
+const isMobile = matchMedia("(max-width: 768px)").matches;
+
+/* ============ 噪点：预生成 4 帧随机噪声，rAF 循环 ============ */
+(function initNoise() {
+  const canvas = document.querySelector("canvas.noise");
+  const makeFrame = (w, h) => {
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    const img = c.getContext("2d").createImageData(w, h);
+    const buf = new Uint32Array(img.data.buffer);
+    for (let i = 0; i < buf.length; i++) buf[i] = Math.random() < 0.5 ? 0xff000000 : 0;
+    return img;
+  };
+  let frames = [], frame = 0;
+  const build = () => {
+    canvas.width = canvas.offsetWidth || 100;
+    canvas.height = canvas.offsetHeight || 100;
+    frames = Array.from({ length: 4 }, () => makeFrame(canvas.width, canvas.height));
+  };
+  build();
+  addEventListener("resize", build, { passive: true });
+  const ctx = canvas.getContext("2d");
+  (function tick() {
+    frame = (frame + 1) % 4;
+    ctx.putImageData(frames[frame], 0, 0);
+    requestAnimationFrame(tick);
+  })();
+})();
+
+/* ============ 入场时间线（结构、时长、缓动逐条对照原站 initIntro） ============ */
+(function initIntro() {
+  const chip = document.querySelector(".current_percent");
+  const num = chip.querySelector(".p-num");
+  const bar = document.querySelector(".line_current");
+  const prog = document.querySelector(".line_progress");
+  const map = document.querySelector(".intro_map");
+  const counter = { value: 0 };
+  const BAR_EM = isMobile ? 15 : 25;
+
+  gsap.set(bar, { width: "0em" });
+
+  const tl = gsap.timeline({ delay: 0.2 });
+
+  tl
+    // 1. 百分比标签浮现
+    .fromTo(chip, { y: "50%", opacity: 0 }, { duration: 0.25, y: "0%", opacity: 1 })
+    .addLabel("counter")
+    // 2. 迷你渐变条从 0 拉宽到 25em，同时整体向右扫过屏幕
+    .fromTo(bar, { width: "0em" }, { width: BAR_EM + "em", duration: 0.7, ease: "power1.in" })
+    .to(prog, {
+      x: () => map.offsetWidth - BAR_EM * parseFloat(getComputedStyle(map).fontSize),
+      duration: 0.7, ease: "power2.in",
+    }, "<")
+    .addLabel("counterEnd")
+    // 3. 渐变条从右往左收起、消失
+    .set(bar, { transformOrigin: "right" })
+    .to(bar, { scaleX: 0, duration: 0.25 }, "<")
+    .to(bar, { opacity: 0, duration: 0.1 }, "-=0.1")
+    // 4. 数字 0 → 100（与 2、3 并行，从 counter 标签开始）
+    .to(counter, {
+      value: 100, duration: 1, ease: "none",
+      onUpdate: () => { num.textContent = Math.round(counter.value) + "%"; },
+    }, "counter")
+    // 5. 大标题层淡入（2s，suiSmooth）
+    .fromTo(".text-layers", { y: "0%", opacity: 0 }, { duration: 2, y: "0%", opacity: 1 })
+    // 6. 百分比标签模糊淡出
+    .to(chip, { opacity: 0, filter: "blur(16px)", transformOrigin: "left", duration: 0.5 }, "<")
+    .addLabel("lastPart", "-=1")
+    // 7. 核心：黑幕整体上移，羽化底边扫过视口，蓝色渐变从下方涌现（2s，suiSmooth）
+    .to(".background_intro", { y: isMobile ? "-80%" : "-100%", duration: 2 }, "<")
+    // 8. 导航同步滑入
+    .to(".navbar", { y: "0%" }, "<")
+    .set(".intro_holder", { zIndex: 0 })
+    // 9. 副标题逐行升起 + CTA 按钮跟进
+    .set(".first_section_content_2", { opacity: 1 }, "lastPart")
+    .fromTo(".splitLine", { y: "100%", opacity: 0 },
+      { duration: 0.8, y: "0%", opacity: 1, stagger: 0.1 }, "lastPart")
+    .fromTo(".cta-wrapper", { y: "100%", opacity: 0 },
+      { duration: 0.8, y: "0%", opacity: 1 }, "lastPart+=0.25");
+
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) tl.progress(1);
+})();
+
+/* ============ 鼠标跟随的“清晰区”（对照原站 __initHeroBlur，F=0.2 lerp） ============ */
+(function initHeroBlur() {
+  const heading = document.querySelector(".hero_heading");
+  const layer = document.querySelector(".text-layers");
+  const zone = document.querySelector(".hero_first_section");
+  let hRect = heading.getBoundingClientRect();
+  let lRect = layer.getBoundingClientRect();
+
+  const setMX = gsap.quickSetter(zone, "--mouse-x", "%");
+  const setMY = gsap.quickSetter(zone, "--mouse-y", "%");
+  const setTX = gsap.quickSetter(heading, "--text-x", "px");
+  const setTY = gsap.quickSetter(heading, "--text-y", "px");
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+  const F = 0.2, T = 1000;
+
+  let tx = 50, ty = 50, tpx = hRect.width / 2, tpy = hRect.height / 2; // 目标
+  let cx = 50, cy = 50, cpx = tpx, cpy = tpy;                          // 当前
+  let mode = "lerp", start = 0, sx, sy, spx, spy, running = false, raf = null;
+
+  function frame(now) {
+    if (mode === "entering" || mode === "snapping") {
+      const p = Math.min((now - start) / T, 1), e = easeOut(p);
+      cx = sx + (tx - sx) * e; cy = sy + (ty - sy) * e;
+      cpx = spx + (tpx - spx) * e; cpy = spy + (tpy - spy) * e;
+      if (p >= 1) { mode = "lerp"; if (mode === "lerp" && p >= 1 && !running) running = false; }
+    } else {
+      cx = lerp(cx, tx, F); cy = lerp(cy, ty, F);
+      cpx = lerp(cpx, tpx, F); cpy = lerp(cpy, tpy, F);
+      if (Math.abs(cx - tx) + Math.abs(cy - ty) + Math.abs(cpx - tpx) + Math.abs(cpy - tpy) < 1) running = false;
+    }
+    setMX(cx); setMY(cy); setTX(cpx); setTY(cpy);
+    if (running) raf = requestAnimationFrame(frame);
+  }
+  function go(m, x, y, px, py) {
+    mode = m; start = performance.now();
+    sx = cx; sy = cy; spx = cpx; spy = cpy;
+    tx = x; ty = y; tpx = px; tpy = py;
+    if (!running) { running = true; raf = requestAnimationFrame(frame); }
+  }
+  const snapCenter = () => go("snapping", 50, 50, hRect.width / 2, hRect.height / 2);
+
+  addEventListener("resize", () => {
+    hRect = heading.getBoundingClientRect();
+    lRect = layer.getBoundingClientRect();
+    snapCenter();
+  }, { passive: true });
+
+  layer.addEventListener("mouseenter", (e) => {
+    go("entering",
+      ((e.clientX - lRect.left) / lRect.width) * 100,
+      ((e.clientY - lRect.top) / lRect.height) * 100,
+      e.clientX - hRect.left, e.clientY - hRect.top);
+  }, { passive: true });
+
+  layer.addEventListener("mousemove", (e) => {
+    tx = ((e.clientX - lRect.left) / lRect.width) * 100;
+    ty = ((e.clientY - lRect.top) / lRect.height) * 100;
+    tpx = e.clientX - hRect.left; tpy = e.clientY - hRect.top;
+    if (mode === "entering" && performance.now() - start >= T) mode = "lerp";
+    if (!running && mode === "lerp") { running = true; raf = requestAnimationFrame(frame); }
+  }, { passive: true });
+
+  layer.addEventListener("mouseleave", snapCenter, { passive: true });
+})();
+</script>
+</body>
+</html>

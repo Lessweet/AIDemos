@@ -34,6 +34,24 @@ export interface ArticleMeta {
 
 export const ARTICLES: ArticleMeta[] = [
   {
+    slug: 'claude-code-verification-loops',
+    file: 'article-claude-code-verification-loops.html',
+    title: '验证循环，把手动检查写进 Skill',
+    date: '2026-07-23',
+    readTime: '6 分钟',
+    tags: ['Agent 协作'],
+    cat: 'product',
+    accent: '#6A823F',
+    collection: '',
+    excerpt:
+      'Anthropic 博客提了一个概念——验证循环：每次重复做的手动检查，写成 Skill 让 Claude 自己跑。编进去的规矩越多，AI 第一次出手就越接近你要的标准。',
+    listCover: 'assets/claude-code-verification-loops/cover4.png',
+    inBlogGrid: true,
+    blogTag: 'Agent 协作',
+    blogDelay: 500,
+    blogCover: { type: 'iframe', src: 'writing/assets/claude-code-verification-loops/cover4.html' },
+  },
+  {
     slug: 'figma-make-designer-pr',
     file: 'article-figma-make-designer-pr.html',
     title: 'AI native 设计师的交付物，不只设计稿，还有 GitHub PR',

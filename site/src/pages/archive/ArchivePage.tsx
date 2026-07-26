@@ -20,6 +20,7 @@ import {
   useSmoothScrollAnchors,
   useHeaderAlwaysVisible,
   useHideNavOnScrollMobile,
+  useAppReady,
 } from '../../shared/hooks';
 
 const PixelIcon = ({ d }: { d: string }) => (
@@ -37,6 +38,22 @@ const HeadingIcon = ({ d }: { d: string }) => (
     </svg>
   </span>
 );
+
+/* 卡片文字信息区:DOM 与原手写结构逐类名一致,8 处重复收敛为一个组件 */
+function CardInfo(props: { label: string; tag?: string; date: string; likeId?: string }) {
+  return (
+    <div className="card-info">
+      <div className="card-title-row">
+        <h3 className="card-label">{props.label}</h3>
+        {props.likeId && <LikeButton id={props.likeId} />}
+      </div>
+      <div className="card-meta">
+        {props.tag && <span className="card-tag">{props.tag}</span>}
+        <span className="card-date">{props.date}</span>
+      </div>
+    </div>
+  );
+}
 
 /* 视频作品卡(card-tall 系列):cardClass 区分 video-full / gray-outline / scaled 变体 */
 function VideoCard(props: {
@@ -77,16 +94,7 @@ function VideoCard(props: {
           )}
         </div>
       </article>
-      <div className="card-info">
-        <div className="card-title-row">
-          <span className="card-label">{p.label}</span>
-          <LikeButton id={p.likeId} />
-        </div>
-        <div className="card-meta">
-          <span className="card-tag">{p.tag}</span>
-          <span className="card-date">{p.date}</span>
-        </div>
-      </div>
+      <CardInfo label={p.label} tag={p.tag} date={p.date} likeId={p.likeId} />
     </div>
   );
 }
@@ -94,6 +102,7 @@ function VideoCard(props: {
 export default function ArchivePage() {
   const [modalSrc, setModalSrc] = useState<string | null>(null);
 
+  useAppReady();
   useHeaderAlwaysVisible();
   useStickyMenu();
   useScrollProgress();
@@ -128,10 +137,7 @@ export default function ArchivePage() {
           与作品卡同构(card-wrapper + card-info):下方显示名称与时间(2026-07-22) */}
       <div className="card-wrapper banner-card">
         <iframe src="design-banner.html?v=28" className="design-banner-frame" title="VIBEDESIGN" scrolling="no"></iframe>
-        <div className="card-info">
-          <div className="card-title-row"><span className="card-label">VIBEDESIGN</span></div>
-          <div className="card-meta"><span className="card-tag">Claude Code</span><span className="card-date">2026-05-26</span></div>
-        </div>
+        <CardInfo label="VIBEDESIGN" tag="Claude Code" date="2026-05-26" />
       </div>
       <aside className="design-menu" aria-label="Design 分类">
         <a href="#ai-native-design" className="nav-cat"><PixelIcon d={PIXEL_PATHS.ICON_SKILL} />Icon Skill</a>
@@ -155,10 +161,7 @@ export default function ArchivePage() {
               >
                 <iframe src="icon-studio/preview-outlined.html?v=4" className="icon-preview-frame" title="Outlined Icon 预览" scrolling="no" tabIndex={-1}></iframe>
               </a>
-              <div className="card-info">
-                <div className="card-title-row"><span className="card-label">Outlined Icon</span></div>
-                <div className="card-meta"><span className="card-date">2026-05-20</span></div>
-              </div>
+              <CardInfo label="Outlined Icon" date="2026-05-20" />
             </div>
             {/* Pixel Icon — 封面卡(内页前 9 个图标动效预览),点击看全部 */}
             <div className="card-wrapper" data-delay="150">
@@ -170,10 +173,7 @@ export default function ArchivePage() {
               >
                 <iframe src="icon-studio/preview-pixel.html?v=4" className="icon-preview-frame" title="Pixel Icon 预览" scrolling="no" tabIndex={-1}></iframe>
               </a>
-              <div className="card-info">
-                <div className="card-title-row"><span className="card-label">Pixel Icon</span></div>
-                <div className="card-meta"><span className="card-date">2026-05-20</span></div>
-              </div>
+              <CardInfo label="Pixel Icon" date="2026-05-20" />
             </div>
           </div>
         </section>
@@ -191,16 +191,7 @@ export default function ArchivePage() {
                   <iframe src="poster-stack.html?v=4" className="card-iframe" frameBorder="0" title="AI Poster 轮播" scrolling="no" tabIndex={-1}></iframe>
                 </div>
               </article>
-              <div className="card-info">
-                <div className="card-title-row">
-                  <span className="card-label">AI Poster</span>
-                  <LikeButton id="10" />
-                </div>
-                <div className="card-meta">
-                  <span className="card-tag">Jimeng AI</span>
-                  <span className="card-date">2026-05-06</span>
-                </div>
-              </div>
+              <CardInfo label="AI Poster" tag="Jimeng AI" date="2026-05-06" likeId="10" />
             </div>
           </div>
         </section>
@@ -218,16 +209,7 @@ export default function ArchivePage() {
                   <iframe src="ai-assistant-motion/index.html?v=2" className="card-iframe" frameBorder="0" allowFullScreen></iframe>
                 </div>
               </article>
-              <div className="card-info">
-                <div className="card-title-row">
-                  <span className="card-label">AI Assistant Motion</span>
-                  <LikeButton id="9" />
-                </div>
-                <div className="card-meta">
-                  <span className="card-tag">Claude Code</span>
-                  <span className="card-date">2026-03-16</span>
-                </div>
-              </div>
+              <CardInfo label="AI Assistant Motion" tag="Claude Code" date="2026-03-16" likeId="9" />
             </div>
             <VideoCard delay={300} group="co-creation" category="motion-posters" cardClass="card card-tall card-video-full card-gray-outline" src="voicer_compressed.mp4" label="Voicer" likeId="14" tag="Adobe After Effects" date="2025-06-14" />
             <VideoCard delay={350} group="co-creation" category="motion-posters" cardClass="card card-tall card-video-full card-gray-outline" src="voicer_card_compressed.mp4" label="Voicer Card" likeId="17" tag="Adobe After Effects" date="2025-06-14" />
@@ -249,16 +231,7 @@ export default function ArchivePage() {
                   <iframe src="multi-scene-character-demo/multi-scene-character-demo.html" className="card-iframe" frameBorder="0" allowFullScreen></iframe>
                 </div>
               </article>
-              <div className="card-info">
-                <div className="card-title-row">
-                  <span className="card-label">Eye Tracking</span>
-                  <LikeButton id="3" />
-                </div>
-                <div className="card-meta">
-                  <span className="card-tag">Claude Code</span>
-                  <span className="card-date">2026-01-08</span>
-                </div>
-              </div>
+              <CardInfo label="Eye Tracking" tag="Claude Code" date="2026-01-08" likeId="3" />
             </div>
             {/* Voice Particles */}
             <div className="card-wrapper" data-delay="100" data-group="native" data-category="visualux">
@@ -267,16 +240,7 @@ export default function ArchivePage() {
                   <iframe src="voice-particles/index.html" className="card-iframe" frameBorder="0" allowFullScreen></iframe>
                 </div>
               </article>
-              <div className="card-info">
-                <div className="card-title-row">
-                  <span className="card-label">Voice Particles</span>
-                  <LikeButton id="4" />
-                </div>
-                <div className="card-meta">
-                  <span className="card-tag">Gemini 3 Pro</span>
-                  <span className="card-date">2026-01-05</span>
-                </div>
-              </div>
+              <CardInfo label="Voice Particles" tag="Gemini 3 Pro" date="2026-01-05" likeId="4" />
             </div>
             <VideoCard delay={150} group="native" category="visualux" cardClass="card card-tall card-video-full" src="Metal_compressed.mp4" label="3D Rotation Effect" likeId="1" tag="Claude Code" date="2026-01-15" />
             <VideoCard delay={200} group="native" category="visualux" cardClass="card card-tall card-video-full" src="3DCardGlass_compressed.mp4" label="3D Rotation Effect" likeId="2" tag="Claude Code" date="2026-01-10" />

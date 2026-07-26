@@ -219,9 +219,13 @@ export function usePillarEntrance(deps: unknown[] = []) {
       requestAnimationFrame(() =>
         requestAnimationFrame(() => {
           const vh = window.innerHeight || document.documentElement.clientHeight;
+          /* 初始批与 observer 同一套判定:露出 ≥10%(底部再让 50px)才算在场。
+             原来的「顶边进视口 40px 内」会把折叠线下只露一条边的第二行也划进首批,
+             入场在看不见的地方播完,滚下来时就没有动画 —— 露边元素留给滚动触发 */
           const inView = targets.filter((el) => {
             const r = el.getBoundingClientRect();
-            return r.top < vh - 40 && r.bottom > 0;
+            const visibleH = Math.min(r.bottom, vh - 50) - Math.max(r.top, 0);
+            return visibleH > 0 && (r.height === 0 || visibleH / r.height >= 0.1);
           });
           revealByRow(inView);
 
@@ -229,8 +233,11 @@ export function usePillarEntrance(deps: unknown[] = []) {
              再次进入(上滑回来同样)重新依次入场 */
           observer = new IntersectionObserver(
             (entries) => {
+              /* ratio 门槛与 threshold:0.1 对齐:IO 在 observe 时会无条件回调一次,
+                 只看 isIntersecting 的话,首批之外只露一条边的元素会被这次初始回调
+                 立即显现,又回到「在看不见的地方播完」 */
               const hits = entries
-                .filter((e) => e.isIntersecting)
+                .filter((e) => e.isIntersecting && e.intersectionRatio >= 0.1)
                 .map((e) => e.target as HTMLElement)
                 .filter((el) => !el.dataset.entered);
               if (hits.length) revealByRow(hits);
@@ -304,6 +311,16 @@ export function useSmoothScrollAnchors() {
 export function useHeaderAlwaysVisible() {
   useEffect(() => {
     document.querySelector('.header')?.classList.remove('header-hidden');
+  }, []);
+}
+
+/* 内容挂载完成后放开内容区(配合 writing.css 的 #app / #app.app-ready)。
+   Blog / Archive 没有 loading 遮罩:浏览器在 React 挂载之前就画了第一帧,
+   那一帧只有顶栏、内容区是空的,随后内容整块以最终态出现 —— 看着就是闪一下。
+   基态透明 + 挂载后淡入,把这一跳抹平。无 JS 时本来也没有内容,不怕一直透明。 */
+export function useAppReady() {
+  useEffect(() => {
+    document.getElementById('app')?.classList.add('app-ready');
   }, []);
 }
 

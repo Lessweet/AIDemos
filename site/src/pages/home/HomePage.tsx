@@ -9,6 +9,10 @@ import type { CSSProperties, ReactNode } from 'react';
 import { useScrollProgress, useHeaderAlwaysVisible } from '../../shared/hooks';
 
 const HERO_STEP = 18;
+/* 镜像 style.css 的 --hero-speed:hero 逐字与署名的时长/延迟在 CSS 里都 ×它,而索引
+   --row-d 不经 CSS 缩放。下方按署名的「真实」出现时刻算列表起始,故要乘它 ——
+   改 style.css 的 --hero-speed 时,这里同步。 */
+const HERO_SPEED = 1.4;
 
 /* hero 逐字拆分(移植入口内联 walker):词包 .hero-word(nowrap 防词中折行),
    空格单元加 .hero-sp;counter 跨行连续,--d = i*18ms */
@@ -37,16 +41,19 @@ function splitHero(text: string, c: { i: number }): ReactNode[] {
   return out;
 }
 
-/* 索引行 rise 拆字(移植入口内联脚本):BASE=620 / 行间 120 / 字间 35,
-   箭头包成该行最后一个「字符」同批升起 */
+/* 索引行 rise 拆字:行间 120 / 字间 35;箭头包成该行最后一个「字符」同批升起。
+   列表起始 BASE 不再固定 620 —— 改由组件内按「署名真实出现时刻」算出(见下方),
+   否则 --hero-speed 放慢署名后,列表会抢在署名之前升起(2026-07-26 修正入场先后)。 */
 const ROWS = [
   { label: 'Blog', href: 'blog.html' },
   { label: 'Archive', href: 'archive.html' },
   { label: 'Contact', href: 'mailto:chentongrong1@gmail.com' },
 ];
-const BASE = 620;
 const ROW_STEP = 120;
 const CHAR_STEP = 35;
+/* = --rise-fade-dur(writing.css token):行内末字淡入完成即视为该行「已就位」,
+   逐行挂 .row-in 放开 hover 反色 —— 每行显示完立刻可交互,不等整段入场收尾 */
+const RISE_FADE = 1050;
 
 const ARROW = (
   <svg viewBox="0 0 24 24">
@@ -70,6 +77,8 @@ export default function HomePage() {
     if (!docEl.classList.contains('hero-ready')) return;
     docEl.classList.remove('hero-ready');
     docEl.classList.remove('entrance-done'); // 行分割线也按首载节奏重播
+    // 重播入场时逐行 hover 闸门一并复位,由下方计时重挂
+    document.querySelectorAll('.home-index-row.row-in').forEach((el) => el.classList.remove('row-in'));
     const els = Array.from(
       document.querySelectorAll<HTMLElement>('.heading-rise-char, .home-index-row'),
     );
@@ -85,9 +94,16 @@ export default function HomePage() {
   /* 入场收尾 2200ms 后给 html 挂 entrance-done(过渡换快速档);
      闸门 = html.hero-ready(loader 收尾/跳过时由入口脚本添加) */
   useEffect(() => {
-    let timer: number | undefined;
+    const timers: number[] = [];
     const markDone = () => {
-      timer = window.setTimeout(() => document.documentElement.classList.add('entrance-done'), 2200);
+      /* 逐行放开 hover:各行末字(箭头)淡入完成的时刻挂 .row-in,该行立即可交互,
+         不陪最后一行等 entranceEnd。延迟公式与 JSX 里 --d 的错峰完全同源。 */
+      document.querySelectorAll<HTMLElement>('.home-index-row').forEach((el, r) => {
+        const chars = el.querySelectorAll('.heading-rise-char').length;
+        const readyAt = BASE + r * ROW_STEP + (chars - 1) * CHAR_STEP + RISE_FADE;
+        timers.push(window.setTimeout(() => el.classList.add('row-in'), readyAt));
+      });
+      timers.push(window.setTimeout(() => document.documentElement.classList.add('entrance-done'), entranceEnd));
     };
     let mo: MutationObserver | undefined;
     if (document.documentElement.classList.contains('hero-ready')) markDone();
@@ -101,17 +117,24 @@ export default function HomePage() {
       mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     }
     return () => {
-      clearTimeout(timer);
+      timers.forEach((t) => clearTimeout(t));
       mo?.disconnect();
     };
   }, []);
 
-  /* hero 拆字:counter 跨两行与 accent 连续,署名延迟 = 总字数*18 + 120 */
+  /* hero 拆字:counter 跨两行与 accent 连续。署名延迟 = 总字数*18 + 40 —— +40 是 hero 末字
+     到署名的极小间隔(约 1 步),让署名接着逐字节拍立刻跟上、不留停顿(2026-07-26 用户要求)。 */
   const c = { i: 0 };
   const line1 = splitHero('From AI-Assisted', c);
   const line2a = splitHero('to ', c);
   const line2b = splitHero('AI-Native Design.', c);
-  const bylineDelay = c.i * HERO_STEP + 120;
+  const bylineDelay = c.i * HERO_STEP + 40;
+  /* 入场先后 = 视觉自上而下:hero → 署名 → 列表。署名走 hero-soft-blur 且 CSS ×--hero-speed,
+     末元素(Role)真实起步 = (bylineDelay+180)×HERO_SPEED;列表在其后 +200ms 起步
+     (真实毫秒;索引 --row-d 不再被 CSS 缩放)。 */
+  const BASE = Math.round((bylineDelay + 180) * HERO_SPEED + 200);
+  /* 入场彻底结束(最后一行最后一字升完 + 余量)→ 用于挂 entrance-done 换快速档 */
+  const entranceEnd = BASE + 2 * ROW_STEP + 8 * CHAR_STEP + 1260 + 200;
 
   return (
     <>

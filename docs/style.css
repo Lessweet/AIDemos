@@ -53,10 +53,30 @@
     /* 缓动统一用 --ease-soft */
 
     /* ============================================================
+       入场动画 —— 全站唯一规则。分两层:
+       · 这里(CSS)管「怎么动」:每段的时长 / 位移 / 模糊,缓动统一 --ease-soft。
+       · 错峰编排「何时开始」在 site/src/pages/home/HomePage.tsx 顶部常量
+         (HERO_STEP / BASE / ROW_STEP / CHAR_STEP):JS 逐元素算出 --d / --row-d
+         内联下发,CSS 读不到,故留 JS,改这里的时长时一并核对那组步长。
+       以后任何入场/升起交互,一律引用下面的变量,不要另写数值。
+       ============================================================ */
+    /* hero 逐字 soft-blur-in(index.html 拆字,html.hero-ready 放闸) */
+    --hero-char-dur: 648ms;         /* 每字化开时长(900×0.72) */
+    --hero-char-shift: 9.3px;       /* 每字起始下移(16×0.58) */
+    --hero-char-blur: 12px;         /* 每字起始模糊 */
+    --hero-byline-stagger: 90ms;    /* 署名三单元错峰步长:By +1×、Role +2× */
+    /* heading-rise 逐字升起(章节标题 + 首页索引行三大字,共用一套) */
+    --rise-char-dur: 1.26s;         /* 字符位移(translateY 110%→0)时长 */
+    --rise-fade-dur: 1.05s;         /* 字符/图标/分割线淡入时长(同一入场时刻) */
+    /* 首页索引行 / 全屏菜单行的分割线「快档」:入场结束(entrance-done)后与 hover 态
+       用,不带入场的逐行延迟。入场时的慢淡入走上面的 --rise-fade-dur。 */
+    --index-divider-dur: 0.24s;
+
+    /* ============================================================
        全站字号 scale —— 6 级,按 HTML 元素/角色命名,桌面/手机统一(只维护这一处)
        --fs-h1      36px  <h1> 大标题(文章/页面 hero)
        --fs-h2      24px  <h2> 小标题(章节)
-       --fs-h3      20px  卡片标题(标题类,h3 级)
+       --fs-h3      18px  卡片标题(标题类,h3 级)
        --fs-body    16px  文章阅读正文段落
        --fs-p       16px  <p> UI 正文 / 二级 tab / 列表标题 / 卡片简介
        --fs-caption 14px  小字:日期 / tag / 图注 / byline / meta(无单一标签)
@@ -67,7 +87,7 @@
        ============================================================ */
     --fs-h1: 36px;
     --fs-h2: 24px;
-    --fs-h3: 20px;
+    --fs-h3: 18px;
     --fs-body: 16px;
     --fs-p: 16px;
     --fs-caption: 14px;
@@ -75,7 +95,10 @@
     /* 字重 token(与字号一套,只维护这一处):细体 + 正文常规 + 标题加粗一档 */
     --fw-thin: 300;
     --fw-normal: 400;
-    --fw-bold: 500;
+    /* 标题字重。500 在本站字体栈(Helvetica Neue + 中文回退 PingFang)里与 400 几乎
+       看不出差别 —— 实测 400/500 并排肉眼难分,600 才明显变粗。2026-07-26 用户反馈
+       「卡片标题没加粗」后由 500 提到 600。影响:卡片标题、Archive 分区标题、文章 h1。 */
+    --fw-bold: 600;
 
     /* ============================================================
        UI icon 设计规范(2026-07-21 定,未来新增 icon 一律遵守):
@@ -89,6 +112,128 @@
           多大,屏幕上的描边始终是 1.5px(否则会随 viewBox 缩放)。
        ============================================================ */
     --icon-stroke: 1.5px;
+
+    /* ============================================================
+       Feed 卡片四组依次淡入(2026-07-26)
+       封面 → 标题 → 摘要 → meta,四段整体透明度 0 → 100%,按顺序错开。
+       不拆字(打字机效果已撤),所以与文案长短无关,长摘要不会拖慢后面那组。
+       闸门 = 卡片入场的 .visible;规则见下方「Feed 卡片文字依次淡入」。
+       ============================================================ */
+    --tf-dur: 0.6s;    /* 每组自己淡入的时长 */
+    --tf-step: 0.2s;   /* 组与组的起步间隔 */
+
+    /* ============================================================
+       hover 反色高亮块 —— 全站唯一参数入口(2026-07-26)
+       hover 时文字身后出现一块直角矩形:底 = 墨色,字 = 纸色(即反色)。
+       目前用在顶栏 Blog / Archive / Contact 三个 tab ——
+       规则实现在 writing.css「顶栏三个 tab 的 hover 反色高亮块」。
+       深色主题的墨/纸对调见下方 body.theme-dark。
+       ============================================================ */
+    --hl-ink: #1a1a1a;      /* 高亮块底色 = 正文墨色 */
+    --hl-paper: #f9f9f9;    /* 块上文字色 = 页面纸色(--site-bg 同值) */
+    /* 块相对文字的留白。上下比左右小一档是有意为之:块挂在 <a> 上,而 <a> 的盒子
+       本身就比字高出约 2.75px(行高余量),两边同值反而会显得左右偏窄 ——
+       0.34em + 2.75px ≈ 0.5em,这样四边到文字的距离才真的一致(2026-07-26 用户要求)。 */
+    --hl-pad-x: 0.5em;
+    --hl-pad-y: 0.34em;
+    /* 顶栏 tab 专用的左右留白:= 相邻 tab 间距的一半,于是相邻两块正好贴合、0 间距
+       (2026-07-26 用户要求)。绑在 --nav-tab-gap 上 —— 以后改 tab 间距,黑块宽度
+       自动跟着走,不会又开出缝。tab 间距本身见 writing.css 的 .nav-cats / .home-nav。 */
+    --nav-tab-gap: 56px;
+    --hl-pad-x-nav: calc(var(--nav-tab-gap) / 2);
+    --hl-dur: 0.18s;        /* 移入:反色出现的时长(比常规 0.42s 变色快,hover 要跟手) */
+    /* 移出:反色消失的时长(页面里的整行 0.8s,2026-07-26)。移出比移入慢 ——
+       与全站 hover 放大(--hover-zoom-in / --hover-zoom-out)同一手法:进场干脆、退场留一口气。
+       底块与文字必须用同一组时长,否则会出现「块还黑着、字已变黑」的看不清的中间态。 */
+    --hl-dur-out: 0.8s;
+    /* 顶栏(三个 tab + 右上角两个圆按钮)单独一档:0.6s(2026-07-26 用户要求)。
+       导航要跟手,退场不宜像页面里的整行那样拖到 1s;右上角三者共用这一个值。 */
+    --hl-dur-out-nav: 0.6s;
+    /* 整行黑块(首页索引行 / 全屏菜单)hover 时,左边文字右移、右边箭头左移各这么多,
+       各自向中间收(2026-07-26 用户要求)。黑块与内容区同宽,文字紧贴块边会局促,
+       靠位移让出呼吸,而不是把块撑宽 —— 撑宽就会和分割线错位。 */
+    --hl-shift: 12px;
+    /* 位移的进/出各一档(2026-07-26 用户要求):进场慢一些、更有推开的分量感,
+       归位快一些、不拖沓。都与黑块的淡入淡出解耦 —— 块进 0.18s / 出 1s。 */
+    --hl-shift-in: 0.5s;
+    --hl-shift-out: 0.3s;
+
+    /* ============================================================
+       首页 hero 入场速度总控(2026-07-26 用户要求「再慢点」)
+       同时缩放「每个字的动画时长」与「字与字的错峰延迟」——
+       等价于 animate-text runtime 的 speed_multiplier 取倒数,
+       所以整段节奏是等比放慢,不会只慢一半、显得脱节。
+       1 = 原基准(spec 的 900ms/25ms × 0.72 ≈ 648ms/18ms);值越大越慢。
+       规则在 writing.css「hero 逐字入场」,只此一个调节点。
+       ============================================================ */
+    --hero-speed: 1.4;
+}
+/* 深色主题:墨纸对调 —— 白块 + 深字 */
+body.theme-dark {
+    --hl-ink: #ffffff;
+    --hl-paper: #0a0a0a;
+}
+
+
+/* ── Feed 卡片四组依次淡入(参数只认上方 :root 的 --tf-* token)──────────────
+   组序:封面 → 标题 → 摘要 → meta。Archive 卡没有摘要,所以是封面 → 标题 → meta 三组。
+   Blog 大卡、Blog 列表、Archive 卡的各组都在这里列全,靠 --tf-i(组序)算延迟,
+   改 token 一处三处同步。
+   闸门是 .card-wrapper.visible(usePillarEntrance 在卡片进入视口时加)——
+   基态透明写在 .visible 之外,卡片没入场前不会先亮一下。 */
+.card-wrapper > .writing-card,
+.card-wrapper > .card,
+.card-wrapper > .design-banner-frame,
+.card-wrapper .bl-thumb,
+.card-wrapper .writing-info .w-title,
+.card-wrapper .writing-info .w-excerpt,
+.card-wrapper .writing-info .w-meta,
+.card-wrapper .bl-text .bl-title,
+.card-wrapper .bl-text .bl-excerpt,
+.card-wrapper .bl-text .bl-date,
+.card-wrapper .card-info .card-title-row,
+.card-wrapper .card-info .card-meta {
+    opacity: 0;
+}
+.card-wrapper.visible > .writing-card,
+.card-wrapper.visible > .card,
+.card-wrapper.visible > .design-banner-frame,
+.card-wrapper.visible .bl-thumb,
+.card-wrapper.visible .writing-info .w-title,
+.card-wrapper.visible .writing-info .w-excerpt,
+.card-wrapper.visible .writing-info .w-meta,
+.card-wrapper.visible .bl-text .bl-title,
+.card-wrapper.visible .bl-text .bl-excerpt,
+.card-wrapper.visible .bl-text .bl-date,
+.card-wrapper.visible .card-info .card-title-row,
+.card-wrapper.visible .card-info .card-meta {
+    opacity: 1;
+    /* color 必须跟着列全:这条特异性(0,3,0)压过 .writing-info .w-title 等(0,2,0)
+       自带的 transition: color 0.42s,只写 opacity 会把 hover 变灰/恢复变成瞬切 */
+    transition: opacity var(--tf-dur) ease calc(var(--tf-i, 0) * var(--tf-step)), color 0.42s ease;
+}
+/* 组序:封面 = 0(不写),其余依次 +1 */
+.card-wrapper .writing-info .w-title,
+.card-wrapper .bl-text .bl-title,
+.card-wrapper .card-info .card-title-row { --tf-i: 1; }
+.card-wrapper .writing-info .w-excerpt,
+.card-wrapper .bl-text .bl-excerpt,
+.card-wrapper .card-info .card-meta { --tf-i: 2; }
+.card-wrapper .writing-info .w-meta,
+.card-wrapper .bl-text .bl-date { --tf-i: 3; }
+@media (prefers-reduced-motion: reduce) {
+    .card-wrapper > .writing-card,
+    .card-wrapper > .card,
+    .card-wrapper > .design-banner-frame,
+    .card-wrapper .bl-thumb,
+    .card-wrapper .writing-info .w-title,
+    .card-wrapper .writing-info .w-excerpt,
+    .card-wrapper .writing-info .w-meta,
+    .card-wrapper .bl-text .bl-title,
+    .card-wrapper .bl-text .bl-excerpt,
+    .card-wrapper .bl-text .bl-date,
+    .card-wrapper .card-info .card-title-row,
+    .card-wrapper .card-info .card-meta { opacity: 1; transition: none; }
 }
 
 html {
@@ -481,8 +626,8 @@ a {
     opacity: 0;
     white-space: pre;        /* keep spaces */
     transition:
-        transform 1.26s var(--ease-soft) var(--d, 0s),
-        opacity 1.05s ease-out var(--d, 0s);
+        transform var(--rise-char-dur) var(--ease-soft) var(--d, 0s),
+        opacity var(--rise-fade-dur) ease-out var(--d, 0s);
     will-change: transform, opacity;
 }
 
@@ -494,7 +639,7 @@ a {
 /* 标题图标随逐字升起一起淡入,不要在文字出现前单独显示(否则页面只剩一个孤零零的图标) */
 .heading-rise .heading-icon {
     opacity: 0;
-    transition: opacity 1.05s var(--ease-soft);
+    transition: opacity var(--rise-fade-dur) var(--ease-soft);
 }
 .heading-rise.heading-rise-in .heading-icon {
     opacity: 1;
