@@ -94,13 +94,13 @@
     --icon-stroke: 1.5px;
 
     /* ============================================================
-       Feed 卡片三组文字依次淡入(2026-07-26)
-       标题 → 摘要 → meta,三段整体透明度 0 → 100%,按顺序错开。
+       Feed 卡片四组依次淡入(2026-07-26)
+       封面 → 标题 → 摘要 → meta,四段整体透明度 0 → 100%,按顺序错开。
        不拆字(打字机效果已撤),所以与文案长短无关,长摘要不会拖慢后面那组。
        闸门 = 卡片入场的 .visible;规则见下方「Feed 卡片文字依次淡入」。
        ============================================================ */
-    --tf-dur: 0.55s;    /* 每组自己淡入的时长 */
-    --tf-step: 0.22s;   /* 组与组的起步间隔 */
+    --tf-dur: 0.6s;    /* 每组自己淡入的时长 */
+    --tf-step: 0.2s;   /* 组与组的起步间隔 */
 
     /* ============================================================
        hover 反色高亮块 —— 全站唯一参数入口(2026-07-26)
@@ -155,11 +155,16 @@ body.theme-dark {
 }
 
 
-/* ── Feed 卡片文字依次淡入(参数只认上方 :root 的 --tf-* token)──────────────
-   三组 = 标题 / 摘要 / meta。Blog 大卡、Blog 列表、Archive 卡各自的三组都在这里列全,
-   靠 --tf-i(组序)算延迟,改 token 一处三处同步。
+/* ── Feed 卡片四组依次淡入(参数只认上方 :root 的 --tf-* token)──────────────
+   组序:封面 → 标题 → 摘要 → meta。Archive 卡没有摘要,所以是封面 → 标题 → meta 三组。
+   Blog 大卡、Blog 列表、Archive 卡的各组都在这里列全,靠 --tf-i(组序)算延迟,
+   改 token 一处三处同步。
    闸门是 .card-wrapper.visible(usePillarEntrance 在卡片进入视口时加)——
    基态透明写在 .visible 之外,卡片没入场前不会先亮一下。 */
+.card-wrapper > .writing-card,
+.card-wrapper > .card,
+.card-wrapper > .design-banner-frame,
+.card-wrapper .bl-thumb,
 .card-wrapper .writing-info .w-title,
 .card-wrapper .writing-info .w-excerpt,
 .card-wrapper .writing-info .w-meta,
@@ -170,6 +175,10 @@ body.theme-dark {
 .card-wrapper .card-info .card-meta {
     opacity: 0;
 }
+.card-wrapper.visible > .writing-card,
+.card-wrapper.visible > .card,
+.card-wrapper.visible > .design-banner-frame,
+.card-wrapper.visible .bl-thumb,
 .card-wrapper.visible .writing-info .w-title,
 .card-wrapper.visible .writing-info .w-excerpt,
 .card-wrapper.visible .writing-info .w-meta,
@@ -181,13 +190,20 @@ body.theme-dark {
     opacity: 1;
     transition: opacity var(--tf-dur) ease calc(var(--tf-i, 0) * var(--tf-step));
 }
-/* 组序:第 1 组不延迟,后两组依次 +--tf-step */
+/* 组序:封面 = 0(不写),其余依次 +1 */
+.card-wrapper .writing-info .w-title,
+.card-wrapper .bl-text .bl-title,
+.card-wrapper .card-info .card-title-row { --tf-i: 1; }
 .card-wrapper .writing-info .w-excerpt,
 .card-wrapper .bl-text .bl-excerpt,
-.card-wrapper .card-info .card-meta { --tf-i: 1; }
+.card-wrapper .card-info .card-meta { --tf-i: 2; }
 .card-wrapper .writing-info .w-meta,
-.card-wrapper .bl-text .bl-date { --tf-i: 2; }
+.card-wrapper .bl-text .bl-date { --tf-i: 3; }
 @media (prefers-reduced-motion: reduce) {
+    .card-wrapper > .writing-card,
+    .card-wrapper > .card,
+    .card-wrapper > .design-banner-frame,
+    .card-wrapper .bl-thumb,
     .card-wrapper .writing-info .w-title,
     .card-wrapper .writing-info .w-excerpt,
     .card-wrapper .writing-info .w-meta,
