@@ -27,6 +27,20 @@
             transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
         }
         #page-loader.done { transform: translateY(-100%); pointer-events: none; }
+        /* Sui 式揭幕(试验):离场前一帧「换装」—— 遮罩加高到 160svh,底边换成径向渐变
+           羽化(顶 70% 仍是实黑,换装瞬间视口内全黑无缝),再整体 2s 上移。羽化底边扫过
+           视口时像黑雾被掀开;内容闸门提前到上移开始,字符在雾下升起、雾过处已就位。
+           缓动 = sui.io 全站自定义曲线 suiSmooth。 */
+        #page-loader.lift {
+            bottom: auto;
+            height: 160vh;
+            height: 160svh;
+            background: radial-gradient(circle farthest-side at 50% 0, #0a0a0a 70%, rgba(10, 10, 10, 0));
+            transition: transform 2s cubic-bezier(0.4, 0, 0.05, 1);
+        }
+        #page-loader.lift .pl-fill,
+        #page-loader.lift .pl-num,
+        #page-loader.lift .pl-logo-tile { opacity: 0; transition: opacity 0.3s ease; }
         /* 进度面动画只用 translateX(合成器线程):width 走主线程会掉帧,
            scaleX 大图层缩放右缘有反锯齿接缝、看起来像闪 */
         #page-loader .pl-fill {
@@ -334,17 +348,23 @@
                         clearInterval(sweep);
                         whenAligned(function () {
                             var released = false;
-                            var release = function () {   /* 上滑完全离场后再放闸,Feed 依次入场 */
+                            var release = function () {   /* 黑雾完全离场后撤走遮罩 */
                                 if (released) return;
                                 released = true;
                                 if (loader) loader.remove();
-                                cleanup();
                             };
-                            if (loader) {
-                                loader.classList.add('done');
-                                loader.addEventListener('transitionend', release, { once: true });
-                            }
-                            setTimeout(release, 800);   /* transitionend 兜底 */
+                            if (!loader) { cleanup(); return; }
+                            /* Sui 式揭幕:先换装成羽化黑幕(同帧全黑无缝),下一帧再
+                               上移 + 放闸 —— 内容在雾下入场,而不是等雾散尽才开始 */
+                            loader.classList.add('lift');
+                            requestAnimationFrame(function () {
+                                requestAnimationFrame(function () {
+                                    loader.classList.add('done');
+                                    cleanup();
+                                });
+                            });
+                            loader.addEventListener('transitionend', release, { once: true });
+                            setTimeout(release, 2600);   /* transitionend 兜底 */
                         });   /* 等数字真正对齐、停一拍,再上滑 —— 见 whenAligned */
                     }
                 }, 40);
