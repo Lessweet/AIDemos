@@ -21,6 +21,7 @@ import {
   useSmoothScrollAnchors,
   useHeaderAlwaysVisible,
   useHideNavOnScrollMobile,
+  useAppReady,
 } from '../../shared/hooks';
 
 const PixelIcon = ({ d }: { d: string }) => (
@@ -111,6 +112,7 @@ function VideoCard(props: {
 export default function ArchivePage() {
   const [modalSrc, setModalSrc] = useState<string | null>(null);
 
+  useAppReady();
   useHeaderAlwaysVisible();
   useStickyMenu();
   useScrollProgress();

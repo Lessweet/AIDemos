@@ -307,6 +307,16 @@ export function useHeaderAlwaysVisible() {
   }, []);
 }
 
+/* 内容挂载完成后放开内容区(配合 writing.css 的 #app / #app.app-ready)。
+   Blog / Archive 没有 loading 遮罩:浏览器在 React 挂载之前就画了第一帧,
+   那一帧只有顶栏、内容区是空的,随后内容整块以最终态出现 —— 看着就是闪一下。
+   基态透明 + 挂载后淡入,把这一跳抹平。无 JS 时本来也没有内容,不怕一直透明。 */
+export function useAppReady() {
+  useEffect(() => {
+    document.getElementById('app')?.classList.add('app-ready');
+  }, []);
+}
+
 /* ── script.js: updateDynamicScale ──
    .card-dynamic-scale 内容按卡片高度自适应(--content-scale) */
 export function useDynamicScale() {

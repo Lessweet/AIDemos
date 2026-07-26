@@ -325,6 +325,23 @@ body.design-page:not(.reading-page) :is(h1, h2, h3, .w-title, .card-label) { fon
     .design-page .design-banner-frame { opacity: 1; transform: none; transition: none; }
 }
 
+/* ---------- 跳页不闪:内容区挂载后淡入(2026-07-26 用户反馈「点 tab 加载新页面会闪烁」)
+   Blog / Archive 没有 loading 遮罩,浏览器在 React 挂载之前就画了第一帧 —— 那一帧
+   只有顶栏、内容区是空的(实测首帧 329ms、内容 379ms,中间约 3 帧),随后内容整块
+   以最终态弹出,这一跳就是「闪一下」。基态透明 + 挂载后淡入把它抹平。
+   闸门 .app-ready 由 useAppReady() 在挂载后加;首页不走这套(它有 loading 遮罩)。 */
+body.blog-page #app,
+body.works-page #app {
+    opacity: 0;
+    transition: opacity 0.22s ease;
+}
+body.blog-page #app.app-ready,
+body.works-page #app.app-ready { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+    body.blog-page #app,
+    body.works-page #app { opacity: 1; transition: none; }
+}
+
 /* ---------- 卡片封面媒体:就绪后透明度淡入(JS 加 .cover-in 触发) ----------
    注意:transition 必须同时声明 transform,否则会把 style.css 里 hover 放大用的
    transform 过渡覆盖掉,导致 hover 缩放是「瞬切」而非自然过渡。 */

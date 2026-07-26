@@ -14,6 +14,7 @@ import {
   useHeaderAlwaysVisible,
   useScrollLag,
   useHideNavOnScrollMobile,
+  useAppReady,
 } from '../../shared/hooks';
 
 type Filter = 'all' | 'ui' | 'product';
@@ -48,6 +49,7 @@ export default function BlogPage() {
   const bigCards = cards.slice(0, bigCount);
   const listCards = cards.slice(bigCount);
 
+  useAppReady();
   useHeaderAlwaysVisible();
   useStickyMenu();
   useScrollProgress();
