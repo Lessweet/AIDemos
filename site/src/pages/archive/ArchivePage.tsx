@@ -44,7 +44,7 @@ function CardInfo(props: { label: string; tag?: string; date: string; likeId?: s
   return (
     <div className="card-info">
       <div className="card-title-row">
-        <span className="card-label">{props.label}</span>
+        <h3 className="card-label">{props.label}</h3>
         {props.likeId && <LikeButton id={props.likeId} />}
       </div>
       <div className="card-meta">

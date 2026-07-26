@@ -3165,8 +3165,8 @@ body.works-page .card-wrapper { gap: 10px; }
 body.works-page .card-info { padding: 2px 4px 28px; }   /* 封面与文字间距再减半 4 → 2(2026-07-22) */
 /* 标题/时间样式与 Blog 卡一致(2026-07-22):左对齐;meta 行同 .w-meta(gap 10/基线对齐);
    日期与 tag 用默认字体 14px #969696(去掉等宽与「•」分隔) */
-/* 作品卡标题字号用正文档 --fs-p(2026-07-22 用户要求,由 h3 档 20px 降为 18px) */
-body.works-page .card-label { font-size: var(--fs-p, 18px); }
+/* 作品卡标题与 Blog 卡(.w-title)完全同档(2026-07-26 用户要求):字号回 h3 档,
+   走 .home-v2 .card-label 的 --fs-h3 / --fw-bold / 1.4,不再单独降为正文档 */
 body.works-page .card-title-row { justify-content: flex-start; }
 body.works-page .card-meta { justify-content: flex-start; gap: 10px; align-items: baseline; }
 body.works-page .card-date,
