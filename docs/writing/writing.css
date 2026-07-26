@@ -2600,7 +2600,9 @@ body.home-landing .home-index-row::before {
     z-index: -1;
     inset: 0 calc(-1 * var(--hl-pad-x));
     background-color: transparent;
-    transition: background-color var(--hl-dur) ease;
+    /* 非 hover 态声明的是「移出」时长 —— 过渡取的是当前状态的声明,
+       所以消失走 --hl-dur-out(1s),出现走下面 :hover 里的 --hl-dur(0.18s) */
+    transition: background-color var(--hl-dur-out) ease;
 }
 /* 三行大字字重:--fw-normal(regular 400)。保留这条高特异性规则作为唯一调节点
    (全局 * 规则本来就是 --fw-normal,但经它显式声明,以后换档只改这里) */
@@ -2627,8 +2629,16 @@ body.home-landing .home-index-row .hi-arrow svg {
    2026-07-26 起 hover 从「变灰」改为「黑底反色」——语义与顶栏 tab 统一为「点亮成块」。
    特异性要压过上面深色主题那条 (0,4,1) 的 hover 变色,故带 body.home-v2 提到 (0,5,1)。 */
 @media (hover: hover) {
-    body.home-v2.home-landing .home-index-row:hover { color: var(--hl-paper); }
-    body.home-v2.home-landing .home-index-row:hover::before { background-color: var(--hl-ink); }
+    /* hover 态声明「移入」时长:出现干脆(0.18s),消失留一口气(1s,见非 hover 态)。
+       行的 transition 必须整条重写 —— 只改 color 会把 border-top-color 那项一起丢掉。 */
+    body.home-v2.home-landing .home-index-row:hover {
+        color: var(--hl-paper);
+        transition: border-top-color 0.24s ease, color var(--hl-dur) ease;
+    }
+    body.home-v2.home-landing .home-index-row:hover::before {
+        background-color: var(--hl-ink);
+        transition: background-color var(--hl-dur) ease;
+    }
 }
 /* hover 只变色,箭头不再位移(2026-07-22 用户要求) */
 
@@ -2641,12 +2651,12 @@ body.home-landing .home-index-row {
     border-top-color: transparent;
     transition:
         border-top-color 1.05s var(--ease-soft) var(--row-d, 0s),
-        color 0.42s ease;   /* hover 变色柔和过渡,与 blog 卡片一致(2026-07-22) */
+        color var(--hl-dur-out) ease;   /* 文字与黑块同一组时长,同进同出 */
 }
 html.hero-ready body.home-landing .home-index-row { border-top-color: rgba(0, 0, 0, 0.2); }
 /* 入场结束后(index.html 挂 entrance-done):分割线过渡换快速档 ——
    1.05s + 逐行延迟只属于入场,常驻会拖慢主题切换时的边框变色 */
-html.entrance-done body.home-landing .home-index-row { transition: border-top-color 0.24s ease, color 0.42s ease; }
+html.entrance-done body.home-landing .home-index-row { transition: border-top-color 0.24s ease, color var(--hl-dur-out) ease; }
 html.hero-ready body.home-landing .home-index-row .heading-rise-char {
     transform: translateY(0);
     opacity: 1;
