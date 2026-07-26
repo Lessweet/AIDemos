@@ -2597,28 +2597,31 @@ body.design-page:not(.reading-page) .hero-headline * {
 .hero-avatar,
 .hero-by,
 .hero-role { opacity: 0; }
-html.hero-ready .hero-ch,
-html.hero-ready .hero-avatar,
-html.hero-ready .hero-by,
-html.hero-ready .hero-role {
+/* hero 大字/署名的闸门从 hero-ready 换成 fog-done(2026-07-26):揭幕黑雾完全离场后
+   才开始入场 —— 否则字符在雾下就播完,雾掀开时已是成品、看不到逐字化开。
+   索引行仍走 hero-ready(雾下入场,底部先被掀开、出现时机刚好)。 */
+html.fog-done .hero-ch,
+html.fog-done .hero-avatar,
+html.fog-done .hero-by,
+html.fog-done .hero-role {
     animation: hero-soft-blur-in 648ms cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: var(--d, 0ms);
 }
 /* 署名不再整块入场:头像、By Tongrong、UI Designer 三个单元在整组延迟(--d,
    由 index.html 切分脚本写在 .hero-byline 上、子元素继承)基础上再逐个错峰,
    每个都走同一条 hero-soft-blur-in,复刻 headline 逐字化开的节奏 */
-html.hero-ready .hero-by   { animation-delay: calc(var(--d, 0ms) + 90ms); }
-html.hero-ready .hero-role { animation-delay: calc(var(--d, 0ms) + 180ms); }
+html.fog-done .hero-by   { animation-delay: calc(var(--d, 0ms) + 90ms); }
+html.fog-done .hero-role { animation-delay: calc(var(--d, 0ms) + 180ms); }
 @keyframes hero-soft-blur-in {
     from { opacity: 0; transform: translate3d(0, 9.3px, 0); filter: blur(12px); }
     to   { opacity: 1; transform: none; filter: blur(0); }
 }
 @media (prefers-reduced-motion: reduce) {
     .hero-ch, .hero-avatar, .hero-by, .hero-role { opacity: 1; }
-    html.hero-ready .hero-ch,
-    html.hero-ready .hero-avatar,
-    html.hero-ready .hero-by,
-    html.hero-ready .hero-role { animation: none; }
+    html.fog-done .hero-ch,
+    html.fog-done .hero-avatar,
+    html.fog-done .hero-by,
+    html.fog-done .hero-role { animation: none; }
 }
 
 /* 署名组:标题下方居中一行 —— 头像 + By Tongrong / UI Designer */
