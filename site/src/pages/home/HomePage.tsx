@@ -69,7 +69,6 @@ export default function HomePage() {
     const docEl = document.documentElement;
     if (!docEl.classList.contains('hero-ready')) return;
     docEl.classList.remove('hero-ready');
-    docEl.classList.remove('fog-done'); // hero 大字的闸门(揭幕雾散后由 index.html 加)也摘掉重播
     docEl.classList.remove('entrance-done'); // 行分割线也按首载节奏重播
     const els = Array.from(
       document.querySelectorAll<HTMLElement>('.heading-rise-char, .home-index-row'),
@@ -78,10 +77,7 @@ export default function HomePage() {
     void document.body.offsetWidth; // 强制回流:隐藏态立即生效
     const r1 = requestAnimationFrame(() => {
       els.forEach((el) => (el.style.transition = ''));
-      requestAnimationFrame(() => {
-        docEl.classList.add('hero-ready');
-        docEl.classList.add('fog-done'); // 回访无雾,hero 与索引行同帧放行
-      });
+      requestAnimationFrame(() => docEl.classList.add('hero-ready'));
     });
     return () => cancelAnimationFrame(r1);
   }, []);

@@ -178,10 +178,7 @@
                        hero-ready 若在首绘前就挂上,索引行的 transition 没有状态变化,
                        会直接以最终态渲染、入场动画被跳过;hero 逐字与索引行都要照常播。 */
                     requestAnimationFrame(function () {
-                        requestAnimationFrame(function () {
-                            docEl.classList.add('hero-ready');
-                            docEl.classList.add('fog-done');   /* 跳过 loading 时无雾,hero 大字直接放行 */
-                        });
+                        requestAnimationFrame(function () { docEl.classList.add('hero-ready'); });
                     });
                     return;
                 }
@@ -317,8 +314,15 @@
                 docEl.style.background = document.body.classList.contains('theme-dark')
                     ? '#0a0a0a'    /* 深色主题:兜底 = --page-bg */
                     : '#f9f9f9';   /* 浅色主题:兜底 = --site-bg(--gray-50),防离场残色 */
-                docEl.classList.add('hero-ready');    /* 放闸:索引行在雾下入场;hero 大字等 fog-done(雾散尽) */
             }
+            /* 放闸:hero 大字开始逐字入场,索引行按各自 --row-d(620ms 起)跟在后面。
+               时机 = 黑雾掀过大字区的那一刻 —— 见 HERO_GATE_MS。 */
+            function openHeroGate() { docEl.classList.add('hero-ready'); }
+            /* 揭幕上移全程 2s(见 #page-loader.done .pl-fill),缓动 cubic-bezier(0.4,0,0.05,1)
+               是急起缓收:0.65s 时位移已走完约六成,黑雾的实黑边正好扫过大字顶部。
+               在这一刻放闸,大字从将散未散的雾里逐字浮出;更早会在实黑下空放一遍,
+               更晚(比如等雾散尽的 2s)整段入场就拖得太久。 */
+            var HERO_GATE_MS = 650;
             /* 最短展示时长:加载再快(缓存/本地),进度也要平滑扫到 100 再上滑,
                保证每次访问都有完整的 loading 过程且不生硬 */
             var MIN_MS = 3000;
@@ -359,19 +363,19 @@
                         if (loader) loader.classList.add('fog');
                         whenAligned(function () {
                             var released = false;
-                            var release = function () {   /* 黑雾完全离场:撤遮罩,放 hero 大字入场 */
+                            var release = function () {   /* 黑雾完全离场:撤遮罩 */
                                 if (released) return;
                                 released = true;
                                 if (loader) loader.remove();
-                                docEl.classList.add('fog-done');   /* hero 大字/署名的闸门(writing.css) */
                             };
-                            if (!loader) { cleanup(); docEl.classList.add('fog-done'); return; }
+                            if (!loader) { cleanup(); openHeroGate(); return; }
                             /* Sui 式揭幕:进度面自身就是羽化黑幕。清掉进度期的行内
-                               transform(translateX 已到 0),交给 .done 规则做 2s 上移;
-                               放闸同帧 —— 内容在雾下入场,而不是等雾散尽才开始 */
+                               transform(translateX 已到 0),交给 .done 规则做 2s 上移 */
                             if (fill) fill.style.transform = '';
                             loader.classList.add('done');
                             cleanup();
+                            /* 雾掀到大字区时放闸(不等它散尽),大字从雾里浮出来 */
+                            setTimeout(openHeroGate, HERO_GATE_MS);
                             /* 只认黑幕自己的 transform 结束(pl-num/logo 的 opacity
                                transitionend 会冒泡上来,不能用 once 一刀切) */
                             loader.addEventListener('transitionend', function (e) {

@@ -2597,31 +2597,31 @@ body.design-page:not(.reading-page) .hero-headline * {
 .hero-avatar,
 .hero-by,
 .hero-role { opacity: 0; }
-/* hero 大字/署名的闸门从 hero-ready 换成 fog-done(2026-07-26):揭幕黑雾完全离场后
-   才开始入场 —— 否则字符在雾下就播完,雾掀开时已是成品、看不到逐字化开。
-   索引行仍走 hero-ready(雾下入场,底部先被掀开、出现时机刚好)。 */
-html.fog-done .hero-ch,
-html.fog-done .hero-avatar,
-html.fog-done .hero-by,
-html.fog-done .hero-role {
+/* 闸门 html.hero-ready 由 index.html 在「黑雾掀过大字区」的那一刻挂上(2026-07-26,
+   不是雾起步、也不是雾散尽):早了字在雾下就播完,雾掀开已是成品;晚了整段等太久。
+   索引行共用这一个闸门,靠自己的 --row-d(620ms 起)排在大字之后依次升起。 */
+html.hero-ready .hero-ch,
+html.hero-ready .hero-avatar,
+html.hero-ready .hero-by,
+html.hero-ready .hero-role {
     animation: hero-soft-blur-in 648ms cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: var(--d, 0ms);
 }
 /* 署名不再整块入场:头像、By Tongrong、UI Designer 三个单元在整组延迟(--d,
    由 index.html 切分脚本写在 .hero-byline 上、子元素继承)基础上再逐个错峰,
    每个都走同一条 hero-soft-blur-in,复刻 headline 逐字化开的节奏 */
-html.fog-done .hero-by   { animation-delay: calc(var(--d, 0ms) + 90ms); }
-html.fog-done .hero-role { animation-delay: calc(var(--d, 0ms) + 180ms); }
+html.hero-ready .hero-by   { animation-delay: calc(var(--d, 0ms) + 90ms); }
+html.hero-ready .hero-role { animation-delay: calc(var(--d, 0ms) + 180ms); }
 @keyframes hero-soft-blur-in {
     from { opacity: 0; transform: translate3d(0, 9.3px, 0); filter: blur(12px); }
     to   { opacity: 1; transform: none; filter: blur(0); }
 }
 @media (prefers-reduced-motion: reduce) {
     .hero-ch, .hero-avatar, .hero-by, .hero-role { opacity: 1; }
-    html.fog-done .hero-ch,
-    html.fog-done .hero-avatar,
-    html.fog-done .hero-by,
-    html.fog-done .hero-role { animation: none; }
+    html.hero-ready .hero-ch,
+    html.hero-ready .hero-avatar,
+    html.hero-ready .hero-by,
+    html.hero-ready .hero-role { animation: none; }
 }
 
 /* 署名组:标题下方居中一行 —— 头像 + By Tongrong / UI Designer */
@@ -2859,7 +2859,11 @@ body.blog-page .bl-title {
     transition: color 0.42s ease;
 }
 body.blog-page .bl-excerpt {
-    margin: 0;
+    /* 截断两行的 overflow: hidden 会把 hover 高亮块外扩的那一圈裁掉(四边都秃)。
+       留一圈等于外扩量的 padding 给它,再用同量负 margin 抵消 —— 文字位置、
+       可用宽度、截断行数全不变,只是把裁剪边界往外让了一圈。 */
+    padding: var(--hl-grow);
+    margin: calc(-1 * var(--hl-grow));
     font-size: var(--fs-caption, 14px);
     color: var(--gray-600);
     line-height: 1.6;
@@ -2870,13 +2874,44 @@ body.blog-page .bl-excerpt {
     overflow: hidden;
 }
 body.blog-page .bl-date { font-size: var(--fs-caption, 14px); color: #969696; transition: color 0.42s ease; }
+/* ── hover 反色高亮块(2026-07-26 用户要求)──────────────────────────
+   列表条目 hover:三组文字身后各出现一块直角矩形,底=墨色、字=纸色(反色),
+   像被选中高亮。替代原先的「文字变淡」——hover 语义从「退开」改为「点亮」。
+   参数全在 style.css :root 的 --hl-* token(墨/纸/外扩量/时长),改一处处处同步。
+   两个实现要点:
+   1. 底块靠 box-shadow 的 spread 撑开,不用 padding —— 行内元素加 padding 会把
+      首字往右推,hover 瞬间文字跳位;box-shadow 不参与布局,零位移。
+   2. box-decoration-break: clone —— 折行后每一行各自成块;不加的话中间行没有底。
+      外扩量略大于行距余量,行与行的块相互交叠、连成一片,不出现条纹。
+   附着点是 .tw-text(Typewriter 的行内容器):行内元素才能让块贴着文字走,
+   挂在 .bl-title 这类块级元素上会撑满整列。 */
+body.blog-page .bl-text .tw-text {
+    border-radius: 0;   /* 直角 —— 与全站方头直角语言一致 */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    transition:
+        color var(--hl-dur) ease,
+        background-color var(--hl-dur) ease,
+        box-shadow var(--hl-dur) ease;
+}
 @media (hover: hover) {
-    body.blog-page .blog-list-item a:hover .bl-title { color: var(--gray-500); }
-    body.blog-page .blog-list-item a:hover .bl-excerpt,
-    body.blog-page .blog-list-item a:hover .bl-date { color: var(--gray-300); }
-    /* 深色主题:hover 同样是「变淡」——用更低的白透明度,不能用浅色灰(会变亮) */
-    body.blog-page.theme-dark .blog-list-item a:hover .bl-excerpt,
-    body.blog-page.theme-dark .blog-list-item a:hover .bl-date { color: rgba(255, 255, 255, 0.35); }
+    body.blog-page .blog-list-item a:hover .tw-text {
+        color: var(--hl-paper);
+        background-color: var(--hl-ink);
+        box-shadow: 0 0 0 var(--hl-grow) var(--hl-ink);
+    }
+    /* 截断省略号是 .bl-excerpt 自己画的(不属于 .tw-text),得单独跟着反色,
+       否则墨底上留一个原色的「…」。
+       这里的 !important 是必须的:省略号的显隐由一条 animation 控制(style.css 的
+       tw-ellipsis),动画的层叠优先级高于普通声明,只有 author !important 压得过它。
+       也不能改用 animation: none —— 那会让动画在移出 hover 时从头重播,
+       省略号先消失、一秒多后再出现。 */
+    body.blog-page .blog-list-item a:hover .bl-excerpt {
+        -webkit-text-fill-color: var(--hl-paper) !important;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.blog-page .bl-text .tw-text { transition: none; }
 }
 /* 深色主题 */
 body.blog-page.theme-dark .bl-title { color: #fff; }
