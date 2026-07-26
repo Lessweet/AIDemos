@@ -28,12 +28,6 @@
 body.design-page:not(.reading-page),
 body.design-page:not(.reading-page) * { font-weight: var(--fw-normal) !important; }
 body.design-page:not(.reading-page) :is(h1, h2, h3, .w-title, .card-label) { font-weight: var(--fw-bold) !important; }
-/* 例外:Feed 卡片标题(.w-title / .card-label)改常规 400(2026-07-26 用户要求)。
-   必须单列一条 —— 它们本身就是 <h3>,只从上面的列表里删名字没用,还会被 h3 那项
-   的 !important 压回加粗;同特异性靠「后写的赢」覆盖掉。
-   两者一起改:Archive 的 .card-label 与 Blog 的 .w-title 是同一层级的卡片标题,
-   字号字重历来保持一致(见下方 .home-v2 .card-label 规则的注释)。 */
-body.design-page:not(.reading-page) :is(.w-title, .card-label) { font-weight: var(--fw-normal) !important; }
 
 /* ---------- 顶层支柱切换(header-center 内) ---------- */
 .pillar-nav {
@@ -1664,16 +1658,16 @@ body.home-v2 .header-placeholder { height: 76px; }
     color: var(--gray-300);
 }
 .writing-info .w-title {
-    font-size: var(--fs-h3);           /* 卡片标题 16px(2026-07-26 由 20px 下调) */
-    font-weight: var(--fw-normal);     /* 400 —— 不再加粗(2026-07-26 用户要求) */
+    font-size: var(--fs-h3);         /* 卡片标题 16px(2026-07-26 由 20px 下调) */
+    font-weight: var(--fw-bold);     /* 500 = 比正文重一档(2026-07-26);Archive 的 .card-label 同值 */
     color: var(--gray-900);
     line-height: 1.4;
     transition: color 0.42s ease;
 }
 /* Design 页网格卡片小标题与 Writing 页(.w-title)字号/字重一致(桌面 + 手机统一) */
 .home-v2 .card-label {
-    font-size: var(--fs-h3);           /* 卡片标题 16px(2026-07-26 由 20px 下调) */
-    font-weight: var(--fw-normal);     /* 400 —— 与 .w-title 同步(2026-07-26) */
+    font-size: var(--fs-h3);         /* 卡片标题 16px(2026-07-26 由 20px 下调) */
+    font-weight: var(--fw-bold);     /* 500 —— 与 .w-title 同步(2026-07-26) */
     line-height: 1.4;
 }
 .writing-info .w-excerpt {
@@ -2271,19 +2265,42 @@ body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active:hover { color: rgb
       平手时后写的赢。往这段前面插会被它们的 color 压掉,字色就跟着块一起没了。 */
 body.home-v2.design-page .header.home-nav .nav-cats .nav-cat,
 body.home-v2.design-page .header.home-nav .header-connect {
+    position: relative;
+    /* 隔离出层叠上下文,让下面 z-index:-1 的块只沉到本 tab 的文字之下,
+       不会掉到顶栏底色后面(那样块就整个看不见了) */
+    isolation: isolate;
+    transition: color var(--hl-dur) ease;
+}
+/* 块用伪元素而不是 box-shadow:shadow 的外扩只能四边同值,而 <a> 的盒子本身就比字
+   高出一圈行高,四边同值会显得左右偏窄;伪元素能把上下、左右分开给(--hl-pad-*)。
+   块从一开始就是最终尺寸、只是透明,hover 只换颜色 —— 几何尺寸自始至终不变,
+   所以没有「由小长大」的缩放感(2026-07-26 用户要求)。 */
+body.home-v2.design-page .header.home-nav .nav-cats .nav-cat::before,
+body.home-v2.design-page .header.home-nav .header-connect::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: calc(-1 * var(--hl-pad-y)) calc(-1 * var(--hl-pad-x));
     border-radius: 0;   /* 直角 —— 与全站方头直角语言一致 */
-    transition:
-        color var(--hl-dur) ease,
-        background-color var(--hl-dur) ease,
-        box-shadow var(--hl-dur) ease;
+    background-color: transparent;
+    transition: background-color var(--hl-dur) ease;
 }
 @media (hover: hover) {
     body.home-v2.design-page .header.home-nav .nav-cats .nav-cat:hover,
     body.home-v2.design-page .header.home-nav .header-connect:hover {
         color: var(--hl-paper);
-        background-color: var(--hl-ink);
-        box-shadow: 0 0 0 var(--hl-grow) var(--hl-ink);
     }
+    body.home-v2.design-page .header.home-nav .nav-cats .nav-cat:hover::before,
+    body.home-v2.design-page .header.home-nav .header-connect:hover::before {
+        background-color: var(--hl-ink);
+    }
+}
+/* 文字在块里左右居中:桌面顶栏不显示箭头(它只在 ≤560px 的汉堡菜单里出现),
+   但零宽的 .nav-arrow 仍是 flex 项,会让 gap 在文字右侧多留 6px(Contact 8px)——
+   块就偏了。桌面直接把它摘出布局,<a> 的盒子回到紧贴文字。 */
+@media (min-width: 561px) {
+    body.home-v2.design-page .header.home-nav .nav-cats .nav-cat .nav-arrow,
+    body.home-v2.design-page .header.home-nav .header-connect .nav-arrow { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
     body.home-v2.design-page .header.home-nav .nav-cats .nav-cat,
