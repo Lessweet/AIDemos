@@ -136,10 +136,24 @@ function initNavToggle(nav) {
         e.stopPropagation();
         setOpen(!nav.classList.contains('nav-open'));
     });
-    // 点击模态内的链接(Blog / Skills / Contact)收起菜单,再正常跳转 ——
-    // 首页点 Blog 是跳回本页(./),不收起菜单就会盖在刚加载出来的页面上。
+    // 点击模态内的链接:
+    // · mailto(Contact)不发生页面跳转 —— 立即收起菜单,否则会永远盖着页面。
+    // · 页面跳转类(Blog / Archive,含跳回本页 = 整页 reload)不播收起动画:
+    //   收起会瞬时复位字符、黑块/分割线/面板再各按时长淡出,新页首绘前
+    //   旧页是一堆先后消失的残影(2026-07-26 用户反馈)。改为菜单原样冻结、
+    //   被点的行加 .nav-leaving 钉住反色,直到浏览器整页切换;
+    //   reload 后的新页本来就是收起态,不存在「菜单盖在新页上」。
     // 点击模态空白区 / 模态外 / Esc 仍不收起(只有 X 或选项能关)。
     panel.addEventListener('click', (e) => {
-        if (e.target.closest('a[href]')) setOpen(false);
+        const link = e.target.closest('a[href]');
+        if (!link) return;
+        if ((link.getAttribute('href') || '').indexOf('mailto:') === 0) { setOpen(false); return; }
+        link.classList.add('nav-leaving');
+    });
+    // 从 bfcache 返回(iOS 后退)会原样恢复「菜单开 + 行反色」的冻结页面:复位
+    window.addEventListener('pageshow', (e) => {
+        if (!e.persisted) return;
+        panel.querySelectorAll('.nav-leaving').forEach((el) => el.classList.remove('nav-leaving'));
+        setOpen(false);
     });
 }

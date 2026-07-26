@@ -2414,9 +2414,21 @@ body.home-landing .design-layout {
 }
 body.home-landing .home-hero {
     flex: 1 1 auto;            /* 撑开剩余高度,把索引推到底部 */
+    display: flex;             /* 纵向 flex:给下面的 auto 边距当分配容器 */
+    flex-direction: column;
     align-items: flex-start;   /* hero 左对齐,与顶栏 logo 同一左缘 */
     text-align: left;
     padding: 0 0 40px;         /* 署名 → 第一条分割线的最小呼吸(余量交给 flex 撑) */
+}
+/* 大屏适配(2026-07-26 用户要求):一屏的剩余高度原先全部堆在「署名 → 索引」之间,
+   高屏上是一整块空白。改用 hero+署名的上下间距去适配 —— 标题 margin-top:auto 与
+   署名 margin-bottom:auto 把剩余高度对半分到这组的上、下,标题↔署名的 40px 锁定
+   不拉开,索引仍钉底;笔记本剩余小、几乎不变。
+   仅桌面生效:手机竖屏也有不少剩余高度,auto 会把 hero 往下拽 —— 手机保持线上的
+   「hero 贴顶、剩余留在署名与索引之间」原布局(2026-07-26 用户要求)。 */
+@media (min-width: 601px) {
+    body.home-landing .hero-headline { margin-top: auto; }
+    body.home-landing .hero-byline { margin-bottom: auto; }
 }
 body.home-landing .hero-byline { justify-content: flex-start; }
 
@@ -2430,11 +2442,12 @@ body.home-landing .hero-by b { color: #181818; }
 body.home-landing .hero-role { color: rgba(0, 0, 0, 0.5); }
 /* landing 版 hero 标题加大一档:原 clamp(26, 4.5vw, 62) 是给「hero + 网格」页用的,
    landing 里标题是绝对主角(桌面封顶 92) */
-body.home-landing .hero-headline { font-size: clamp(32px, 6.5vw, 80px); }   /* 桌面上限 -12px(92→80,2026-07-26 用户要求) */
-/* 小屏:6.5vw 撞到 32px 下限显小,改为跟视口更陡的缩放(390px 上约 41px);
-   系数以首行「From AI-Assisted」不折行为准 */
+body.home-landing .hero-headline { font-size: clamp(40px, 6.5vw, 96px); }   /* 大屏上限 80→96(2026-07-26 用户要求「最大可以再大」;更早 92→80 的降档被此取代) */
+/* 小屏:改为跟视口更陡的缩放,系数以首行「From AI-Assisted」不折行为准。
+   最小字号统一 40px(2026-07-26 用户定):= 线上主流手机(390px 宽)的实际渲染档,
+   任何设备上标题都不小于这一档;两条 clamp 下限同值。 */
 @media (max-width: 600px) {
-    body.home-landing .hero-headline { font-size: clamp(36px, 10.5vw, 48px); }
+    body.home-landing .hero-headline { font-size: clamp(40px, 10.5vw, 48px); }
 }
 
 /* 顶栏只留左上角 logo:分类项 / Contact / 手机端汉堡全部隐藏 */
@@ -2659,6 +2672,31 @@ body.home-landing .home-index-row .hi-arrow svg {
     body.home-v2.home-landing .home-index-row.row-in:hover .hi-arrow {
         transform: translateX(calc(-1 * var(--hl-shift)));
         transition: transform var(--hl-shift-in) ease;
+    }
+}
+/* 触屏:hover 不存在,点按(:active)复用同一套整行反色作点击反馈
+   (2026-07-26 用户要求,与全屏菜单一致)。:active 不会像 :hover 那样被 tap 粘住,
+   按下亮起、松手即随导航离场;系统自带的灰色 tap 高亮关掉,不与反色叠加。
+   按下必须瞬时上色(transition: none):快速点按 :active 只存在一瞬,若走 0.18s
+   淡入,黑块才到半程(半透明 = 发灰)就开始淡出,永远到不了纯黑;
+   松手的柔和淡出由基态声明的移出时长负责,不受影响。 */
+@media (hover: none) {
+    body.home-v2.home-landing .home-index-row { -webkit-tap-highlight-color: transparent; }
+    body.home-v2.home-landing .home-index-row.row-in:active {
+        color: var(--hl-paper);
+        transition: none;
+    }
+    body.home-v2.home-landing .home-index-row.row-in:active::before {
+        background-color: var(--hl-ink);
+        transition: none;
+    }
+    body.home-v2.home-landing .home-index-row.row-in:active .hi-label {
+        transform: translateX(var(--hl-shift));
+        transition: none;
+    }
+    body.home-v2.home-landing .home-index-row.row-in:active .hi-arrow {
+        transform: translateX(calc(-1 * var(--hl-shift)));
+        transition: none;
     }
 }
 /* hover 只变色,箭头不再位移(2026-07-22 用户要求) */
@@ -3237,5 +3275,56 @@ body.works-page.theme-dark .card-meta .card-tag { color: rgba(255, 255, 255, 0.4
         transform: translateX(calc(-1 * var(--hl-shift)));
         transition: transform var(--hl-shift-in) ease;
     }
+}
+/* 触屏:点按(:active)复用同一套整行反色作点击反馈(2026-07-26 用户要求,
+   与首页索引行一致)。选择器/特异性与上面 hover 版一一对应,仅状态换 :active;
+   按下瞬时上色(transition: none,理由见首页索引行触屏块注释)。 */
+@media (hover: none) {
+    .home-v2 .header.home-nav .nav-collapse .nav-cat,
+    .home-v2 .header.home-nav .nav-collapse .header-connect { -webkit-tap-highlight-color: transparent; }
+    body.home-v2 .header.home-nav .nav-collapse .nav-cats .nav-cat:active,
+    body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect:active {
+        color: var(--hl-paper);
+        transition: none;
+    }
+    .home-v2 .header.home-nav .nav-collapse .nav-cat:active::before,
+    .home-v2 .header.home-nav .nav-collapse .header-connect:active::before {
+        background-color: var(--hl-ink);
+        transition: none;
+    }
+    .home-v2 .header.home-nav .nav-collapse .nav-cat:active .heading-rise-mask,
+    .home-v2 .header.home-nav .nav-collapse .header-connect:active .connect-label {
+        transform: translateX(var(--hl-shift));
+        transition: none;
+    }
+    .home-v2 .header.home-nav .nav-collapse .nav-cat:active .nav-arrow,
+    .home-v2 .header.home-nav .nav-collapse .header-connect:active .nav-arrow {
+        transform: translateX(calc(-1 * var(--hl-shift)));
+        transition: none;
+    }
+}
+/* 跳转钉住(2026-07-26 用户反馈「点击后卡了一些元素才消失」):点击链接后
+   nav-boot 不再收起菜单(收起会瞬时复位字符、其余各按时长淡出,新页首绘前
+   全是残影),而是给被点的行加 .nav-leaving —— 反色保持到整页切换,菜单其余
+   部分原样冻结。选择器与 hover/:active 版一一对应。 */
+body.home-v2 .header.home-nav .nav-collapse .nav-cats .nav-cat.nav-leaving,
+body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-leaving {
+    color: var(--hl-paper);
+    transition: none;
+}
+.home-v2 .header.home-nav .nav-collapse .nav-cat.nav-leaving::before,
+.home-v2 .header.home-nav .nav-collapse .header-connect.nav-leaving::before {
+    background-color: var(--hl-ink);
+    transition: none;
+}
+.home-v2 .header.home-nav .nav-collapse .nav-cat.nav-leaving .heading-rise-mask,
+.home-v2 .header.home-nav .nav-collapse .header-connect.nav-leaving .connect-label {
+    transform: translateX(var(--hl-shift));
+    transition: none;
+}
+.home-v2 .header.home-nav .nav-collapse .nav-cat.nav-leaving .nav-arrow,
+.home-v2 .header.home-nav .nav-collapse .header-connect.nav-leaving .nav-arrow {
+    transform: translateX(calc(-1 * var(--hl-shift)));
+    transition: none;
 }
 }
