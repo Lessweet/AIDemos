@@ -30,10 +30,6 @@
         #page-loader.done { background: transparent; pointer-events: none; }
         #page-loader.done .pl-num,
         #page-loader.done .pl-logo-tile { opacity: 0; transition: opacity 0.3s ease; }
-        /* logo 圆角磁贴底暂藏(2026-07-26 用户要求):底板透明、isolation 一并摘掉,
-           multiply 直接融进身后底色 —— 灰底期白底消失只留黑 logo,黑面扫过时 logo 溶进墨面。
-           原磁贴样式(上方)不删,未来想加回时删掉本条覆盖即可 */
-        #page-loader .pl-logo-tile { background: transparent; isolation: auto; }
         /* 进度面动画只用 translateX(合成器线程):width 走主线程会掉帧,
            scaleX 大图层缩放右缘有反锯齿接缝、看起来像闪 */
         /* 进度面 = 揭幕黑幕本体(Sui 式揭幕,2026-07-26):平面加高到 210svh,进度期
@@ -53,19 +49,11 @@
         #page-loader.fog .pl-fill {
             background: radial-gradient(circle farthest-side at 50% 0, #0a0a0a 70%, rgba(10, 10, 10, 0));
         }
-        /* 离场:黑雾 2s 上移,羽化底边扫过视口像雾被掀开;缓动 = sui.io 的 suiSmooth。
-           终点不划满 -100%,停在 -88% —— 羽化尾巴留在视口顶部约 22svh 内,
-           形成常驻的顶部暗雾(致敬 Sui 终态的深色顶区;想调浓淡就改这个百分比:
-           越接近 -100% 留得越少) */
+        /* 离场:黑雾 2s 上移,羽化底边扫过视口像雾被掀开;缓动 = sui.io 的 suiSmooth */
         #page-loader.done .pl-fill {
-            transform: translateY(-88%);
+            transform: translateY(-100%);
             transition: transform 2s cubic-bezier(0.4, 0, 0.05, 1);
         }
-        /* 同会话回访跳过 loading 时直接落在停留态:雾的终态是页面视觉的一部分,
-           首载与回访要一致 */
-        #page-loader.parked .pl-fill,
-        #page-loader.parked .pl-num,
-        #page-loader.parked .pl-logo-tile { transition: none; }
         /* 数字排版:大数字 + 小号 % 沉底对齐(下标感) */
         /* 进度数字暂不展示(2026-07-22 用户要求):引擎照常驱动(收尾时序不变),仅视觉隐藏 */
         #page-loader .pl-num { visibility: hidden; }
@@ -124,7 +112,7 @@
             width: 56px; height: 56px;   /* 方块 56 = 视频 40 + 边距 8×2 */
             padding: 8px;
             background: #e5e5ea;   /* 中性浅灰(主站 --gray-200,2026-07-22):黑面扫过时是灰磁贴而非近白 */
-            border-radius: 12px;
+            /* 直角磁贴(2026-07-26 用户要求):圆角摘掉;想恢复圆角加回 border-radius: 12px */
             transform: translate(-50%, -50%);
             pointer-events: none;
             isolation: isolate;    /* multiply 只对底板生效,不跟身后的黑色进度面混合 */
@@ -184,8 +172,7 @@
             try {
                 if (sessionStorage.getItem('seen-loading')) {
                     var early = document.getElementById('page-loader');
-                    /* 不再移除:跳过动画、直接落在「顶部暗雾停留」终态(parked 关过渡) */
-                    if (early) early.classList.add('fog', 'done', 'parked');
+                    if (early) early.remove();
                     docEl.style.background = document.body.classList.contains('theme-dark') ? '#0a0a0a' : '#f9f9f9';
                     /* 放闸前先让初始态(隐藏)真正绘制一帧 —— 双 rAF 跨过首次绘制。
                        hero-ready 若在首绘前就挂上,索引行的 transition 没有状态变化,
@@ -369,15 +356,15 @@
                         if (loader) loader.classList.add('fog');
                         whenAligned(function () {
                             var released = false;
-                            var release = function () {   /* 停留态收尾:遮罩常驻(顶部暗雾),只释放合成层提示 */
+                            var release = function () {   /* 黑雾完全离场后撤走遮罩 */
                                 if (released) return;
                                 released = true;
-                                if (fill) fill.style.willChange = 'auto';
+                                if (loader) loader.remove();
                             };
                             if (!loader) { cleanup(); return; }
                             /* Sui 式揭幕:进度面自身就是羽化黑幕。清掉进度期的行内
-                               transform(translateX 已到 0),交给 .done 规则做 2s 上移
-                               至停留位;放闸同帧 —— 内容在雾下入场,而不是等雾散尽才开始 */
+                               transform(translateX 已到 0),交给 .done 规则做 2s 上移;
+                               放闸同帧 —— 内容在雾下入场,而不是等雾散尽才开始 */
                             if (fill) fill.style.transform = '';
                             loader.classList.add('done');
                             cleanup();
