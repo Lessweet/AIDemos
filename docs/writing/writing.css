@@ -460,8 +460,9 @@ body.reading-page .article-body blockquote { border-left-color: #1a1a1a; }
 .reading-layout {
     width: min(1280px, calc(100% - 48px));
     margin: 0 auto;
-    /* 正文顶部与顶栏间距统一为 160px,不随视窗变化(桌面/平板/手机一致) */
-    padding: 160px 0 80px;
+    /* 顶栏下留白走三页共享的 --nav-content-gap(2026-07-26 用户要求统一;原写死 160px)。
+       .reading-layout 本身就起始于顶栏下沿,所以这里的 padding-top 即是可见间距。 */
+    padding: var(--nav-content-gap) 0 80px;
 }
 /* 文章列表(左)/ 目录(右)/「文章 ▾」开关一律不展示。
    用 .reading-layout 后代选择器提高特异度,稳定盖过下方 .reader-list{display:flex} 等原三栏样式 */
@@ -1453,7 +1454,7 @@ body .home-nav .nav-cats .nav-cat.active {
         align-items: flex-start;
         justify-content: space-between;
         gap: 24px;
-        padding: 9px 0 80px;   /* 与首页索引行完全同值(2026-07-26 要求全屏菜单与首页一致) */
+        padding: 9px 0 40px;   /* 与首页索引行完全同值(80 → 40,2026-07-26) */
         border-top: 1px solid rgba(0, 0, 0, 0.2);
         text-align: left;
         font-size: var(--index-label-size) !important;   /* 与首页索引行同一 token;!important 压掉桌面 clamp/fs-body 档 */
@@ -2429,7 +2430,7 @@ body.home-landing .hero-by b { color: #181818; }
 body.home-landing .hero-role { color: rgba(0, 0, 0, 0.5); }
 /* landing 版 hero 标题加大一档:原 clamp(26, 4.5vw, 62) 是给「hero + 网格」页用的,
    landing 里标题是绝对主角(桌面封顶 92) */
-body.home-landing .hero-headline { font-size: clamp(32px, 6.5vw, 92px); }
+body.home-landing .hero-headline { font-size: clamp(32px, 6.5vw, 80px); }   /* 桌面上限 -12px(92→80,2026-07-26 用户要求) */
 /* 小屏:6.5vw 撞到 32px 下限显小,改为跟视口更陡的缩放(390px 上约 41px);
    系数以首行「From AI-Assisted」不折行为准 */
 @media (max-width: 600px) {
@@ -2581,7 +2582,7 @@ body.home-landing .home-index-row {
     align-items: flex-start;
     justify-content: space-between;
     gap: 24px;
-    padding: 9px 0 80px;   /* 上:分割线 → 标签的间距(原 18,减半);下:行高 +24px(2026-07-26) */
+    padding: 9px 0 40px;   /* 上:分割线 → 标签的间距;下:行下留白 80 → 40(2026-07-26 用户觉得 80 过大) */
     border-top: 1px solid rgba(0, 0, 0, 0.2);
     color: #181818;
     text-decoration: none;
@@ -2682,7 +2683,7 @@ html.hero-ready body.home-landing .home-index-row .heading-rise-char {
     body.home-landing .home-index-row { border-top-color: rgba(0, 0, 0, 0.2); transition: none; }
 }
 @media (max-width: 600px) {
-    body.home-landing .home-index-row { padding: 7px 0 80px; }   /* 行下留白 56 → 80(行高 +24px,与桌面一致) */
+    body.home-landing .home-index-row { padding: 7px 0 40px; }   /* 行下留白与桌面一致(80 → 40,2026-07-26) */
 }
 
 /* 标题:--fw-normal 常规字重 + 紧字距。

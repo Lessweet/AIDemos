@@ -28,8 +28,9 @@
         /* 离场(Sui 式揭幕,2026-07-26):灰底转透明 —— 切换瞬间视口整个被黑面盖着,
            不可见;此后雾下露出的是页面本体。纯色底一次重绘,不碰动画图层 */
         #page-loader.done { background: transparent; pointer-events: none; }
-        #page-loader.done .pl-num,
-        #page-loader.done .pl-logo-tile { opacity: 0; transition: opacity 0.3s ease; }
+        #page-loader.done .pl-num { opacity: 0; transition: opacity 0.3s ease; }
+        /* logo 淡出:上移触发后延迟 0.2s 开始,时长 0.4s(2026-07-26 用户定稿) */
+        #page-loader.done .pl-logo-tile { opacity: 0; transition: opacity 0.4s ease 0.2s; }
         /* 进度面动画只用 translateX(合成器线程):width 走主线程会掉帧,
            scaleX 大图层缩放右缘有反锯齿接缝、看起来像闪 */
         /* 进度面 = 揭幕黑幕本体(Sui 式揭幕,2026-07-26):平面加高到 210svh,进度期
@@ -145,7 +146,7 @@
             transition: none !important;
         }
     </style>
-<link href="style.css?v=135" rel="stylesheet"/>
+<link href="style.css?v=136" rel="stylesheet"/>
 <!-- Kaushan Script:hero 强调词暂时改回无衬线,字体加载先注释掉,恢复手写体时一并放开
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&amp;display=swap" rel="stylesheet"/> -->

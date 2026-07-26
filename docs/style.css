@@ -208,7 +208,9 @@ body.theme-dark {
 .card-wrapper.visible .card-info .card-title-row,
 .card-wrapper.visible .card-info .card-meta {
     opacity: 1;
-    transition: opacity var(--tf-dur) ease calc(var(--tf-i, 0) * var(--tf-step));
+    /* color 必须跟着列全:这条特异性(0,3,0)压过 .writing-info .w-title 等(0,2,0)
+       自带的 transition: color 0.42s,只写 opacity 会把 hover 变灰/恢复变成瞬切 */
+    transition: opacity var(--tf-dur) ease calc(var(--tf-i, 0) * var(--tf-step)), color 0.42s ease;
 }
 /* 组序:封面 = 0(不写),其余依次 +1 */
 .card-wrapper .writing-info .w-title,
