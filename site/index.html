@@ -44,11 +44,24 @@
             transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             will-change: transform;
         }
-        /* 扫满 100% 的时刻换羽化底(fog):此时视口整个在实黑区(210svh × 70% = 147svh
-           > 视口高),切换不可见;趁收尾停顿的 550ms 把大图层光栅化做完,上移起步不掉帧 */
-        #page-loader.fog .pl-fill {
+        /* 扫满 100% 的时刻换羽化底(fog):宽视口下羽化弧会掠进视口下方两角,直切黑↔雾
+           两角会突然发灰。所以 fog 分两步:①雾层 ::after 瞬时置为不透明 —— 此刻它压在
+           还不透明的实黑底上、同为 #0a0a0a,切换不可见;②实黑底色单独 0.5s 淡出,
+           角上从纯黑柔和过渡到雾的羽化灰。两层不能同时交叉淡变:各 50% 时叠加只有
+           约 75% 不透明,整屏会透底闪白。0.5s < HOLD_MS 550ms:溶解在上移起步前走完,
+           .done 覆盖 transition 时不会跳变;同样趁这段停顿把大图层(含 ::after)
+           光栅化做完,上移起步不掉帧 */
+        #page-loader .pl-fill::after {
+            content: '';
+            position: absolute; inset: 0;
             background: radial-gradient(circle farthest-side at 50% 0, #0a0a0a 70%, rgba(10, 10, 10, 0));
+            opacity: 0;
         }
+        #page-loader.fog .pl-fill {
+            background-color: transparent;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.5s ease;
+        }
+        #page-loader.fog .pl-fill::after { opacity: 1; }
         /* 离场:黑雾 2s 上移,羽化底边扫过视口像雾被掀开;缓动 = sui.io 的 suiSmooth */
         #page-loader.done .pl-fill {
             transform: translateY(-100%);

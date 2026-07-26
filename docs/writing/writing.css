@@ -2312,28 +2312,6 @@ body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active { color: rgba(255,
     /* (顶栏不做当前页高亮 —— 2026-07-26 用户要求取消选中态,黑块只在 hover 时出现。
        上面那几条既有的 active 同色规则即为最终态,这里不再额外声明。) */
 }
-/* ── 顶栏三个 tab 作为一组、在顶栏内整体居中(2026-07-26 用户要求)──────────
-   做法:桌面把 .nav-cats / .header-right 变成 display:contents,让 Blog / Archive /
-   Contact 直接成为 .nav-collapse 的三个子项 —— 否则这三项分属两个容器,
-   没法当作一组来定位。再把这一组绝对居中(顶栏是 position:fixed,是它的包含块)。
-   绝对定位让它脱离 flex 流,于是 logo 恒定最左、主题按钮恒定最右,三者互不挤压;
-   组内仍用 --nav-tab-gap,相邻黑块因此保持贴合。 */
-@media (min-width: 561px) {
-    .home-v2 .header.home-nav .nav-collapse {
-        display: flex;
-        align-items: center;
-        gap: var(--nav-tab-gap);
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-    }
-    .home-v2 .header.home-nav .nav-cats,
-    .home-v2 .header.home-nav .header-right { display: contents; }
-    /* logo 恒定最左、主题按钮恒定最右 */
-    .home-v2 .header.home-nav .header-left { order: 1; flex: 0 0 auto; }
-    .home-v2 .header.home-nav .theme-toggle { margin-left: auto; }
-}
-
 /* 文字在块里左右居中:桌面顶栏不显示箭头(它只在 ≤560px 的汉堡菜单里出现),
    但零宽的 .nav-arrow 仍是 flex 项,会让 gap 在文字右侧多留 6px(Contact 8px)——
    块就偏了。桌面直接把它摘出布局,<a> 的盒子回到紧贴文字。 */
