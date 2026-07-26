@@ -101,6 +101,22 @@
     --tw-dur: 80ms;         /* 单字显现时长(阶跃:结束帧一跳到位),同时是全组统一的起手延迟 */
     --tw-step: 13ms;        /* 字与字错峰(打字节奏) —— 摘要长,每字省 1ms 整句省几十 ms,是手感主控 */
     --tw-line-gap: 150ms;   /* 组与组之间的停顿(上一组打完 → 下一组起步) */
+
+    /* ============================================================
+       hover 反色高亮块 —— 全站唯一参数入口(2026-07-26)
+       hover 时文字身后出现一块直角矩形:底 = 墨色,字 = 纸色(即反色)。
+       规则实现在 writing.css「hover 反色高亮块」,附着点是 .tw-text。
+       深色主题的墨/纸对调见下方 body.theme-dark。
+       ============================================================ */
+    --hl-ink: #1a1a1a;      /* 高亮块底色 = 正文墨色 */
+    --hl-paper: #f9f9f9;    /* 块上文字色 = 页面纸色(--site-bg 同值) */
+    --hl-grow: 0.32em;      /* 块相对文字的外扩量;略大于行距余量,折行时行与行连成一片不出条纹 */
+    --hl-dur: 0.18s;        /* 反色切换时长(比常规 0.42s 变色快,hover 要跟手) */
+}
+/* 深色主题:墨纸对调 —— 白块 + 深字 */
+body.theme-dark {
+    --hl-ink: #ffffff;
+    --hl-paper: #0a0a0a;
 }
 
 /* ── Feed 卡片 typewriter 规则(参数只认上方 :root 的 --tw-* token)──────
@@ -112,10 +128,33 @@
    阶跃不用 steps(1,end) 缓动 —— Chromium 对 finished 动画在结束边界取值时
    偶发取到阶跃前的 0(实测约 2% 的字永久隐形),改用关键帧百分比自制阶跃:
    0%~99% 隐藏、100% 显现,linear 下结束帧直接取最后一帧值,绕开缓动函数。 */
-.tw-ch { opacity: 1; }
+.tw-ch {
+    opacity: 1;
+    /* 取回本来的文字色 —— 摘要块把自己的文字填充设成了透明(为了藏省略号,见下),
+       这里用 currentColor 抵消:currentColor = 该字继承到的 color,深浅主题、
+       hover 反色都自动跟随,不用重复写一遍颜色。 */
+    -webkit-text-fill-color: currentColor;
+}
 .card-wrapper.visible .tw-ch {
     animation: tw-type var(--tw-dur) linear both;
     animation-delay: calc(var(--tw-d, 0ms) + var(--tw-i, 0) * var(--tw-step));
+}
+/* 截断省略号跟着最后一个字一起出现(2026-07-26 用户反馈:省略号一开始就在)。
+   省略号是浏览器按 -webkit-line-clamp 的截断位置画的,不是 .tw-ch,而全文从一开始
+   就在 DOM 里(只是字透明),所以打字还没到那儿它就先画出来了。
+   办法:让摘要块自身的文字填充色在「本组打完」的那一刻才从透明切回来 ——
+   块自己画的东西(省略号)受它管,字符单元有上面的 currentColor 不受影响。
+   时刻 = 标题字数 + 摘要字数 - 1 个字距 + 组间停顿(+ 动画自身的 dur)。 */
+.card-wrapper.visible .writing-info .w-excerpt,
+.card-wrapper.visible .bl-text .bl-excerpt {
+    animation: tw-ellipsis var(--tw-dur) linear both;
+    animation-delay: calc(
+        (var(--tw-n1, 0) + var(--tw-n2, 0) - 1) * var(--tw-step) + var(--tw-line-gap)
+    );
+}
+@keyframes tw-ellipsis {
+    0%, 99% { -webkit-text-fill-color: transparent; }
+    100% { -webkit-text-fill-color: currentColor; }
 }
 @keyframes tw-type {
     0%, 99% { opacity: 0; }
