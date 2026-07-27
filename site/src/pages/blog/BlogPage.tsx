@@ -289,25 +289,25 @@ function flightAnims(
   }
   const c = getComputedStyle(el);
   return [
+    // 位移:合成器动画,零重排
     el.animate([{ transform: 'translate(0px, 0px)' }, { transform: shift }], geom),
+    // 颜色:平滑插值。color 不触发重排,可以逐帧变
+    el.animate([{ color: c.color }, { color: to.color }], {
+      duration: dur,
+      easing: TYPE_EASE,
+      fill: 'both',
+    }),
+    /* 字号/行高/字距:每变一次就要重排一次文字。逐帧变的话一次飞行要重排十几次,
+       3x DPR 上肉眼能看出抖(2026-07-28 用户实测屏幕上也能看到)。改成 steps 分档,
+       重排降到 4 次;两端只差 1.33 倍(18↔24),每档 1.5px,跳变小到看不出来。
+       为什么不用 transform: scale —— 那会把宽度一起放大 1.33 倍撑出容器,而两端
+       容器同宽,文字的换行位置就全错了。 */
     el.animate(
       [
-        {
-          fontSize: c.fontSize,
-          lineHeight: c.lineHeight,
-          letterSpacing: c.letterSpacing,
-          width: `${from.width}px`,
-          color: c.color,
-        },
-        {
-          fontSize: `${to.fs}px`,
-          lineHeight: to.lh,
-          letterSpacing: to.ls,
-          width: `${to.width}px`,
-          color: to.color,
-        },
+        { fontSize: c.fontSize, lineHeight: c.lineHeight, letterSpacing: c.letterSpacing, width: `${from.width}px` },
+        { fontSize: `${to.fs}px`, lineHeight: to.lh, letterSpacing: to.ls, width: `${to.width}px` },
       ],
-      { duration: dur, easing: TYPE_EASE, fill: 'both' },
+      { duration: dur, easing: 'steps(4, end)', fill: 'both' },
     ),
   ];
 }
@@ -608,19 +608,27 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
             fill: 'both',
           }),
         );
+        // 颜色平滑(不重排)
+        closingAnims.push(
+          el.animate([{ color: c.color }, { color: origin.color }], {
+            duration: back,
+            easing: TYPE_EASE,
+            fill: 'both',
+          }),
+        );
+        // 字号/行高/字距分档(每次都要重排,见 flightAnims 里的注释)
         closingAnims.push(
           el.animate(
             [
-              { fontSize: c.fontSize, lineHeight: c.lineHeight, letterSpacing: c.letterSpacing, width: c.width, color: c.color },
+              { fontSize: c.fontSize, lineHeight: c.lineHeight, letterSpacing: c.letterSpacing, width: c.width },
               {
                 fontSize: `${origin.fs}px`,
                 lineHeight: origin.lh,
                 letterSpacing: origin.ls,
                 width: `${origin.width}px`,
-                color: origin.color,
               },
             ],
-            { duration: back, easing: TYPE_EASE, fill: 'both' },
+            { duration: back, easing: 'steps(4, end)', fill: 'both' },
           ),
         );
       });
