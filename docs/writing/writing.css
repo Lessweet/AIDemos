@@ -3206,6 +3206,17 @@ body.article-closing .article-byline > span {
 body.article-morphing .article-byline > span:not(.article-flying-el) { opacity: 0; }
 /* 返回键同样等飞行落位再淡入。参考里 X 按钮也不是跟着卡片一起硬出现的 ——
    几何先到位,附属控件后跟,层次才拉得开。 */
+/* 模态里的文章标题收到 24px(桌面独立文章页仍是 --fs-h1 36px)。
+   两端字号差得越大,联动过程里跳动感越重;更要命的是收起时飞行中的标题一直比
+   目标大,它那两行会盖住卡片下方的摘要(2026-07-27 用户截图实测重叠)。
+   卡片标题是 --fs-h3 18px,24px 时只差 1.33 倍,重叠窗口窄到基本看不见。
+   只在模态里改 —— 桌面点卡片是普通跳转,没有联动,不该陪着把主标题缩小
+   (2026-07-28 用户实测桌面偏小)。
+   收起(article-closing)也要写:飞行件的字号由 WAAPI 从这个值起算,漏了它
+   收起时的目标字号就会跳回 36px。 */
+body.article-modal .blog-article-host .article-h1,
+body.article-closing .blog-article-host .article-h1 { font-size: 24px; }
+
 /* 模态里的文章封面:先铺卡片上那张静态图(--cover-still 由 BlogPage 下发),
    动态版(iframe)压在上面、初始透明,加载好了才淡入。
    这样落位那一刻两边是同一张图、像素级一致,彻底没有「换实例」这回事 ——
