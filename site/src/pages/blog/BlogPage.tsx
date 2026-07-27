@@ -54,6 +54,9 @@ const morphMs = (back = false) => {
 /* 起步果断、尾段长收 —— 贴近参考里那种「一下就到位、最后轻轻停住」的手感。
    先前用的 easeOutQuad(0.25,0.46,0.45,0.94)全程温吞,起步不够干脆。 */
 const COVER_EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
+/* 排版属性专用:两端略缓、中段匀速。字号变化要的是「一路缩下去」的过程感,
+   不能像位移那样前段冲刺(见 flightAnims 的注释)。 */
+const TYPE_EASE = 'cubic-bezier(0.4, 0.05, 0.35, 1)';
 /* 模态只在手机端(SMALL_MQ)启用 —— 桌面点卡片照常跳转到独立文章页,那边是
    「左列表 + 右正文」的两栏阅读布局(2026-07-27 用户定)。 */
 
@@ -89,21 +92,56 @@ function unpin(el: HTMLElement) {
     .replace(/transition:[^;]+;?/, '');
 }
 
-/* 封面交接:挂上 iframe 的 src,等它真正画出一帧再让文章封面顶替飞行件。
-   iframe 与卡片封面是同一个 HTML,但这是第二个实例,渲染要从零跑一遍
-   (实测 40~50ms 一帧)。飞行期间不加载、落位后再加载,这一帧就落在静止
-   状态下,看不出来。超时兜底,避免 iframe 加载失败时封面永远不露面。 */
+/* 封面交接。三件事:
+
+   ① iframe 的 src 到这一刻才挂上。它和卡片封面是同一个 HTML,但这是第二个实例,
+      渲染要从零跑一遍(实测 40~50ms 一帧);飞行期间不加载,这一帧就落在静止
+      状态下,看不出来。
+
+   ② 能对齐进度的就对齐:<video> 直接把 currentTime 抄过去,接着放而不是从头。
+
+   ③ 对不齐的交叉淡入。动态封面(iframe)里跑的是它自己的 CSS/JS 动画,没有
+      外部接口能把进度设过去,两个实例必然各播各的;列表行的缩略图更是静态图,
+      和动态封面根本不同源。硬切就是用户说的「卡一下,从另一帧跳到另一帧」。
+      淡入盖不住内容不同,但盖得住那一下硬切。 */
 function handoffCover(
   target: HTMLElement | null,
   flyer: HTMLElement | null,
-  anim: Animation | null,
+  anims: Animation[] | null,
   ref: { current: (() => void) | null },
 ) {
   const settle = () => {
     ref.current = null;
-    if (target) target.style.visibility = '';
-    anim?.cancel(); // 先显形再撤 fill,同一同步块内完成,不留空帧
-    if (flyer) unpin(flyer);
+    if (!target) {
+      anims?.forEach((a) => a.cancel());
+      if (flyer) unpin(flyer);
+      return;
+    }
+    /* 能同步的先同步:同一段视频接着放 */
+    const src = flyer?.querySelector<HTMLVideoElement>('video');
+    const dst = target.querySelector<HTMLVideoElement>('video');
+    if (src && dst && Number.isFinite(src.currentTime)) {
+      try {
+        dst.currentTime = src.currentTime;
+      } catch {
+        /* 元数据还没就绪就设 currentTime 会抛,忽略即可 —— 下面的淡入照样兜底 */
+      }
+    }
+    target.style.visibility = '';
+    const fade = target.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: 180,
+      easing: 'ease-out',
+    });
+    if (flyer) {
+      flyer.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: 'ease-out' });
+      fade.onfinish = () => {
+        anims?.forEach((a) => a.cancel());
+        unpin(flyer);
+        flyer.style.opacity = '';
+      };
+    } else {
+      anims?.forEach((a) => a.cancel());
+    }
   };
   const iframe = target?.querySelector<HTMLIFrameElement>('iframe[data-src]');
   if (!iframe) {
@@ -156,19 +194,83 @@ function correctPin(el: HTMLElement, r: DOMRect) {
   if (Math.abs(dy) > 0.5) el.style.top = `${r.top - dy}px`;
 }
 
-type Landing = { left: number; top: number; width: number; height: number; fs: number };
-function flightFrames(el: HTMLElement, from: DOMRect, to: Landing, kind: string): Keyframe[] {
+type Landing = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  fs: number;
+  lh: string;
+  ls: string;
+  color: string;
+};
+function readLanding(el: HTMLElement): Landing {
+  const r = el.getBoundingClientRect();
+  const c = getComputedStyle(el);
+  return {
+    left: r.left,
+    top: r.top,
+    width: r.width,
+    height: r.height,
+    fs: parseFloat(c.fontSize),
+    lh: c.lineHeight,
+    ls: c.letterSpacing,
+    color: c.color,
+  };
+}
+
+/* 一段飞行拆成两条曲线,作用在同一个元素的不同属性上:
+
+   · 几何(transform)走 COVER_EASE —— 起步果断,位移要跟手。
+   · 排版(字号/行高/字距/宽度/颜色)走 TYPE_EASE —— 均匀得多。字号如果跟着
+     果断曲线走,前 30% 时间就跑完 70% 的变化,看起来是「唰一下变小然后慢慢挪」,
+     用户实测收起时「标题没有联动缩小的过程」正是这个(36px→20px 只用了 72ms)。
+
+   封面是 iframe/video,只能用 transform scale(重排它太贵);文字则真动 font-size,
+   一路真实重排,落位与目标逐像素吻合。颜色也在这里插值 —— 卡片上的 tag 和日期
+   是 #969696,文章里是 #1a1a1a,不插值就是交接瞬间硬切一下。 */
+function flightAnims(
+  el: HTMLElement,
+  from: DOMRect,
+  to: Landing,
+  kind: string,
+  dur: number,
+): Animation[] {
   const shift = `translate(${to.left - from.left}px, ${to.top - from.top}px)`;
+  const geom = { duration: dur, easing: COVER_EASE, fill: 'both' as FillMode };
   if (kind === 'cover') {
     return [
-      { transform: 'translate(0px, 0px) scale(1, 1)' },
-      { transform: `${shift} scale(${to.width / from.width}, ${to.height / from.height})` },
+      el.animate(
+        [
+          { transform: 'translate(0px, 0px) scale(1, 1)' },
+          { transform: `${shift} scale(${to.width / from.width}, ${to.height / from.height})` },
+        ],
+        geom,
+      ),
     ];
   }
-  const fs = parseFloat(getComputedStyle(el).fontSize);
+  const c = getComputedStyle(el);
   return [
-    { transform: 'translate(0px, 0px)', fontSize: `${fs}px`, width: `${from.width}px` },
-    { transform: shift, fontSize: `${to.fs}px`, width: `${to.width}px` },
+    el.animate([{ transform: 'translate(0px, 0px)' }, { transform: shift }], geom),
+    el.animate(
+      [
+        {
+          fontSize: c.fontSize,
+          lineHeight: c.lineHeight,
+          letterSpacing: c.letterSpacing,
+          width: `${from.width}px`,
+          color: c.color,
+        },
+        {
+          fontSize: `${to.fs}px`,
+          lineHeight: to.lh,
+          letterSpacing: to.ls,
+          width: `${to.width}px`,
+          color: to.color,
+        },
+      ],
+      { duration: dur, easing: TYPE_EASE, fill: 'both' },
+    ),
   ];
 }
 
@@ -337,19 +439,12 @@ export default function BlogPage() {
     flyers.forEach(({ el, from, kind }) => {
       const target = landing(kind);
       if (!target) return;
-      const r = target.getBoundingClientRect();
-      if (!r.width || !r.height) return;
-      const to: Landing = { left: r.left, top: r.top, width: r.width, height: r.height, fs: parseFloat(getComputedStyle(target).fontSize) };
+      const to = readLanding(target);
+      if (!to.width || !to.height) return;
       target.style.visibility = 'hidden'; // 落位前卡片这份不露脸
       hidden.push(target);
       /* 收起不需要延迟交接:文章封面早画好了,飞的就是它 */
-      anims.push(
-        el.animate(flightFrames(el, from, to, kind), {
-          duration: morphMs(true),
-          easing: COVER_EASE,
-          fill: 'both',
-        }),
-      );
+      anims.push(...flightAnims(el, from, to, kind, morphMs(true)));
     });
 
     if (!anims.length) {
@@ -384,25 +479,20 @@ export default function BlogPage() {
             ? host.querySelector<HTMLElement>('.article-eyebrow .a-tag')
             : articleDateEl(host);
 
-    const pairs: { el: HTMLElement; kind: string; target: HTMLElement; anim: Animation }[] = [];
+    const pairs: { el: HTMLElement; kind: string; target: HTMLElement; anims: Animation[] }[] = [];
     const anims: Animation[] = [];
     const hidden: HTMLElement[] = [];
     flying.items.forEach(({ el, from, kind }) => {
       const target = targetOf(kind);
       if (!target) return;
-      const r = target.getBoundingClientRect();
-      if (!r.width || !r.height) return;
-      const to: Landing = { left: r.left, top: r.top, width: r.width, height: r.height, fs: parseFloat(getComputedStyle(target).fontSize) };
+      const to = readLanding(target);
+      if (!to.width || !to.height) return;
       /* 文章侧先藏起来,避免与飞行中的源元素重影 */
       target.style.visibility = 'hidden';
       hidden.push(target);
-      const anim = el.animate(flightFrames(el, from, to, kind), {
-        duration: morphMs(),
-        easing: COVER_EASE,
-        fill: 'both',
-      });
-      anims.push(anim);
-      pairs.push({ el, kind, target, anim });
+      const group = flightAnims(el, from, to, kind, morphMs());
+      anims.push(...group);
+      pairs.push({ el, kind, target, anims: group });
     });
 
     if (!anims.length) {
@@ -413,14 +503,14 @@ export default function BlogPage() {
       /* 同一同步块内交接:文章侧显形、飞行件复位,中间不留可见帧。
          封面例外 —— 它的 iframe 到这一刻才开始加载(飞行期间被摘了 src),
          这会儿交接等于换上一张白图。留着飞行件顶在原位,等它画出来再换。 */
-      pairs.forEach(({ el, kind, target, anim }) => {
+      pairs.forEach(({ el, kind, target, anims: group }) => {
         if (kind === 'cover') return;
         target.style.visibility = '';
-        anim.cancel(); // 清掉 fill 保持的 transform,元素才能回到自己的排版
+        group.forEach((a) => a.cancel()); // 清掉 fill 保持的 transform,元素才能回到自己的排版
         unpin(el);
       });
       const cover = pairs.find((pr) => pr.kind === 'cover');
-      handoffCover(cover?.target ?? null, cover?.el ?? null, cover?.anim ?? null, handoffRef);
+      handoffCover(cover?.target ?? null, cover?.el ?? null, cover?.anims ?? null, handoffRef);
       flyingRef.current = null;
       /* byline 里不参与飞行的部分(阅读时长)在飞行期间被压住,落位后淡入 ——
          否则同一行里一半已就位、一半还在半路飞,读起来是两件事。
@@ -438,9 +528,9 @@ export default function BlogPage() {
        fill 顶着,一取消就当场弹回卡片原位,而文章封面还没显形,中间会空一帧
        (2026-07-27 实测 fly@72 跳回 fly@182)。 */
     return () =>
-      pairs.forEach(({ kind, anim }) => {
+      pairs.forEach(({ kind, anims: group }) => {
         if (kind === 'cover' && handoffRef.current) return;
-        anim.cancel();
+        group.forEach((a) => a.cancel());
       });
   }, [article, hostReady]);
 

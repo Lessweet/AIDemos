@@ -3093,28 +3093,32 @@ body.article-modal .header .site-title { display: none; }
    顶栏越简单越好(2026-07-27 用户定) */
 body.article-modal .header .theme-toggle,
 body.article-modal .header .nav-toggle { display: none !important; }
+/* 返回键与顶栏右侧那两个圆钮同一套外观:36×36 白色圆底(深色主题 #1A1A1A)。
+   尺寸/底色/深色值都对齐 .theme-toggle 与 .nav-toggle,改那边时这里一并核对。 */
 .article-modal-back {
     position: fixed;
-    top: 0;
+    top: 18px;      /* 与顶栏两圆钮垂直居中对齐(顶栏 72 高,圆钮 36) */
     left: 24px;
     z-index: 101;   /* 高于顶栏(100) */
     display: flex;
     align-items: center;
     justify-content: center;
     width: 36px;
-    height: 72px;   /* 与顶栏等高,整块可点 */
+    height: 36px;
     appearance: none;
     -webkit-appearance: none;
-    background: none;
+    background: #fff;
+    border-radius: 50%;
     border: 0;
     padding: 0;
     cursor: pointer;
     color: #181818;
 }
+body.theme-dark .article-modal-back { background: #1A1A1A; }
 .article-modal-back svg {
     display: block;
-    width: 22px;
-    height: 22px;
+    width: 18px;    /* 与汉堡横线同宽:圆底内的光学尺寸对齐 */
+    height: 18px;
     stroke: currentColor;
     stroke-width: var(--icon-stroke, 1.5px);
     fill: none;
