@@ -593,38 +593,31 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       finish();
       return;
     }
-    /* 摘要淡入提前到飞行中段(2026-07-28 用户要求):不等落位,飞行走到 ~40%
-       就开始淡,落位时已到大半,收尾更连贯。飞行期间槽位罩着它 —— visibility
-       继承 hidden、opacity 通配强制 1(通配已排除 .w-excerpt)—— 所以这里内联
-       visibility 放行,WAAPI 推 opacity;播完清内联,交还给槽位/入场态。 */
-    window.setTimeout(
-      () => {
-        const fadeEls = [...(wrapper?.querySelectorAll<HTMLElement>('.w-excerpt') ?? [])];
-        /* 没有文章封面飞回来(该篇没做封面)时,卡片自己的封面也走淡入,
-           否则它要等槽位解锁才瞬现。有封面飞回时绝不能加 —— 卡片封面是落点,
-           正藏着等飞行件落位,中途显形会和飞行中的封面重影。 */
-        if (!pendingCover && !flyers.some((f) => f.kind === 'cover')) {
-          const cardCover = wrapper?.querySelector<HTMLElement>('.writing-card');
-          if (cardCover) fadeEls.push(cardCover);
-        }
-        fadeEls.forEach((el) => {
-          el.style.visibility = 'visible';
-          /* 480ms:260ms 太弱 —— 飞行件(标题/tag/日期)同时在动,注意力全在它们
-             身上,而淡入在落位后只剩百来毫秒就结束了,等于没看见(2026-07-28 用户
-             两次反馈「没有淡入效果」)。拉长到落位后仍有大半程还在淡。
-             不要加 translateY:槽位的冻结规则里有 transform: none !important
-             (给飞行件的祖先用的),会把 WAAPI 的位移一起压掉。 */
-          const a = el.animate([{ opacity: 0 }, { opacity: 1 }], {
-            duration: 480,
-            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-          });
-          a.onfinish = () => {
-            el.style.visibility = '';
-          };
+    /* 摘要与列表其余卡片同时淡入(2026-07-28)。此前它延后到飞行 40% 才起步,
+       比周围晚 100ms —— 邻卡已经淡到三成它才开始,慢半拍地跟在整体后面,就被
+       淹没了,用户连着几次反馈「看不出淡入」。现在同起同收,收起 = 整个列表
+       一起淡回来,被点那张卡也在其中。
+       飞行期间槽位用 visibility 罩着它(opacity 通配已排除 .w-excerpt),这里
+       内联放行 visibility、用 WAAPI 推 opacity;播完清内联交还槽位/入场态。 */
+    {
+      const fadeEls = [...(wrapper?.querySelectorAll<HTMLElement>('.w-excerpt') ?? [])];
+      /* 没有封面飞回来(该篇没做封面)时,卡片封面也并进来一起淡 —— 否则它要等
+         槽位解锁才瞬现。有封面飞回时绝不能加:卡片封面是落点,正藏着等飞行件。 */
+      if (!pendingCover && !flyers.some((f) => f.kind === 'cover')) {
+        const cardCover = wrapper?.querySelector<HTMLElement>('.writing-card');
+        if (cardCover) fadeEls.push(cardCover);
+      }
+      fadeEls.forEach((el) => {
+        el.style.visibility = 'visible';
+        const a = el.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: 420,
+          easing: 'ease-out',
         });
-      },
-      Math.round(morphMs(true) * 0.4),
-    );
+        a.onfinish = () => {
+          el.style.visibility = '';
+        };
+      });
+    }
 
     anims[anims.length - 1].onfinish = () => {
       hidden.forEach((el) => (el.style.visibility = ''));
