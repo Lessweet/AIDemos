@@ -7,7 +7,8 @@ import { blogCards, bySlug } from '../../content/articles';
 import ArticlePage from '../article/ArticlePage';
 import { ARTICLE_SHELL } from '../../content/articleShell';
 import { CatIcon } from '../../shared/catIcons';
-import PageTitle from '../../shared/PageTitle';
+import PageTitle, { RISE_CHAR_STEP } from '../../shared/PageTitle';
+import PageCollapse from '../../shared/PageCollapse';
 import {
   useStickyMenu,
   useScrollProgress,
@@ -290,7 +291,11 @@ function flightAnims(
   ];
 }
 
-export default function BlogPage() {
+/* modalTitle(来自首页模态那条线):首页模态内嵌时由 HomePage 传入 ——
+   标题随整块从索引行位置平移上来,本身就是那行字的延续,不再自己播逐字升起:
+   'held' = 位移期间按住,'revealed' = 瞬时显形。
+   独立 blog.html 入口不传,标题走自己的 per-character rise,行为与线上一致。 */
+export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'revealed' }) {
   const [filter, setFilter] = useState<Filter>('all');
   const [article, setArticle] = useState<ArticleState>(null);
   const articleHostRef = useRef<HTMLDivElement | null>(null);
@@ -735,7 +740,14 @@ export default function BlogPage() {
 
   return (
     <>
-      <PageTitle text="Blog" />
+      <div className="page-title-row">
+        <PageTitle text="Blog" held={!!modalTitle} revealed={modalTitle === 'revealed'} />
+        <PageCollapse
+          modal={!!modalTitle}
+          held={modalTitle === 'held'}
+          riseDelay={4 * RISE_CHAR_STEP}
+        />
+      </div>
       <aside aria-label="Writing 分类" className="design-menu">
         {FILTERS.map((f) => (
           <button
