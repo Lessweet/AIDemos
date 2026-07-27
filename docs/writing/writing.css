@@ -3093,12 +3093,13 @@ body.article-modal .header .site-title { display: none; }
    顶栏越简单越好(2026-07-27 用户定) */
 body.article-modal .header .theme-toggle,
 body.article-modal .header .nav-toggle { display: none !important; }
-/* 返回键与顶栏右侧那两个圆钮同一套外观:36×36 白色圆底(深色主题 #1A1A1A)。
-   尺寸/底色/深色值都对齐 .theme-toggle 与 .nav-toggle,改那边时这里一并核对。 */
+/* 关闭键与顶栏右侧那两个圆钮同一套外观:36×36 白色圆底(深色主题 #1A1A1A)。
+   尺寸/底色/深色值都对齐 .theme-toggle 与 .nav-toggle,改那边时这里一并核对。
+   放右侧 —— 顶栏右边本来就是那两个圆钮的位置,模态里它们让位给它(2026-07-27)。 */
 .article-modal-back {
     position: fixed;
     top: 18px;      /* 与顶栏两圆钮垂直居中对齐(顶栏 72 高,圆钮 36) */
-    left: 24px;
+    right: 24px;
     z-index: 101;   /* 高于顶栏(100) */
     display: flex;
     align-items: center;
@@ -3128,7 +3129,7 @@ body.theme-dark .article-modal-back { background: #1A1A1A; }
 .article-modal-back svg * { vector-effect: non-scaling-stroke; }
 body.theme-dark .article-modal-back { color: #fff; }
 @media (max-width: 600px) {
-    .article-modal-back { left: 16px; }
+    .article-modal-back { right: 16px; }
 }
 /* FLIP 期间封面的 transform 由 WAAPI 独占:阅读页原有的入场过渡(translateY(22px)
    → 0,1.5s)会和放大动画抢同一个属性,导致封面一边放大一边被往下推。
