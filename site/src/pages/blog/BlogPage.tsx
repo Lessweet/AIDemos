@@ -26,9 +26,6 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: 'product', label: 'Product' },
 ];
 
-/* 大封面数响应式(2026-07-22 定稿):桌面 12,小屏/手机(≤800px)6 */
-const BIG_COVERS_DESKTOP = 12;
-const BIG_COVERS_MOBILE = 6;
 const SMALL_MQ = '(max-width: 800px)';
 
 /* ── Blog → 文章详情 全屏模态(feat/article-modal)──
@@ -92,6 +89,41 @@ function unpin(el: HTMLElement) {
     .replace(/transition:[^;]+;?/, '');
 }
 
+/* 把 from 里每条 CSS 动画的进度抄到 to 的同一条上。跨域会抛 SecurityError
+   (本站封面同源,不会走到),文档没就绪时列表为空,都按「同步不了」处理。 */
+function syncCoverAnimations(from: HTMLIFrameElement | null, to: HTMLIFrameElement | null) {
+  if (!from || !to) return;
+  try {
+    const a = from.contentDocument?.getAnimations?.() ?? [];
+    const b = to.contentDocument?.getAnimations?.() ?? [];
+    if (!a.length || a.length !== b.length) return;
+    b.forEach((anim, i) => {
+      try {
+        anim.currentTime = a[i].currentTime;
+      } catch {
+        /* 单条对不上不影响其他 */
+      }
+    });
+  } catch {
+    /* 拿不到 contentDocument:放弃同步,交叉淡入兜底 */
+  }
+}
+
+/* 动态封面是 canvas shader,不是 CSS 动画:内部有个 shaderTime,从 HERO_CFG.time0
+   起按 __shaderRate(0.9)每秒推进,由自己的 rAF 驱动。两个实例各自从 time0 开始,
+   相位差 = 各自已运行的时长 —— 交接时就是用户说的「卡一下,从另一帧跳到另一帧」。
+   shaderTime 是闭包变量,外面改不了;但 time0 写在文档内联的 HERO_CFG 里,只要在
+   解析前改掉就行。封面是自包含的单文件(80K,无外部资源),所以取回文本、把 time0
+   换成卡片此刻的进度、用 srcdoc 挂上去 —— 新实例睁眼就在正确的相位上,是真的接着
+   播。取文本在飞行一开始就发,340ms 的飞行足够盖掉这次请求(还走缓存)。
+   列表行的缩略图是静态 png,没有源 iframe 可读,拿不到进度,只能交给交叉淡入。 */
+function coverPhase(win: (Window & { HERO_CFG?: { time0?: number }; __shaderRate?: number }) | null) {
+  const base = win?.HERO_CFG?.time0;
+  if (win == null || typeof base !== 'number') return null;
+  const rate = typeof win.__shaderRate === 'number' ? win.__shaderRate : 0.9;
+  return base + rate * (win.performance.now() / 1000);
+}
+
 /* 封面交接。三件事:
 
    ① iframe 的 src 到这一刻才挂上。它和卡片封面是同一个 HTML,但这是第二个实例,
@@ -109,6 +141,7 @@ function handoffCover(
   flyer: HTMLElement | null,
   anims: Animation[] | null,
   ref: { current: (() => void) | null },
+  html: Promise<string | null> | null,
 ) {
   const settle = () => {
     ref.current = null;
@@ -117,7 +150,7 @@ function handoffCover(
       if (flyer) unpin(flyer);
       return;
     }
-    /* 能同步的先同步:同一段视频接着放 */
+    /* 能同步的先同步,别只靠淡入盖 */
     const src = flyer?.querySelector<HTMLVideoElement>('video');
     const dst = target.querySelector<HTMLVideoElement>('video');
     if (src && dst && Number.isFinite(src.currentTime)) {
@@ -127,6 +160,15 @@ function handoffCover(
         /* 元数据还没就绪就设 currentTime 会抛,忽略即可 —— 下面的淡入照样兜底 */
       }
     }
+    /* 动态封面(iframe)里跑的是一堆 1.6~1.7s 无限循环的 CSS animation,相位由
+       各自文档的创建时刻决定 —— 两个实例必然错开,交接就是「跳到另一帧」。
+       两边同源,可以直接把每条动画的 currentTime 抄过去,相位对齐后是真的接着
+       播,而不是靠淡入糊过去。同一个 HTML,动画条数与顺序一致才对得上,不一致
+       就放弃(留给淡入兜底)。 */
+    syncCoverAnimations(
+      flyer?.querySelector<HTMLIFrameElement>('iframe') ?? null,
+      target.querySelector<HTMLIFrameElement>('iframe'),
+    );
     target.style.visibility = '';
     const fade = target.animate([{ opacity: 0 }, { opacity: 1 }], {
       duration: 180,
@@ -163,8 +205,26 @@ function handoffCover(
     () => requestAnimationFrame(() => requestAnimationFrame(go)),
     { once: true },
   );
-  iframe.src = iframe.dataset.src ?? '';
+  const raw = iframe.dataset.src ?? '';
   iframe.removeAttribute('data-src');
+  const phase = coverPhase(
+    (flyer?.querySelector<HTMLIFrameElement>('iframe')?.contentWindow ?? null) as never,
+  );
+  /* 挂源这件事不能受交接状态影响:先前这里写了 if (fired) return,超时一旦先到,
+     iframe 就再也拿不到源、封面全白(2026-07-27 实测 srcdoc 和 src 都是空的)。
+     交接早晚是观感问题,没有源是功能没了。 */
+  void (async () => {
+    if (html && phase != null) {
+      const text = await html.catch(() => null);
+      const patched = text?.replace(/"time0":\s*[0-9.]+/, `"time0":${phase.toFixed(2)}`);
+      // patched === text 说明没找到 time0 字段(封面换了写法),退回原路
+      if (text && patched && patched !== text) {
+        iframe.srcdoc = patched;
+        return;
+      }
+    }
+    iframe.src = raw; // 对不齐相位:照常加载,交叉淡入兜底
+  })();
 }
 
 /* 把元素就地钉成 fixed。left/top 直接写视口坐标是不够的:只要任何一个祖先带了
@@ -285,24 +345,14 @@ export default function BlogPage() {
      (2026-07-27 用户实测「能看出没有联动,是两个独立的」)。 */
   /* 封面交接的「立即完成」句柄:iframe 画完或超时后自行清空 */
   const handoffRef = useRef<(() => void) | null>(null);
+  /* 封面 HTML 的取回:飞行一开始就发,落位时用来注入对齐后的 time0 */
+  const coverHtmlRef = useRef<Promise<string | null> | null>(null);
   const flyingRef = useRef<{ items: { el: HTMLElement; from: DOMRect; kind: string }[] } | null>(null);
   const blogScrollRef = useRef(0);
+  /* 全部走大封面卡片:不再分「大封面区 + 列表区」两种样式(2026-07-27 用户要求统一)。
+     顺带解决了列表式那套的一个硬伤 —— 它的缩略图是静态 png,而文章封面是动态的,
+     展开时必然看见一次内容切换,没法像大卡片那样对齐相位。 */
   const cards = blogCards();
-  /* 大封面区展示前 N 篇(桌面 12/小屏 6),其后进列表区;
-     文章按日期倒序,最新永远在大封面区最前 */
-  const [bigCount, setBigCount] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia(SMALL_MQ).matches
-      ? BIG_COVERS_MOBILE
-      : BIG_COVERS_DESKTOP,
-  );
-  useEffect(() => {
-    const mq = window.matchMedia(SMALL_MQ);
-    const update = () => setBigCount(mq.matches ? BIG_COVERS_MOBILE : BIG_COVERS_DESKTOP);
-    mq.addEventListener('change', update);
-    return () => mq.removeEventListener('change', update);
-  }, []);
-  const bigCards = cards.slice(0, bigCount);
-  const listCards = cards.slice(bigCount);
 
   /* 打开文章(仅手机端):记录封面起飞几何 → 换外壳 → 挂载阅读页 → 下一相做 FLIP。
      桌面端返回 false,调用方不拦截点击,照常跳转到独立文章页 —— 那边是「左列表 +
@@ -323,6 +373,14 @@ export default function BlogPage() {
     /* 把卡片的封面/标题/标签就地钉成 fixed:位置不变、脱离流,后面 Blog 内容隐藏
        时它们仍留在屏幕上继续飞。不搬 DOM —— 封面是 iframe,一移动就会重新加载。 */
     const wrapper = coverEl.closest<HTMLElement>('.card-wrapper');
+    /* 卡片封面是 iframe 时,现在就把它的 HTML 取回来(走缓存),落位时要用它注入
+       对齐后的 time0(见 handoffCover)。列表行是 <img>,没有可对齐的源,跳过。 */
+    const srcFrame = coverEl.querySelector<HTMLIFrameElement>('iframe');
+    coverHtmlRef.current = srcFrame?.src
+      ? fetch(srcFrame.src)
+          .then((r) => (r.ok ? r.text() : null))
+          .catch(() => null)
+      : null;
     const items = (
       [
         [coverEl, 'cover'],
@@ -510,7 +568,13 @@ export default function BlogPage() {
         unpin(el);
       });
       const cover = pairs.find((pr) => pr.kind === 'cover');
-      handoffCover(cover?.target ?? null, cover?.el ?? null, cover?.anims ?? null, handoffRef);
+      handoffCover(
+        cover?.target ?? null,
+        cover?.el ?? null,
+        cover?.anims ?? null,
+        handoffRef,
+        coverHtmlRef.current,
+      );
       flyingRef.current = null;
       /* byline 里不参与飞行的部分(阅读时长)在飞行期间被压住,落位后淡入 ——
          否则同一行里一半已就位、一半还在半路飞,读起来是两件事。
@@ -555,7 +619,7 @@ export default function BlogPage() {
   useHeaderAlwaysVisible();
   useStickyMenu();
   useScrollProgress();
-  usePillarEntrance([bigCount]); // 断点切换(N 变化)后列表项是新节点,入场系统需重新绑定
+  usePillarEntrance([cards.length]); // 卡片数变化后是新节点,入场系统需重新绑定
   useHideNavOnScrollMobile();
   useScrollLag();
 
@@ -579,7 +643,7 @@ export default function BlogPage() {
       <div className="design-content">
         <section className="category-section" id="writing-all">
           <div className="category-grid">
-            {bigCards.map((a) => (
+            {cards.map((a) => (
               <div
                 key={a.slug}
                 className="card-wrapper"
@@ -598,7 +662,16 @@ export default function BlogPage() {
                     openArticle(a.slug, e.currentTarget);
                   }}
                 >
-                  {a.blogCover?.type === 'video' ? (
+                  {!a.blogCover ? (
+                    /* 少数几篇没有做动态封面(voices / figma-agent / genie),
+                       用阅读器那张缩略图填大封面位,object-fit 裁成同样的 16:9 */
+                    <img
+                      src={`writing/${a.listCover}`}
+                      alt=""
+                      loading="lazy"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  ) : a.blogCover.type === 'video' ? (
                     <video
                       autoPlay
                       loop
@@ -616,7 +689,7 @@ export default function BlogPage() {
                   ) : (
                     <iframe
                       loading="lazy"
-                      src={a.blogCover!.src}
+                      src={a.blogCover.src}
                       style={{
                         width: '100%',
                         height: '100%',
@@ -640,40 +713,6 @@ export default function BlogPage() {
               </div>
             ))}
           </div>
-          {/* 列表式条目(第 BIG_COVERS 张之后):左 1:1 方形封面缩略图 + 右标题/简介/时间 */}
-          {listCards.length > 0 && (
-            <div className="blog-list">
-              {listCards.map((a) => (
-                <div
-                  key={a.slug}
-                  className="card-wrapper blog-list-item"
-                  data-cat={a.cat}
-                  data-date={a.date}
-                  data-slug={a.slug}
-                  hidden={!(filter === 'all' || a.cat === filter)}
-                >
-                  <a
-                    href={`writing/${a.file}`}
-                    onClick={(e) => {
-                      if (!window.matchMedia(SMALL_MQ).matches) return; // 桌面:照常跳转
-                      e.preventDefault();
-                      const thumb = e.currentTarget.querySelector<HTMLElement>('.bl-thumb');
-                      openArticle(a.slug, thumb ?? e.currentTarget);
-                    }}
-                  >
-                    <span className="bl-thumb">
-                      <img src={`writing/${a.listCover}`} alt="" loading="lazy" />
-                    </span>
-                    <span className="bl-text">
-                      <h3 className="bl-title">{a.title}</h3>
-                      <p className="bl-excerpt">{a.excerpt}</p>
-                      <span className="bl-date">{a.date}</span>
-                    </span>
-                  </a>
-                </div>
-              ))}
-            </div>
-          )}
         </section>
       </div>
       {/* 模态返回:顶栏左侧的返回箭头(模态时顶掉 logo 的位置)。固定在顶栏里,
@@ -682,11 +721,12 @@ export default function BlogPage() {
         <button
           type="button"
           className="article-modal-back"
-          aria-label="返回文章列表"
+          aria-label="关闭文章"
           onClick={() => history.back()}
         >
+          {/* 关闭叉:方头直角、currentColor、non-scaling-stroke —— 走全站 icon 规范 */}
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15 5 L8 12 L15 19" />
+            <path d="M6 6 L18 18 M18 6 L6 18" />
           </svg>
         </button>
       )}
