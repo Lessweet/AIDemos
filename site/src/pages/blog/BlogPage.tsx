@@ -404,6 +404,10 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
        works-page)枚举,摘掉就得逐条补 article-modal —— 先前那样做漏了主题按钮,
        按钮被压成 4px 挤到左上角。Blog 自己的 feed 网格由 .article-modal 的
        display:none 规则关掉即可(2026-07-27 用户:顶栏两个按钮要和首页一样)。 */
+    /* 底色起点:先顶成 Blog 的 --site-bg,让 ::before 以它渲染一帧,下一帧再撤掉,
+       颜色才有得过渡(见 writing.css 里同款注释)。不这样做它就是瞬切。 */
+    const siteBg = getComputedStyle(body).getPropertyValue('--site-bg').trim();
+    if (siteBg) body.style.setProperty('--page-tint', siteBg);
     body.classList.add('writing-page', 'reading-page', 'article-modal');
     /* 文章封面的垫底图 = 卡片上那张,两边同图才能无缝落位。
        取 img 已解析的绝对地址,不要自己拼相对路径 —— pushState 之后文档 URL 变成
@@ -421,6 +425,10 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
        (style.css,给锚点跳转用),不覆盖的话这次归零会变成一段平滑滚动 ——
        用户看到的就是「展开时页面自己在滚」(2026-07-27 实测滚动曲线在减速)。 */
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    /* 两帧后撤掉起点值,底色开始向该篇的 tint 过渡 */
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => body.style.removeProperty('--page-tint')),
+    );
     /* 校正必须放在最后:带 transform 的祖先(列表行的入场动画)会随页面滚动,
        上面的归零一走,先前算好的 fixed 坐标又整体偏了两千像素。等布局全部
        落定再补(2026-07-27 实测 top 仍停在 2218)。 */

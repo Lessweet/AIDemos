@@ -3251,6 +3251,14 @@ body.article-modal .article-cover {
    按钮被压成 4px 挤到左上角)。
    但底色要跟着走:每篇文章有自己的 --page-tint(阅读页的纸感底色),而 blog-page
    的顶栏是固定的 --site-bg,两者不一致会在顶栏下沿留一道色差。 */
+/* 展开时页面底色也要渐变。阅读页的底是 ::before 那块 fixed 满屏,它随 reading-page
+   一起新建 —— 新建的元素没有过渡起点,底色是「啪」地从 Blog 灰跳成该篇的 tint,
+   而四件却是渐渐飞的,一快一慢就成了那道闪(2026-07-28 用户录屏第 361→362 帧)。
+   JS 先把 --page-tint 顶成 --site-bg 渲染一帧,再撤掉让它过渡到真实 tint;
+   这里把时长对齐飞行,两者同步到位。特异性要写满,压过上面那条 2s 的切文章淡变。 */
+body.writing-page.design-page.reading-page.article-modal::before {
+    transition: background-color var(--article-morph-dur) var(--ease);
+}
 body.article-modal .header.home-nav {
     background: var(--page-tint, var(--site-bg)) !important;
     /* 与共享元素飞行同一时长(同一个 token),颜色和元素一起到位。
