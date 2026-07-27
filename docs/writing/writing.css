@@ -2944,6 +2944,18 @@ body.works-page.theme-dark .page-title { color: #fff; }
    阅读页内容挂在 .blog-article-host(顶替独立页的 div.reading-layout#app)。
    同层替换而非叠第二层 —— 文章页外壳与 Blog 差异极大(75 条 reading-page 规则、
    不同挂载根、per-article 主题色),叠层会让 body 类切换与返回栈都失控。 */
+/* 按下反馈:点下去先轻轻一缩。点击到飞行起步之间有约 35ms 是等文章挂载的空窗,
+   这段时间画面完全静止,读起来就是「点了没反应」。参考(App Store 卡片展开)在
+   这里也有这么一下预备动作。只给触屏 —— 桌面端点卡片是普通跳转,不需要。
+   缩到 0.97 后如果 pointer 还没抬起就起飞,飞行的起点几何本身就是缩小态,
+   衔接是连续的;抬起了则回弹,也只是一下轻反馈。 */
+@media (hover: none) {
+    body.blog-page .writing-card:active,
+    body.blog-page .blog-list-item:active { transform: scale(0.97); }
+}
+body.blog-page .writing-card,
+body.blog-page .blog-list-item { transition: transform 0.14s var(--ease); }
+
 /* Blog 的标题 / 筛选 / feed 在模态里全部让位。
    .page-title 与 .page-title-row 都要写:本分支的 BlogPage 标题没有外层 row
    (那是另一条线的结构),只写 row 会漏掉标题、它继续占 56px,把文章整体下推
@@ -3022,7 +3034,8 @@ body.article-closing .blog-article-host {
 /* 顶栏在关闭过程里保持 Blog 的底色,避免最后一帧从 tint 硬跳回灰白 */
 body.article-closing .header.home-nav {
     background: var(--site-bg) !important;
-    transition: background-color var(--article-morph-dur) var(--ease) !important;
+    /* 收起走快档,跟飞行同步 —— 用展开那档的话颜色会比元素慢一倍 */
+    transition: background-color var(--article-morph-back-dur) var(--ease) !important;
 }
 /* 整页底层同步回 Blog 底色 —— 阅读页的底是 ::before 那一块 fixed 满屏,收起时
    它若还停在文章的 --page-tint,顶栏(上面这条已切回 --site-bg)和页面底就差一道色。
@@ -3030,9 +3043,10 @@ body.article-closing .header.home-nav {
    2s 的 transition 也要关掉,否则色差会挂着慢慢褪、比硬跳更显眼。 */
 body.writing-page.design-page.article-closing::before {
     background: var(--site-bg);
+    /* 同上:底层与顶栏、飞行三者同一档 */
     /* 原本关掉 transition 是为了消除与顶栏的色差 —— 现在顶栏也走同一时长同一
        缓动,两者一起渐变回 Blog 底色,既不留色差也不硬跳。 */
-    transition: background-color var(--article-morph-dur) var(--ease);
+    transition: background-color var(--article-morph-back-dur) var(--ease);
 }
 
 /* 单栏下标题/正文回到阅读列宽:≥1000px 的两栏规则把它们放开成 max-width:none
@@ -3160,6 +3174,10 @@ body.article-closing .article-byline > span {
    一半还在飞,读起来是两件事。落位后由 JS 用 WAAPI 淡入(CSS 过渡被上面那条
    transition:none 挡住,推不动)。 */
 body.article-morphing .article-byline > span:not(.article-flying-el) { opacity: 0; }
+/* 返回键同样等飞行落位再淡入。参考里 X 按钮也不是跟着卡片一起硬出现的 ——
+   几何先到位,附属控件后跟,层次才拉得开。 */
+body.article-morphing .article-modal-back { opacity: 0; }
+body.article-modal .article-modal-back { transition: opacity 0.26s var(--ease); }
 
 /* banner 与全部作品拼成一个连续的 3 列网格。
    原结构:banner 与 4 个 .category-section 在 .design-layout 里平级,每个 section 各自

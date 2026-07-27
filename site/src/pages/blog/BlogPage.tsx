@@ -40,15 +40,20 @@ type ArticleState = { slug: string; phase: 'morph' | 'open' | 'closing' } | null
 /* 封面放大的时长与缓动。ease-out:点击立即起步、末端滑行落位。
    420ms:620 实测偏慢(2026-07-27 用户「要更快」)—— 手机端位移距离本来就短,
    放大要跟手。 */
-/* 飞行时长的真值在 style.css 的 --article-morph-dur —— 顶栏底色的过渡也读它,
-   两处同步才不会「颜色先到位、元素还在飞」。读不到时兜底 420。 */
-const morphMs = () => {
+/* 飞行时长的真值在 style.css 的 --article-morph-dur / --article-morph-back-dur ——
+   顶栏底色的过渡也读它们,两处同步才不会「颜色先到位、元素还在飞」。
+   展开与收起分两档:收起是让路,比展开快(见 style.css 那里的注释)。 */
+const morphMs = (back = false) => {
   const v = parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue('--article-morph-dur'),
+    getComputedStyle(document.documentElement).getPropertyValue(
+      back ? '--article-morph-back-dur' : '--article-morph-dur',
+    ),
   );
-  return Number.isFinite(v) && v > 0 ? v * 1000 : 420;
+  return Number.isFinite(v) && v > 0 ? v * 1000 : back ? 240 : 340;
 };
-const COVER_EASE = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+/* 起步果断、尾段长收 —— 贴近参考里那种「一下就到位、最后轻轻停住」的手感。
+   先前用的 easeOutQuad(0.25,0.46,0.45,0.94)全程温吞,起步不够干脆。 */
+const COVER_EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
 /* 模态只在手机端(SMALL_MQ)启用 —— 桌面点卡片照常跳转到独立文章页,那边是
    「左列表 + 右正文」的两栏阅读布局(2026-07-27 用户定)。 */
 
@@ -80,7 +85,8 @@ function unpin(el: HTMLElement) {
     .replace(/height:[^;]+;?/, '')
     .replace(/margin:[^;]+;?/, '')
     .replace(/z-index:[^;]+;?/, '')
-    .replace(/transform-origin:[^;]+;?/, '');
+    .replace(/transform-origin:[^;]+;?/, '')
+    .replace(/transition:[^;]+;?/, '');
 }
 
 /* 封面交接:挂上 iframe 的 src,等它真正画出一帧再让文章封面顶替飞行件。
@@ -137,6 +143,9 @@ function pin(el: HTMLElement, r: DOMRect, z: string) {
   el.style.margin = '0';
   el.style.zIndex = z;
   el.style.transformOrigin = 'top left';
+  /* 关掉 transition:卡片带着按下反馈的 transform 过渡,飞行归 WAAPI 管,
+     两者叠在同一个属性上会在起飞和复位时各自抢一下。 */
+  el.style.transition = 'none';
   el.classList.add('article-flying-el');
 }
 function correctPin(el: HTMLElement, r: DOMRect) {
@@ -336,7 +345,7 @@ export default function BlogPage() {
       /* 收起不需要延迟交接:文章封面早画好了,飞的就是它 */
       anims.push(
         el.animate(flightFrames(el, from, to, kind), {
-          duration: morphMs(),
+          duration: morphMs(true),
           easing: COVER_EASE,
           fill: 'both',
         }),
