@@ -717,8 +717,13 @@ body.reading-page .reading-layout .reader-list { padding-top: 0; }
 @media (min-width: 1000px) {
     .article-reading .article-cover { --cover-bleed-x: 72px; --cover-bleed-top: 64px; }
 }
-/* 标题组下方间距 = 上方,精确对齐:byline 底边距 72,并清零正文首段默认上边距,避免叠加 */
-body.reading-page .article-body > *:first-child { margin-top: 0; }
+/* 清零正文首段的上边距,避免与 byline 的下边距叠加(40 + 40 = 80,而段落之间只有
+   40 —— 用户实测「角标栏下面的间距比段落间距大」)。
+   必须带上 style + * 这一条:fragment 里 .article-body 的第一个子元素是内联
+   <style>,:first-child 命中的是它,真正的首段排在第二个,原来那条规则从来没生效过
+   (2026-07-28)。两条都留,兼容没有内联 style 的 fragment。 */
+body.reading-page .article-body > *:first-child,
+body.reading-page .article-body > style:first-child + * { margin-top: 0; }
 
 /* 文章详情页:标题上方标签组(eyebrow)—— 圆角矩形描边黑色 tag,左对齐、与标题同左缘。
    一处覆盖三篇文章及 article-template 后续生成的页面;justify-content 压过模板内联的居中。 */
