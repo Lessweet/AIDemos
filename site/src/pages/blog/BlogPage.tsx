@@ -307,10 +307,21 @@ export default function BlogPage() {
     items: { el: HTMLElement; from: DOMRect; origin: Landing; kind: string }[];
   } | null>(null);
   const blogScrollRef = useRef(0);
-  /* 全部走大封面卡片:不再分「大封面区 + 列表区」两种样式(2026-07-27 用户要求统一)。
-     顺带解决了列表式那套的一个硬伤 —— 它的缩略图是静态 png,而文章封面是动态的,
-     展开时必然看见一次内容切换,没法像大卡片那样对齐相位。 */
+  /* 全部走大封面卡片:不再分「大封面区 + 列表区」两种样式(2026-07-27 用户要求统一)。 */
   const cards = blogCards();
+  /* 封面按端分型(2026-07-28 用户定):手机端静态图 —— 它和文章模态里的封面是
+     同一张,联动落位像素级一致、没有换实例的跳变,顺带整页不跑 shader;
+     桌面端保持动态封面(iframe/video)—— 桌面点卡片是普通跳转,没有模态联动,
+     不需要陪着降级。断点切换时重渲染换型。 */
+  const [isSmall, setIsSmall] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(SMALL_MQ).matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(SMALL_MQ);
+    const update = () => setIsSmall(mq.matches);
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   /* 打开文章(仅手机端):记录封面起飞几何 → 换外壳 → 挂载阅读页 → 下一相做 FLIP。
      桌面端返回 false,调用方不拦截点击,照常跳转到独立文章页 —— 那边是「左列表 +
@@ -761,16 +772,38 @@ export default function BlogPage() {
                     openArticle(a.slug, e.currentTarget);
                   }}
                 >
-                  {/* 列表一律用静态封面图。动态封面(iframe/video)留给文章页 ——
-                      两边都是同一张图时,落位那一刻是像素级一致,不存在换实例的
-                      跳变;文章页的动态版在落位之后才淡入(2026-07-27 用户定)。
-                      顺带把列表页的 10 个 shader iframe 全省了。 */}
-                  <img
-                    src={`writing/${a.listCover}`}
-                    alt=""
-                    loading="lazy"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  />
+                  {/* 手机端 = 静态图(与文章模态同一张,联动零跳变);
+                      桌面端 = 动态封面,无 blogCover 的少数篇用静态图兜底 */}
+                  {isSmall || !a.blogCover ? (
+                    <img
+                      src={`writing/${a.listCover}`}
+                      alt=""
+                      loading="lazy"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  ) : a.blogCover.type === 'video' ? (
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      poster={a.blogCover.poster}
+                      src={a.blogCover.src}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  ) : (
+                    <iframe
+                      loading="lazy"
+                      src={a.blogCover.src}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        border: 0,
+                        display: 'block',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                  )}
                 </a>
                 <div className="card-info writing-info">
                   <h3 className="w-title">{a.title}</h3>
