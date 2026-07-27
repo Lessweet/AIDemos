@@ -74,6 +74,10 @@ function articleDateEl(host: HTMLElement): HTMLElement | null {
   );
 }
 
+/* 落位后还钉在封面位、尚未交接的那份卡片封面。收起时直接拿它原路飞回去,
+   连交接都不用发生 —— 见 handoffCover 里 arm 的注释。 */
+type PendingCover = { flyer: HTMLElement; anims: Animation[] | null };
+
 /* 飞行件复位:摘掉钉住用的内联样式,让它回到自己原本的排版里。 */
 function unpin(el: HTMLElement) {
   el.classList.remove('article-flying-el');
@@ -142,9 +146,12 @@ function handoffCover(
   anims: Animation[] | null,
   ref: { current: (() => void) | null },
   html: Promise<string | null> | null,
+  pending: { current: PendingCover | null },
 ) {
+  /* 真正的交接:目标显形、飞行件退场。不在落位那一刻做 —— 见下方 arm 的注释。 */
   const settle = () => {
     ref.current = null;
+    pending.current = null;
     if (!target) {
       anims?.forEach((a) => a.cancel());
       if (flyer) unpin(flyer);
@@ -160,11 +167,6 @@ function handoffCover(
         /* 元数据还没就绪就设 currentTime 会抛,忽略即可 —— 下面的淡入照样兜底 */
       }
     }
-    /* 动态封面(iframe)里跑的是一堆 1.6~1.7s 无限循环的 CSS animation,相位由
-       各自文档的创建时刻决定 —— 两个实例必然错开,交接就是「跳到另一帧」。
-       两边同源,可以直接把每条动画的 currentTime 抄过去,相位对齐后是真的接着
-       播,而不是靠淡入糊过去。同一个 HTML,动画条数与顺序一致才对得上,不一致
-       就放弃(留给淡入兜底)。 */
     syncCoverAnimations(
       flyer?.querySelector<HTMLIFrameElement>('iframe') ?? null,
       target.querySelector<HTMLIFrameElement>('iframe'),
@@ -186,23 +188,45 @@ function handoffCover(
     }
   };
   const iframe = target?.querySelector<HTMLIFrameElement>('iframe[data-src]');
-  if (!iframe) {
-    settle();
-    return;
-  }
-  let fired = false;
-  const go = () => {
-    if (fired) return;
-    fired = true;
+  /* 落位不交接。封面的实现五花八门:只有两个封面把 time0 写成字面量能被注入相位,
+     有的 time0 每次随机、有的连 CFG 都没有,还有 <video> —— 换实例就必然闪一下
+     (用户实测「下面的卡片都是淡入淡出」「视频封面会闪」)。
+     所以落位后让卡片自己那份继续钉在封面位顶着,等两件事之一发生才换:
+       · 用户滚动 —— 封面正在离开视野、眼睛也跟着动,这一下最不容易被看见;
+       · 收起 —— 那就根本不用换,飞回去的还是同一份,全程零跳变。
+     不滚动就直接收起的话,这次展开自始至终没有换过实例。 */
+  let armed = false;
+  let onScroll: (() => void) | null = null;
+  const done = () => {
     clearTimeout(timer);
+    if (onScroll) window.removeEventListener('scroll', onScroll);
     settle();
   };
-  ref.current = go;
-  const timer = window.setTimeout(go, 900);
+  /* ref 始终是「立即收尾」的语义 —— closeArticle 拿它把交接一次性了结。
+     布置滚动监听是 arm 干的事,由 load / 超时触发,不走 ref。 */
+  ref.current = done;
+  if (flyer) pending.current = { flyer, anims };
+  const arm = () => {
+    if (armed) return;
+    armed = true;
+    clearTimeout(timer);
+    onScroll = () => {
+      onScroll = null;
+      settle();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true, once: true });
+  };
+  /* 没有待挂载的 iframe(封面是 <video>,或 fragment 结构没被 deferCover 命中):
+     没有「等它画出来」这一步,直接进入等滚动的状态。 */
+  const timer = window.setTimeout(arm, 900);
+  if (!iframe) {
+    arm();
+    return;
+  }
   iframe.addEventListener(
     'load',
     // 再等两帧:load 只说明文档就绪,封面自己的首帧还没画上去
-    () => requestAnimationFrame(() => requestAnimationFrame(go)),
+    () => requestAnimationFrame(() => requestAnimationFrame(arm)),
     { once: true },
   );
   const raw = iframe.dataset.src ?? '';
@@ -347,6 +371,8 @@ export default function BlogPage() {
   const handoffRef = useRef<(() => void) | null>(null);
   /* 封面 HTML 的取回:飞行一开始就发,落位时用来注入对齐后的 time0 */
   const coverHtmlRef = useRef<Promise<string | null> | null>(null);
+  /* 尚未交接的封面(展开后没滚动过就收起时,直接拿它原路飞回) */
+  const pendingCoverRef = useRef<PendingCover | null>(null);
   const flyingRef = useRef<{ items: { el: HTMLElement; from: DOMRect; kind: string }[] } | null>(null);
   const blogScrollRef = useRef(0);
   /* 全部走大封面卡片:不再分「大封面区 + 列表区」两种样式(2026-07-27 用户要求统一)。
@@ -421,13 +447,20 @@ export default function BlogPage() {
      真实几何),最后 FLIP 回去。封面是 iframe,全程不搬动 DOM —— 一旦 appendChild
      到别处,iframe 会重新加载、画面闪空(2026-07-27)。 */
   const closeArticle = () => {
-    /* 封面交接可能还挂着(iframe 未画完就被收起)——先立即结掉,
-       否则待会儿要飞回去的文章封面还是 visibility:hidden 的。 */
-    handoffRef.current?.();
+    /* 封面若还没交接(展开后没滚动过),飞回去的就该是当初飞过来的那一份 ——
+       它已经钉在封面位上,原路缩回卡片,全程没换过实例,零跳变。
+       只有已经交接过(用户滚动过)才退回「拿文章封面飞」的老路。 */
+    const pendingCover = pendingCoverRef.current;
+    if (!pendingCover) handoffRef.current?.();
     const body = document.body;
     const slug = article?.slug;
 
     const finish = () => {
+      /* 原路飞回的那份要还原:它是 feed 里的真实节点,不还原就一直钉着 */
+      if (pendingCover) {
+        pendingCover.anims?.forEach((a) => a.cancel());
+        unpin(pendingCover.flyer);
+      }
       body.classList.remove(
         'writing-page',
         'reading-page',
@@ -455,7 +488,8 @@ export default function BlogPage() {
        同样保证全程只有一份可见(见 morph 处的注释)。 */
     const flyers = (
       [
-        [host.querySelector<HTMLElement>('.article-cover'), 'cover'],
+        /* 封面:优先用还钉着的那份(见上),否则才用文章里的 */
+        [pendingCover ? null : host.querySelector<HTMLElement>('.article-cover'), 'cover'],
         [host.querySelector<HTMLElement>('.article-h1'), 'title'],
         [host.querySelector<HTMLElement>('.article-eyebrow .a-tag'), 'tag'],
         [articleDateEl(host), 'date'],
@@ -504,6 +538,23 @@ export default function BlogPage() {
       /* 收起不需要延迟交接:文章封面早画好了,飞的就是它 */
       anims.push(...flightAnims(el, from, to, kind, morphMs(true)));
     });
+
+    /* 还钉着的那份:不重新量几何 —— 它现在的位置就是展开动画的终态,
+       直接从当前 transform 补一段回到 translate(0,0)(pin 时的 left/top
+       就是卡片原位)。不能先 cancel 展开动画再量,cancel 会撤掉 fill、
+       当场弹回卡片位。 */
+    if (pendingCover) {
+      const el = pendingCover.flyer;
+      const from = getComputedStyle(el).transform;
+      anims.push(
+        el.animate(
+          [{ transform: from === 'none' ? 'translate(0px, 0px) scale(1, 1)' : from }, { transform: 'translate(0px, 0px) scale(1, 1)' }],
+          { duration: morphMs(true), easing: COVER_EASE, fill: 'both' },
+        ),
+      );
+      pendingCoverRef.current = null;
+      handoffRef.current = null;
+    }
 
     if (!anims.length) {
       hidden.forEach((el) => (el.style.visibility = ''));
@@ -574,6 +625,7 @@ export default function BlogPage() {
         cover?.anims ?? null,
         handoffRef,
         coverHtmlRef.current,
+        pendingCoverRef,
       );
       flyingRef.current = null;
       /* byline 里不参与飞行的部分(阅读时长)在飞行期间被压住,落位后淡入 ——

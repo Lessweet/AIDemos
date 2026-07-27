@@ -2985,7 +2985,11 @@ body.article-modal .article-flying-el { visibility: visible; }
    transform / animation 全冻掉。feed 此时已隐藏,冻了不影响观感。
    :not(.article-flying-el) 是关键 —— 飞行件自己的 transform 归 WAAPI 管,
    这里一旦连它也 !important 掉,就彻底不动了。 */
-body.article-modal .design-content *:not(.article-flying-el) {
+body.article-modal .design-content *:not(.article-flying-el),
+/* 收起时同样要冻:这时飞回去的是 feed 里那张卡片自己(它一路钉着没交接),
+   一旦 article-modal 摘掉、wrapper 的入场 transform 复活,它又成了 fixed 的
+   包含块,飞行件坐标当场被劫持(2026-07-27 实测收起第一帧飞到 -1225)。 */
+body.article-closing .design-content *:not(.article-flying-el) {
     transform: none !important;
     animation: none !important;
     transition: none !important;
