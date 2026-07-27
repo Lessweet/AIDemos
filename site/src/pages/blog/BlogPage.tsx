@@ -600,9 +600,14 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
         }
         fadeEls.forEach((el) => {
           el.style.visibility = 'visible';
+          /* 480ms:260ms 太弱 —— 飞行件(标题/tag/日期)同时在动,注意力全在它们
+             身上,而淡入在落位后只剩百来毫秒就结束了,等于没看见(2026-07-28 用户
+             两次反馈「没有淡入效果」)。拉长到落位后仍有大半程还在淡。
+             不要加 translateY:槽位的冻结规则里有 transform: none !important
+             (给飞行件的祖先用的),会把 WAAPI 的位移一起压掉。 */
           const a = el.animate([{ opacity: 0 }, { opacity: 1 }], {
-            duration: 260,
-            easing: 'ease-out',
+            duration: 480,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
           });
           a.onfinish = () => {
             el.style.visibility = '';
