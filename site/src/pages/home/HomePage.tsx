@@ -120,6 +120,15 @@ const MORPH_REF_PX = 420;
    观感就是「转到一半停住、过一会儿才补完」(2026-07-27 用户实测 Archive)。
    0.55 仍嫌慢(用户再提),收到 0.36:块刚起步箭头就已转到位,干脆利落。 */
 const ARROW_SPIN_RATIO = 0.36;
+/* 展开时标题行先起步、feed 晚这么多跟上(2026-07-27 用户要求「blog 那一行先往上
+   移动,再带出 feed」)—— 读作标题把列表「带」上来,而不是一整块平移。
+   收起同样错峰但反过来(feed 先走、标题殿后),归位时标题最后落进行里。
+   注意 fill:'both':延迟期间元素必须保持起始态,否则会先显示在最终位置再跳回去。 */
+const FEED_LEAD_MS = 90;
+/* 展开(上移)比收起慢一档(2026-07-27 用户要求「向上移动的速度整体时长增加」)。
+   收起不跟着加:那一程用户没提,且退场本来就该比进场干脆。
+   基准时长 --page-morph-dur 仍是两者共用,这里只在展开时乘系数。 */
+const MORPH_OPEN_SCALE = 1.35;
 function morphTiming(distance?: number) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     return { duration: 1, easing: 'linear' };
@@ -312,11 +321,16 @@ export default function HomePage() {
     const to = titleMask.getBoundingClientRect();
     const dx = from.left - to.left;
     const dy = from.top - to.top;
-    const timing = morphTiming(Math.hypot(dx, dy));
+    const base = morphTiming(Math.hypot(dx, dy));
+    const timing = { ...base, duration: base.duration * MORPH_OPEN_SCALE };
     const anims = els.map((el) =>
       el.animate(
         [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0px, 0px)' }],
-        timing,
+        {
+          ...timing,
+          delay: el.classList.contains('page-title-row') ? 0 : FEED_LEAD_MS,
+          fill: 'both',
+        },
       ),
     );
     const collapseSvg = inActive<SVGSVGElement>('.page-collapse svg');
@@ -330,7 +344,10 @@ export default function HomePage() {
       );
     }
     rideAnimsRef.current = anims;
-    anims[0].onfinish = () => setModal({ target: modal.target, phase: 'open' });
+    /* 挂在最后结束的动画上:feed 带 FEED_LEAD_MS 延迟,比标题行晚落位 ——
+       挂在 anims[0](标题行)的话,open 相会提前 cancel 掉还在飞的 feed */
+    const lastAnim = anims.find((a) => (a.effect?.getTiming().delay ?? 0) > 0) ?? anims[0];
+    lastAnim.onfinish = () => setModal({ target: modal.target, phase: 'open' });
     return () => {
       cancelAnimationFrame(waveRaf);
       waveTimers.forEach(clearTimeout);
@@ -464,8 +481,16 @@ export default function HomePage() {
             },
             { transform: `translate(${natLeft + rideEnd.x}px, ${natTop + rideEnd.y}px)` },
           ],
-          { duration: rideTiming.duration, easing: rideTiming.easing, fill: 'forwards' },
+          {
+            duration: rideTiming.duration,
+            easing: rideTiming.easing,
+            /* 与被它接替的那段同 delay:标题行收起时殿后 FEED_LEAD_MS,
+               不带上的话 currentTime 落在曲线的另一个时刻,接力处会跳 */
+            delay: FEED_LEAD_MS,
+            fill: 'both',
+          },
         );
+        /* currentTime 含 delay 期,所以直接用已流逝的绝对时间 */
         landAnim.currentTime = HOME_RESTORE_MS;
         landAnim.onfinish = finishClose;
         rideAnimsRef.current.push(landAnim);
@@ -530,15 +555,19 @@ export default function HomePage() {
        可用区间,统一回 ease-out。 */
     const timing = morphTiming(Math.hypot(dx - curX, dy - startY));
     rideTiming = timing;
-    const anims = els.map((el) =>
-      el.animate(
+    const anims = els.map((el) => {
+      /* 逐元素读自己的当前偏移:展开的错峰(FEED_LEAD_MS)会让标题行与 feed 处在
+         不同位置,统一用 els[0] 的值会让 feed 跳一下 */
+      const em = new DOMMatrixReadOnly(getComputedStyle(el).transform);
+      const isTitle = el.classList.contains('page-title-row');
+      return el.animate(
         [
-          { transform: `translate(${curX}px, ${startY}px)` },
+          { transform: `translate(${em.m41}px, ${em.m42 - scrolled}px)` },
           { transform: `translate(${dx}px, ${dy}px)` },
         ],
-        { ...timing, fill: 'forwards' },
-      ),
-    );
+        { ...timing, delay: isTitle ? FEED_LEAD_MS : 0, fill: 'both' },
+      );
+    });
     const collapseSvg = inActive<SVGSVGElement>('.page-collapse svg');
     if (collapseSvg) {
       /* 与展开对称:旋转压到位移时长的 ARROW_SPIN_RATIO,不拖 ease-out 的角度长尾 */
@@ -551,7 +580,9 @@ export default function HomePage() {
       );
     }
     rideAnimsRef.current = anims;
-    anims[0].onfinish = finishClose;
+    /* 标题行殿后归位,收尾挂它 —— 挂 feed 的话标题还在飞就被清理掉了 */
+    const lastClose = anims.find((a) => (a.effect?.getTiming().delay ?? 0) > 0) ?? anims[0];
+    lastClose.onfinish = finishClose;
     return () => {
       clearTimeout(restoreTimer);
       if (fallbackTimer) clearTimeout(fallbackTimer);
