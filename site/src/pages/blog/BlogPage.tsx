@@ -193,6 +193,18 @@ function handoffCover(
   arm();
 }
 
+/* 收起时的飞行起点钳到视口边缘。滚动过再关闭的话,文章那几件早已滚出视野
+   (实测滚 700px 后封面 top=-628、标题 -362),照原样起飞就是穿越整整 900px 冲回
+   卡片位,240ms 内跑完 —— 用户看到的是「缩一下放一下、闪过去」(2026-07-28)。
+   钳到上边缘外一个身位:方向感还在(从上方回来),距离却减半,速度就正常了。
+   元素本来就在视野外看不见,起点挪一挪没有违和。 */
+function clampToViewport(r: DOMRect): DOMRect {
+  const vh = window.innerHeight;
+  const top = Math.max(-r.height, Math.min(vh, r.top));
+  if (top === r.top) return r;
+  return { ...r.toJSON(), top, bottom: top + r.height, y: top } as DOMRect;
+}
+
 /* 把元素就地钉成 fixed。left/top 直接写视口坐标是不够的:只要任何一个祖先带了
    transform / filter / will-change,它就成了 fixed 的包含块,坐标会相对它算 ——
    Blog 列表行的入场动画正是这种,实测飞行件跑到视口外 2400px 处(2026-07-27)。
@@ -496,7 +508,11 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       .filter(([el]) => !!el)
       /* 先把三份几何全测完再钉 —— 边测边钉会互相污染:封面一旦脱流,后面的标题
          当场上移一个封面高(实测 203px),起点就量歪了(2026-07-27)。 */
-      .map(([el, kind]) => ({ el: el as HTMLElement, from: (el as HTMLElement).getBoundingClientRect(), kind }))
+      .map(([el, kind]) => ({
+        el: el as HTMLElement,
+        from: clampToViewport((el as HTMLElement).getBoundingClientRect()),
+        kind,
+      }))
       .map(({ el, from, kind }) => {
         pin(el, from, '90'); // 90:低于顶栏(100),缩回时从顶栏下穿过
         return { el, from, kind };
