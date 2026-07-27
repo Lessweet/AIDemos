@@ -333,6 +333,9 @@ export default function HomePage() {
         },
       ),
     );
+    /* 位移期间按住视频:display:none 时它们是暂停的,恢复可见会同时重启解码
+       (Archive 有 10 个 autoplay video),正好压在动画帧上。落位后再放行。 */
+    allInActive<HTMLVideoElement>('video').forEach((v) => v.pause());
     const collapseSvg = inActive<SVGSVGElement>('.page-collapse svg');
     if (collapseSvg) {
       anims.push(
@@ -361,6 +364,11 @@ export default function HomePage() {
   /* open:整块已就位(动画结束、transform 回到 none),解除滚动锁 */
   useLayoutEffect(() => {
     if (modal?.phase !== 'open') return;
+    /* 落位后再放视频:位移期间它们被按住,避免解码与动画抢主线程 */
+    allInActive<HTMLVideoElement>('video').forEach((v) => {
+      const p = v.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    });
     document.body.classList.remove('home-modal-riding');
     rideAnimsRef.current.forEach((a) => a.cancel());
     rideAnimsRef.current = [];
@@ -568,6 +576,9 @@ export default function HomePage() {
         { ...timing, delay: isTitle ? FEED_LEAD_MS : 0, fill: 'both' },
       );
     });
+    /* 位移期间按住视频:display:none 时它们是暂停的,恢复可见会同时重启解码
+       (Archive 有 10 个 autoplay video),正好压在动画帧上。落位后再放行。 */
+    allInActive<HTMLVideoElement>('video').forEach((v) => v.pause());
     const collapseSvg = inActive<SVGSVGElement>('.page-collapse svg');
     if (collapseSvg) {
       /* 与展开对称:旋转压到位移时长的 ARROW_SPIN_RATIO,不拖 ease-out 的角度长尾 */

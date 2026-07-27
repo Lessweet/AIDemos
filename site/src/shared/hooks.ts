@@ -5,6 +5,16 @@
  */
 import { useEffect } from 'react';
 
+/* 首页模态整块位移期间(展开上移 / 收起下移 / 布局恢复):元素的几何在剧烈变化,
+   但那是「块在动」不是用户在滚 —— 依赖几何测量的观察器一律让路,主线程留给动画。
+   实测 Archive 展开时主线程有 5 个长任务(最长 213ms)、掉帧 17 次,而 Blog 零长
+   任务 —— 差在 Archive 独有的 useDynamicScale(offsetHeight 读 + 自定义属性写
+   互相触发)与更多的 pillar 观察目标(2026-07-27)。 */
+export const isHomeModalRiding = () =>
+  document.body.classList.contains('home-modal-riding') ||
+  document.body.classList.contains('home-modal-closing') ||
+  document.body.classList.contains('home-restoring');
+
 /* ── writing.js: initStickyMenu ──
    移动端:把胶囊分类条的 sticky top 设为顶栏实际高度(入口内联脚本已同步设过一次,
    这里补 resize / load 监听) */
@@ -178,6 +188,7 @@ export function usePillarEntrance(deps: unknown[] = []) {
     let observer: IntersectionObserver | null = null;
     let resetObserver: IntersectionObserver | null = null;
     let mo: MutationObserver | null = null;
+    let bodyMo: MutationObserver | null = null;
 
     const revealByRow = (els: HTMLElement[]) => {
       /* 轨迹随滚动方向:上滑进入 → 隐藏态切到上方(-22px),显现时向下落;
@@ -231,14 +242,12 @@ export function usePillarEntrance(deps: unknown[] = []) {
 
           /* 2026-07-22 改为可重播:进入视口按行错峰显现;完全离开视口后复位,
              再次进入(上滑回来同样)重新依次入场 */
-          /* 首页模态收起期间(整块下移 + 布局摘除,test/page-interaction):
-             元素的视口交叠在剧烈变化,但那是「块在动」不是「用户在滚」——
-             显现与复位都要冻结。不冻结的话,下移中滑出视口的卡片会被 resetObserver
-             逐个瞬时打回隐藏态,在整体淡出的 0.42s 里一个个「瞬灭」,
-             看起来就是 feed 跟不上、层级撕裂(2026-07-27 用户实测 Archive 收起)。 */
-          const homeModalTransition = () =>
-            document.body.classList.contains('home-modal-closing') ||
-            document.body.classList.contains('home-restoring');
+          /* 收起时不冻结的话,下移中滑出视口的卡片会被 resetObserver 逐个瞬时打回
+             隐藏态,在整体淡出里一个个「瞬灭」;展开时不冻结,则每次回调都要对全部
+             元素做 getBoundingClientRect 排序分行 + 调度定时器,正好压在动画帧上
+             (Archive 30 个观察目标,实测长任务的来源之一)。
+             展开的首屏批次已由 HomePage 手动点名,冻结期间漏掉的由下方 bodyMo 补扫。 */
+          const homeModalTransition = isHomeModalRiding;
           observer = new IntersectionObserver(
             (entries) => {
               if (homeModalTransition()) return;
@@ -274,6 +283,21 @@ export function usePillarEntrance(deps: unknown[] = []) {
             observer!.observe(el);
             resetObserver!.observe(el);
           });
+
+          /* 位移结束后补扫一次:冻结期间 IntersectionObserver 的回调被丢弃,而交叠
+             状态已不再变化 —— 不补的话那批元素永远等不到下一次回调,停在隐藏态。 */
+          bodyMo = new MutationObserver(() => {
+            if (homeModalTransition()) return;
+            const vh2 = window.innerHeight || document.documentElement.clientHeight;
+            const pending = targets.filter((el) => {
+              if (el.dataset.entered) return false;
+              const r = el.getBoundingClientRect();
+              const visibleH = Math.min(r.bottom, vh2 - 50) - Math.max(r.top, 0);
+              return visibleH > 0 && (r.height === 0 || visibleH / r.height >= 0.1);
+            });
+            if (pending.length) revealByRow(pending);
+          });
+          bodyMo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
         }),
       );
 
@@ -295,6 +319,7 @@ export function usePillarEntrance(deps: unknown[] = []) {
       observer?.disconnect();
       resetObserver?.disconnect();
       mo?.disconnect();
+      bodyMo?.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
@@ -338,7 +363,15 @@ export function useAppReady() {
    .card-dynamic-scale 内容按卡片高度自适应(--content-scale) */
 export function useDynamicScale() {
   useEffect(() => {
+    let pending = false;
     const update = () => {
+      /* 位移期间跳过:展开时卡片尺寸从 0 变实际值会连环触发 ResizeObserver,
+         每次都读 offsetHeight(强制同步布局)再写 --content-scale(又触发布局),
+         正好压在动画帧上。记一笔,等位移结束补算一次。 */
+      if (isHomeModalRiding()) {
+        pending = true;
+        return;
+      }
       document.querySelectorAll<HTMLElement>('.card-dynamic-scale').forEach((card) => {
         const cardHeight = card.offsetHeight;
         const contentHeight = parseInt(card.dataset.contentHeight || '') || 812;
@@ -354,10 +387,19 @@ export function useDynamicScale() {
       ro = new ResizeObserver(update);
       document.querySelectorAll('.card-dynamic-scale').forEach((card) => ro!.observe(card));
     }
+    /* 位移结束(riding 类摘除)后把跳过的那次补上 */
+    const bodyMo = new MutationObserver(() => {
+      if (pending && !isHomeModalRiding()) {
+        pending = false;
+        update();
+      }
+    });
+    bodyMo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     return () => {
       window.removeEventListener('load', update);
       window.removeEventListener('resize', update);
       ro?.disconnect();
+      bodyMo.disconnect();
     };
   }, []);
 }
