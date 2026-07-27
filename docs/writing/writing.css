@@ -685,7 +685,38 @@ body.reading-page .reading-layout .reader-list { padding-top: 0; }
 /* 版式:标题组(标题/日期)置顶,封面接在标题组之后、正文之前(按 HTML 自然顺序)。
    封面上接 byline(byline 下边距 72px),自身下边距 72px 隔开正文,上下对称。 */
 .article-reading { display: flex; flex-direction: column; }
-.article-reading .article-cover { margin: 0 0 24px; }   /* 封面下→正文 间距(收紧);上间距由 byline 提供 */
+/* 封面置于标题组之上(2026-07-27 用户要求):HTML 里它排在 byline 之后,
+   父级已是 flex column,用 order 换序即可,不必改 13 篇 fragment 的结构
+   (fragment 由 extract-articles.mjs 生成,改了会被重跑覆盖)。 */
+.article-reading .article-cover {
+    order: -1;
+    /* 通栏 hero:撑满整个右栏(阅读区)的外缘,不跟标题/正文的 --reading-col 收窄
+       —— 2026-07-27 用户圈图明确「展示区域」指的是右栏全宽。
+       右栏自身有 padding(桌面 64/72),负边距把这层内边距顶掉,让封面真正齐边;
+       顶部同样上提,封面直接贴住右栏顶。变量在下方按断点覆盖。 */
+    /* 出血量 = 封面上方 / 左右各有多少内边距要顶掉,按断点不同:
+       · 单列(<1000):左右要顶掉 .reading-layout 的居中留白(width 是
+         calc(100% - 48px),故每侧 24px;≤600 改 32px 容器 → 每侧 16px),
+         封面齐到视口边缘;顶部留白来自 .reading-layout 的 padding-top
+         (= --nav-content-gap),顶掉才能像宽屏那样贴住顶栏下沿。
+       · 两栏(≥1000):.reading-layout 的 padding-top 为 0,改由右栏自己的
+         padding 72/64 提供 —— 见下方 min-width:1000px 的覆盖。 */
+    --cover-bleed-x: 24px;
+    --cover-bleed-top: var(--nav-content-gap);
+    width: auto;
+    max-width: none;
+    margin: calc(-1 * var(--cover-bleed-top)) calc(-1 * var(--cover-bleed-x)) 56px;
+    border-radius: 0;   /* 齐边通栏,不留圆角(另见下方带 !important 的覆盖) */
+}
+/* ≥1000px 两栏布局下右栏有 padding 72/64,出血量与之同值。
+   必须写在上面那条默认值「之后」—— 两者特异性相同(0,2,0),靠顺序决胜;
+   放进上方的 min-width:1000px 块里会被后面的默认值 0 覆盖(2026-07-27 实测)。 */
+@media (max-width: 600px) {
+    .article-reading .article-cover { --cover-bleed-x: 16px; }   /* 容器 calc(100% - 32px) */
+}
+@media (min-width: 1000px) {
+    .article-reading .article-cover { --cover-bleed-x: 72px; --cover-bleed-top: 64px; }
+}
 /* 标题组下方间距 = 上方,精确对齐:byline 底边距 72,并清零正文首段默认上边距,避免叠加 */
 body.reading-page .article-body > *:first-child { margin-top: 0; }
 
@@ -755,7 +786,7 @@ body.reading-page .article-eyebrow-top .a-tag {
 }
 
 /* 标题组(标题 / 署名)收窄到与正文段落同宽,左缘与下方正文对齐
-   (封面仍保持满宽 hero) */
+   (封面不在此列 —— 它是通栏 hero,撑满整个右栏,见 .article-reading .article-cover) */
 .article-eyebrow,
 .article-h1,
 .article-byline {
@@ -769,7 +800,9 @@ body.reading-page .article-eyebrow-top .a-tag {
 /* H1 桌面 / 手机统一 = --fs-h1(48px),不再分断点 */
 /* tag、byline 维持基准值(手机端有单独的尺寸/内边距微调,见下方 ≤600 段)。 */
 
-/* 标题组(标题 / 发布时间·阅读时长)整体居中 —— 所有断点统一 */
+/* 标题组(标题 / 发布时间·阅读时长)整体居中 —— 所有断点统一。
+   2026-07-27 一度改左对齐 + 屏蔽 fragment 里的 <br>,用户否掉:标题组维持线上原样
+   (居中、逗号处按 <br> 换行),本轮唯一的版式变化是它挪到了封面下方。 */
 body.reading-page .article-h1 { text-align: center; }
 body.reading-page .article-byline { text-align: center; justify-content: center; }
 
@@ -807,7 +840,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
 .article-cover {
     width: 100%;
     aspect-ratio: 16 / 9;
-    border-radius: 6px;          /* 跟正文图片圆角统一 */
+    border-radius: 0;            /* 通栏 hero 齐边,不留圆角(2026-07-27 用户要求) */
     background: var(--gray-100);
     overflow: hidden;
     margin: 80px 0;   /* 封面上下间距各 80px */
@@ -1732,7 +1765,9 @@ body.home-v2 .header-placeholder { height: 76px; }
 .home-v2 .foundation-card,
 .home-v2 .icon-cover,
 .home-v2 .icon-preview-frame { border-radius: 12px !important; }
-.article-cover { border-radius: 6px !important; }
+/* 封面直角(2026-07-27 用户要求):它是通栏 hero、齐容器边缘,圆角会在齐边处显脏。
+   保留 !important 是因为上一行那组同样带 !important,同特异性靠顺序决胜。 */
+.article-cover { border-radius: 0 !important; }
 
 /* Blog 列表封面改直角(2026-07-21,原 12px 圆角);archive.html 不含 .writing-card,
    文章详情页 .article-cover 不受影响 */
