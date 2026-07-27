@@ -76,7 +76,15 @@ function articleDateEl(host: HTMLElement): HTMLElement | null {
 
 /* 落位后还钉在封面位、尚未交接的那份卡片封面。收起时直接拿它原路飞回去,
    连交接都不用发生 —— 见 handoffCover 里 arm 的注释。 */
-type PendingCover = { flyer: HTMLElement; anims: Animation[] | null };
+type PendingCover = {
+  flyer: HTMLElement;
+  anims: Animation[] | null;
+  rest: { el: HTMLElement; kind: string; target: HTMLElement; anims: Animation[]; origin: Landing }[];
+  /* 撤掉「等滚动」的监听但不交接 —— 收起时用。closeArticle 自己会 scrollTo 把
+     位置归位,那一下同样会触发 scroll,不撤的话交接当场发生、四件被 unpin,
+     原路飞回就没得飞了(2026-07-27 实测收起第一帧只剩封面还挂着)。 */
+  disarm: () => void;
+};
 
 /* 飞行件复位:摘掉钉住用的内联样式,让它回到自己原本的排版里。 */
 function unpin(el: HTMLElement) {
@@ -147,11 +155,19 @@ function handoffCover(
   ref: { current: (() => void) | null },
   html: Promise<string | null> | null,
   pending: { current: PendingCover | null },
+  rest: { el: HTMLElement; kind: string; target: HTMLElement; anims: Animation[]; origin: Landing }[],
 ) {
   /* 真正的交接:目标显形、飞行件退场。不在落位那一刻做 —— 见下方 arm 的注释。 */
   const settle = () => {
     ref.current = null;
     pending.current = null;
+    /* 文字三件:两边渲染完全一致(位置/字号/字重/颜色实测逐项相同),直接切,
+       不需要淡入 —— 淡入反而会让同样的字重影一下。 */
+    rest.forEach(({ el, target, anims: group }) => {
+      target.style.visibility = '';
+      group.forEach((a) => a.cancel());
+      unpin(el);
+    });
     if (!target) {
       anims?.forEach((a) => a.cancel());
       if (flyer) unpin(flyer);
@@ -205,7 +221,16 @@ function handoffCover(
   /* ref 始终是「立即收尾」的语义 —— closeArticle 拿它把交接一次性了结。
      布置滚动监听是 arm 干的事,由 load / 超时触发,不走 ref。 */
   ref.current = done;
-  if (flyer) pending.current = { flyer, anims };
+  const disarm = () => {
+    clearTimeout(timer);
+    if (onScroll) {
+      window.removeEventListener('scroll', onScroll);
+      onScroll = null;
+    }
+    ref.current = null;
+    pending.current = null;
+  };
+  if (flyer) pending.current = { flyer, anims, rest, disarm };
   const arm = () => {
     if (armed) return;
     armed = true;
@@ -373,7 +398,9 @@ export default function BlogPage() {
   const coverHtmlRef = useRef<Promise<string | null> | null>(null);
   /* 尚未交接的封面(展开后没滚动过就收起时,直接拿它原路飞回) */
   const pendingCoverRef = useRef<PendingCover | null>(null);
-  const flyingRef = useRef<{ items: { el: HTMLElement; from: DOMRect; kind: string }[] } | null>(null);
+  const flyingRef = useRef<{
+    items: { el: HTMLElement; from: DOMRect; origin: Landing; kind: string }[];
+  } | null>(null);
   const blogScrollRef = useRef(0);
   /* 全部走大封面卡片:不再分「大封面区 + 列表区」两种样式(2026-07-27 用户要求统一)。
      顺带解决了列表式那套的一个硬伤 —— 它的缩略图是静态 png,而文章封面是动态的,
@@ -416,7 +443,12 @@ export default function BlogPage() {
       ] as [HTMLElement | null, string][]
     )
       .filter(([el]) => !!el)
-      .map(([el, kind]) => ({ el: el as HTMLElement, from: (el as HTMLElement).getBoundingClientRect(), kind }));
+      /* origin = pin 之前的完整排版快照(几何 + 字号/行高/字距/颜色)。收起时若这
+         几件还没交接,就照着它原路飞回去,不必去 host 里重新找目标。 */
+      .map(([el, kind]) => {
+        const e = el as HTMLElement;
+        return { el: e, from: e.getBoundingClientRect(), origin: readLanding(e), kind };
+      });
     items.forEach(({ el, from }) => pin(el, from, '95')); // 95:低于顶栏(100)
     flyingRef.current = { items };
 
@@ -451,7 +483,8 @@ export default function BlogPage() {
        它已经钉在封面位上,原路缩回卡片,全程没换过实例,零跳变。
        只有已经交接过(用户滚动过)才退回「拿文章封面飞」的老路。 */
     const pendingCover = pendingCoverRef.current;
-    if (!pendingCover) handoffRef.current?.();
+    if (pendingCover) pendingCover.disarm();
+    else handoffRef.current?.();
     const body = document.body;
     const slug = article?.slug;
 
@@ -460,6 +493,11 @@ export default function BlogPage() {
       if (pendingCover) {
         pendingCover.anims?.forEach((a) => a.cancel());
         unpin(pendingCover.flyer);
+        pendingCover.rest.forEach(({ el, target, anims: g }) => {
+          g.forEach((a) => a.cancel());
+          unpin(el);
+          target.style.visibility = ''; // 文章那份随卸载消失,还原以免残留
+        });
       }
       body.classList.remove(
         'writing-page',
@@ -488,11 +526,13 @@ export default function BlogPage() {
        同样保证全程只有一份可见(见 morph 处的注释)。 */
     const flyers = (
       [
-        /* 封面:优先用还钉着的那份(见上),否则才用文章里的 */
+        /* 还没交接的话,四件都还是卡片那份、都还钉着,原路飞回即可 —— 一件都不要
+           去 host 里取。取了会得到文章那份(此刻 visibility:hidden),等于又钉起
+           一套看不见的元素跟着飞(2026-07-27 实测收起时两套同时在飞)。 */
         [pendingCover ? null : host.querySelector<HTMLElement>('.article-cover'), 'cover'],
-        [host.querySelector<HTMLElement>('.article-h1'), 'title'],
-        [host.querySelector<HTMLElement>('.article-eyebrow .a-tag'), 'tag'],
-        [articleDateEl(host), 'date'],
+        [pendingCover ? null : host.querySelector<HTMLElement>('.article-h1'), 'title'],
+        [pendingCover ? null : host.querySelector<HTMLElement>('.article-eyebrow .a-tag'), 'tag'],
+        [pendingCover ? null : articleDateEl(host), 'date'],
       ] as [HTMLElement | null, string][]
     )
       .filter(([el]) => !!el)
@@ -544,16 +584,47 @@ export default function BlogPage() {
        就是卡片原位)。不能先 cancel 展开动画再量,cancel 会撤掉 fill、
        当场弹回卡片位。 */
     if (pendingCover) {
-      const el = pendingCover.flyer;
-      const from = getComputedStyle(el).transform;
+      const back = morphMs(true);
+      /* 封面:只有 transform 需要回。用当前 computed 的 matrix 起步,不重新量几何 */
+      const cv = pendingCover.flyer;
+      const cvFrom = getComputedStyle(cv).transform;
       anims.push(
-        el.animate(
-          [{ transform: from === 'none' ? 'translate(0px, 0px) scale(1, 1)' : from }, { transform: 'translate(0px, 0px) scale(1, 1)' }],
-          { duration: morphMs(true), easing: COVER_EASE, fill: 'both' },
+        cv.animate(
+          [
+            { transform: cvFrom === 'none' ? 'translate(0px, 0px) scale(1, 1)' : cvFrom },
+            { transform: 'translate(0px, 0px) scale(1, 1)' },
+          ],
+          { duration: back, easing: COVER_EASE, fill: 'both' },
         ),
       );
-      pendingCoverRef.current = null;
-      handoffRef.current = null;
+      /* 文字三件:排版也要跟着回到卡片那一套,所以照 origin 快照补一条。
+         不用 anim.reverse() —— 反向播放会把 ease-out 变成 ease-in,收起就成了
+         「先慢后快」,与定好的手感相反。 */
+      pendingCover.rest.forEach(({ el, origin }) => {
+        const c = getComputedStyle(el);
+        anims.push(
+          el.animate([{ transform: c.transform === 'none' ? 'translate(0px, 0px)' : c.transform }, { transform: 'translate(0px, 0px)' }], {
+            duration: back,
+            easing: COVER_EASE,
+            fill: 'both',
+          }),
+        );
+        anims.push(
+          el.animate(
+            [
+              { fontSize: c.fontSize, lineHeight: c.lineHeight, letterSpacing: c.letterSpacing, width: c.width, color: c.color },
+              {
+                fontSize: `${origin.fs}px`,
+                lineHeight: origin.lh,
+                letterSpacing: origin.ls,
+                width: `${origin.width}px`,
+                color: origin.color,
+              },
+            ],
+            { duration: back, easing: TYPE_EASE, fill: 'both' },
+          ),
+        );
+      });
     }
 
     if (!anims.length) {
@@ -588,10 +659,16 @@ export default function BlogPage() {
             ? host.querySelector<HTMLElement>('.article-eyebrow .a-tag')
             : articleDateEl(host);
 
-    const pairs: { el: HTMLElement; kind: string; target: HTMLElement; anims: Animation[] }[] = [];
+    const pairs: {
+      el: HTMLElement;
+      kind: string;
+      target: HTMLElement;
+      anims: Animation[];
+      origin: Landing;
+    }[] = [];
     const anims: Animation[] = [];
     const hidden: HTMLElement[] = [];
-    flying.items.forEach(({ el, from, kind }) => {
+    flying.items.forEach(({ el, from, origin, kind }) => {
       const target = targetOf(kind);
       if (!target) return;
       const to = readLanding(target);
@@ -601,7 +678,7 @@ export default function BlogPage() {
       hidden.push(target);
       const group = flightAnims(el, from, to, kind, morphMs());
       anims.push(...group);
-      pairs.push({ el, kind, target, anims: group });
+      pairs.push({ el, kind, target, anims: group, origin });
     });
 
     if (!anims.length) {
@@ -612,12 +689,10 @@ export default function BlogPage() {
       /* 同一同步块内交接:文章侧显形、飞行件复位,中间不留可见帧。
          封面例外 —— 它的 iframe 到这一刻才开始加载(飞行期间被摘了 src),
          这会儿交接等于换上一张白图。留着飞行件顶在原位,等它画出来再换。 */
-      pairs.forEach(({ el, kind, target, anims: group }) => {
-        if (kind === 'cover') return;
-        target.style.visibility = '';
-        group.forEach((a) => a.cancel()); // 清掉 fill 保持的 transform,元素才能回到自己的排版
-        unpin(el);
-      });
+      /* 四件一起延后交接。封面延后是因为换实例必闪(见 handoffCover);标题/tag/
+         日期虽然两边渲染一致,但它们和封面同处一个画面 —— 封面还钉着、文字却已
+         换成文章那份,滚动时就会一个跟着滚一个不跟。索性同一时机一起换。
+         于是「展开、看一眼、收起」这条路径上一次交接都不发生。 */
       const cover = pairs.find((pr) => pr.kind === 'cover');
       handoffCover(
         cover?.target ?? null,
@@ -626,6 +701,7 @@ export default function BlogPage() {
         handoffRef,
         coverHtmlRef.current,
         pendingCoverRef,
+        pairs.filter((pr) => pr.kind !== 'cover'),
       );
       flyingRef.current = null;
       /* byline 里不参与飞行的部分(阅读时长)在飞行期间被压住,落位后淡入 ——
@@ -640,12 +716,13 @@ export default function BlogPage() {
       });
       done();
     };
-    /* 封面若还挂着交接(handoffRef 非空),这里不能 cancel —— 它的终态全靠
-       fill 顶着,一取消就当场弹回卡片原位,而文章封面还没显形,中间会空一帧
-       (2026-07-27 实测 fly@72 跳回 fly@182)。 */
+    /* 交接没完成之前,四件的动画一条都不能 cancel —— 它们的终态全靠 fill 顶着,
+       一取消就当场弹回卡片原位,而文章那份还 visibility:hidden,等于这一件直接
+       从画面上消失。先前这里只放过了 cover,于是 morph→open 那次 cleanup 就把
+       标题/tag/日期的动画全撤了(2026-07-27 实测收起第一帧标题已在卡片位)。 */
     return () =>
-      pairs.forEach(({ kind, anims: group }) => {
-        if (kind === 'cover' && handoffRef.current) return;
+      pairs.forEach(({ anims: group }) => {
+        if (handoffRef.current) return;
         group.forEach((a) => a.cancel());
       });
   }, [article, hostReady]);
