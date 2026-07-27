@@ -2985,6 +2985,14 @@ body.article-modal .article-flying-el { visibility: visible; }
    transform / animation 全冻掉。feed 此时已隐藏,冻了不影响观感。
    :not(.article-flying-el) 是关键 —— 飞行件自己的 transform 归 WAAPI 管,
    这里一旦连它也 !important 掉,就彻底不动了。 */
+/* 槽位:飞行期间被点那张卡的 wrapper 锁高隐形(高度由 JS 锁在钉前值),流内留
+   一个等高的洞,列表其余部分纹丝不动;飞行件单独放行。没有这个洞,四件钉成
+   fixed 脱流后 wrapper 塌掉,后面的卡片全体上移,收起快落位时飞行件会压在
+   下一张卡上(2026-07-27 用户截图)。 */
+body.article-modal .card-wrapper.article-slot,
+body.article-closing .card-wrapper.article-slot { visibility: hidden; }
+body.article-modal .card-wrapper.article-slot .article-flying-el,
+body.article-closing .card-wrapper.article-slot .article-flying-el { visibility: visible; }
 body.article-modal .design-content *:not(.article-flying-el),
 /* 收起时同样要冻:这时飞回去的是 feed 里那张卡片自己(它一路钉着没交接),
    一旦 article-modal 摘掉、wrapper 的入场 transform 复活,它又成了 fixed 的

@@ -348,6 +348,17 @@ export default function BlogPage() {
         const e = el as HTMLElement;
         return { el: e, from: e.getBoundingClientRect(), origin: readLanding(e), kind };
       });
+    /* 槽位保高:四件一钉成 fixed 就脱离文档流,card-wrapper 会塌掉一个封面的
+       高度,后面的卡片全体上移 —— 展开时 feed 整体隐藏看不见,收起时 feed 已恢复
+       可见,用户看到的就是「快落位时飞行件压在下一张卡上」(2026-07-27 截图)。
+       所以把 wrapper 锁在钉前的布局高度(offsetHeight,不受入场 transform 影响),
+       流内留一个等高的洞;洞里剩下的散件(摘要等)连同 wrapper 一起藏掉(CSS
+       .article-slot),飞行件单独放行 —— 列表其余部分纹丝不动,四件飞回洞里,
+       落位即原样。锁在 finish() 里解。 */
+    if (wrapper) {
+      wrapper.style.height = `${wrapper.offsetHeight}px`;
+      wrapper.classList.add('article-slot');
+    }
     items.forEach(({ el, from }) => pin(el, from, '95')); // 95:低于顶栏(100)
     flyingRef.current = { items };
 
@@ -396,6 +407,12 @@ export default function BlogPage() {
     const slug = article?.slug;
 
     const finish = () => {
+      /* 槽位解锁(见 openArticle 里锁高的注释);与 unpin 同一同步块,不留空帧 */
+      const slot = document.querySelector<HTMLElement>('.card-wrapper.article-slot');
+      if (slot) {
+        slot.style.height = '';
+        slot.classList.remove('article-slot');
+      }
       /* 原路飞回的那份要还原:它是 feed 里的真实节点,不还原就一直钉着 */
       if (pendingCover) {
         pendingCover.anims?.forEach((a) => a.cancel());
