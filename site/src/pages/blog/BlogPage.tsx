@@ -503,6 +503,15 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
     document.querySelectorAll<HTMLElement>('.design-content .card-wrapper').forEach((el) => {
       el.classList.add('visible');
       el.dataset.entered = '1';
+      /* 整个列表柔和回归,不只是被点那张卡的摘要。
+         此前只让摘要淡入,但周围所有卡片是「唰」一下同时出现的,那一下比 260ms 的
+         摘要淡入抢眼得多,淡入就被淹没了 —— 用户连着三次反馈「看不出淡入」
+         (2026-07-28)。让视口内的卡片一起淡,单张卡的层次才浮得出来。
+         视口外的跳过:看不见,白费一次合成。 */
+      if (el.classList.contains('article-slot')) return;
+      const r = el.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) return;
+      el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: 'ease-out' });
     });
 
     /* ③ 量目标卡片 —— 必须在 Blog 布局恢复之后 */
