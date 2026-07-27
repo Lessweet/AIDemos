@@ -2211,7 +2211,10 @@ body.reading-page .header.home-nav::after {
     /* ==== 首页 / Blog / Archive 三页共享规范(2026-07-21 定)====
        1. 背景色必须一致:全走 --site-bg,改这一处三页同步,禁止某页单独改值;
        2. 顶栏下留白必须一致:全走 --nav-content-gap,同样只改这一处。 */
-    --site-bg: var(--gray-50, #f9f9f9);
+    /* 2026-07-27 用户要求加深:脱离 --gray-50(#f9f9f9,近白)改为直接给值 ——
+       #f2f2f2 能读出「灰底面」,白色封面卡自然浮出;--gray-50 仍留给文章页卡片表面。
+       同步点:site/index.html 首帧四处底色 + style.css --hl-paper(纸色)与此同值。 */
+    --site-bg: #f2f2f2;
     --nav-content-gap: 120px;   /* 2026-07-26 用户要求减半(原 240px) */
     /* 首页索引行与手机端全屏菜单三项共用的字号(2026-07-21):两处必须一致。
        当前 = --fs-h2(24px,style.css 字号 scale) */
@@ -3003,6 +3006,14 @@ body.article-closing .blog-article-host {
 }
 /* 顶栏在关闭过程里保持 Blog 的底色,避免最后一帧从 tint 硬跳回灰白 */
 body.article-closing .header.home-nav { background: var(--site-bg) !important; }
+/* 整页底层同步回 Blog 底色 —— 阅读页的底是 ::before 那一块 fixed 满屏,收起时
+   它若还停在文章的 --page-tint,顶栏(上面这条已切回 --site-bg)和页面底就差一道色。
+   底色是近白的 #f9f9f9 时差 7 个色阶看不出,加深到 #f2f2f2 后就露馅了(2026-07-27)。
+   2s 的 transition 也要关掉,否则色差会挂着慢慢褪、比硬跳更显眼。 */
+body.writing-page.design-page.article-closing::before {
+    background: var(--site-bg);
+    transition: none;
+}
 
 /* 单栏下标题/正文回到阅读列宽:≥1000px 的两栏规则把它们放开成 max-width:none
    (那是给「右栏撑满」用的),模态里没有左栏,应当像独立页单列那样收窄居中。 */
