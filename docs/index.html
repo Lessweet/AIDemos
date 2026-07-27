@@ -10,9 +10,9 @@
 <link href="apple-touch-icon.png?v=15" rel="apple-touch-icon"/>
 <!-- loading 遮罩样式放在 head 最前:首帧直接画灰底,避免外部 CSS 阻塞期间的白屏闪烁 -->
 <style>
-        /* 首帧底色 = 页面背景 --gray-50:三处(这里 / loader 底 / cleanup 兜底)必须同值,
+        /* 首帧底色 = 页面背景 --site-bg(#f2f2f2):四处(这里 / loader 底 / 主题切换 / cleanup 兜底)必须同值,
            否则 loading 上滑离场时底部会漏出一条异色(之前的淡米色残留就是 #F7F7F4 ≠ 页面底) */
-        html { background: #f9f9f9; }
+        html { background: #f2f2f2; }
         /* 进度数字用 DIN 细体:开源 D-DIN(SIL OFL)base64 内嵌 ——
            零网络请求、file:// 本地预览不受 CORS 限制,首帧即 DIN 字形 */
         @font-face {
@@ -22,7 +22,7 @@
         }
         #page-loader {
             position: fixed; inset: 0; z-index: 9999;
-            background: #f9f9f9;   /* = --gray-50(--site-bg),与页面底同值(见上方首帧底色注释) */
+            background: #f2f2f2;   /* = --site-bg,与页面底同值(见上方首帧底色注释) */
             overflow: hidden;
         }
         /* 离场(Sui 式揭幕,2026-07-26):灰底转透明 —— 切换瞬间视口整个被黑面盖着,
@@ -153,9 +153,9 @@
 <link href="writing/writing.css?v=427" rel="stylesheet"/>
 <!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁 -->
 <script src="nav-boot.js?v=8"></script>
-  <script type="module" crossorigin src="/assets/index-BreC9AYh.js"></script>
+  <script type="module" crossorigin src="/assets/index-BHG8JTST.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/index-JqYYXcKf.js">
-  <link rel="modulepreload" crossorigin href="/assets/hooks-DmLshUq3.js">
+  <link rel="modulepreload" crossorigin href="/assets/hooks-CmJ1emzA.js">
 </head>
 <!-- 复用 design-page 的 pillar 布局(左侧二级导航 + 右侧分模块),Writing 与 Design 页对称 -->
 <!-- home-landing:仅首页 —— 一屏白底 landing(writing.css);blog.html 不带。
@@ -190,7 +190,7 @@
                 if (sessionStorage.getItem('seen-loading')) {
                     var early = document.getElementById('page-loader');
                     if (early) early.remove();
-                    docEl.style.background = document.body.classList.contains('theme-dark') ? '#0a0a0a' : '#f9f9f9';
+                    docEl.style.background = document.body.classList.contains('theme-dark') ? '#0a0a0a' : '#f2f2f2';
                     /* 放闸前先让初始态(隐藏)真正绘制一帧 —— 双 rAF 跨过首次绘制。
                        hero-ready 若在首绘前就挂上,索引行的 transition 没有状态变化,
                        会直接以最终态渲染、入场动画被跳过;hero 逐字与索引行都要照常播。 */
@@ -330,7 +330,7 @@
                 docEl.classList.remove('is-loading');
                 docEl.style.background = document.body.classList.contains('theme-dark')
                     ? '#0a0a0a'    /* 深色主题:兜底 = --page-bg */
-                    : '#f9f9f9';   /* 浅色主题:兜底 = --site-bg(--gray-50),防离场残色 */
+                    : '#f2f2f2';   /* 浅色主题:兜底 = --site-bg,防离场残色 */
             }
             /* 放闸:hero 大字开始逐字入场,索引行按各自 --row-d(620ms 起)跟在后面。
                时机 = 黑雾掀过大字区的那一刻 —— 见 HERO_GATE_MS。 */
