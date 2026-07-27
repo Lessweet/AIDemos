@@ -231,8 +231,17 @@ export function usePillarEntrance(deps: unknown[] = []) {
 
           /* 2026-07-22 改为可重播:进入视口按行错峰显现;完全离开视口后复位,
              再次进入(上滑回来同样)重新依次入场 */
+          /* 首页模态收起期间(整块下移 + 布局摘除,test/page-interaction):
+             元素的视口交叠在剧烈变化,但那是「块在动」不是「用户在滚」——
+             显现与复位都要冻结。不冻结的话,下移中滑出视口的卡片会被 resetObserver
+             逐个瞬时打回隐藏态,在整体淡出的 0.42s 里一个个「瞬灭」,
+             看起来就是 feed 跟不上、层级撕裂(2026-07-27 用户实测 Archive 收起)。 */
+          const homeModalTransition = () =>
+            document.body.classList.contains('home-modal-closing') ||
+            document.body.classList.contains('home-restoring');
           observer = new IntersectionObserver(
             (entries) => {
+              if (homeModalTransition()) return;
               /* ratio 门槛与 threshold:0.1 对齐:IO 在 observe 时会无条件回调一次,
                  只看 isIntersecting 的话,首批之外只露一条边的元素会被这次初始回调
                  立即显现,又回到「在看不见的地方播完」 */
@@ -246,6 +255,7 @@ export function usePillarEntrance(deps: unknown[] = []) {
           );
           resetObserver = new IntersectionObserver(
             (entries) => {
+              if (homeModalTransition()) return;
               entries.forEach((e) => {
                 if (e.isIntersecting) return;
                 const el = e.target as HTMLElement;

@@ -2169,7 +2169,10 @@ body.reading-page .header.home-nav::after {
     /* ==== 首页 / Blog / Archive 三页共享规范(2026-07-21 定)====
        1. 背景色必须一致:全走 --site-bg,改这一处三页同步,禁止某页单独改值;
        2. 顶栏下留白必须一致:全走 --nav-content-gap,同样只改这一处。 */
-    --site-bg: var(--gray-50, #f9f9f9);
+    /* 2026-07-27 用户要求加深:脱离 --gray-50(#f9f9f9,近白)改为直接给值 ——
+       #f2f2f2 能读出「灰底面」,白色封面卡自然浮出;--gray-50 仍留给文章页卡片表面。
+       同步点:index.html 首帧三处底色 + style.css --hl-paper(纸色)与此同值。 */
+    --site-bg: #f2f2f2;
     --nav-content-gap: 120px;   /* 2026-07-26 用户要求减半(原 240px) */
     /* 首页索引行与手机端全屏菜单三项共用的字号(2026-07-21):两处必须一致。
        当前 = --fs-h2(24px,style.css 字号 scale) */
@@ -2847,7 +2850,7 @@ html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + var(--hero-b
     /* 上下留白各翻倍(实测顶栏→标题 48→96、署名→首卡 56→112)。
        上边少加的 32px 来自 body.no-banner .design-layout 的 padding-top,不是这里漏了。 */
     .home-hero { padding: 64px 0 112px; }
-    .hero-byline { margin-top: 28px; }
+    .hero-byline { margin-top: 36px; }   /* 标题 → 署名 +8px(2026-07-27 用户圈图,原 28) */
     /* 字号:外面那条 clamp(30px, 5.4vw, 76px) 在手机上永远撞到 30px 下限 —— 不随视口走,
        342px 的可用宽里标题只占 287px,显小。这里改成跟视口线性缩放。
        系数由实测得出:第二行(Kaushan 1.2em)自然宽约 9.6×字号,减掉左右各 24px 页面内边距,
@@ -2863,6 +2866,71 @@ html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + var(--hero-b
     body.home-landing .home-index { padding-bottom: 24px; }
     body.home-landing .hero-byline { margin-top: 24px; }
 }
+
+/* ============ 首页 → Blog / Archive 全屏模态(test/page-interaction 实验) ============
+   点击首页 Blog / Archive 行不再跳页:同文档内 body 换成 blog-page / works-page 布局,
+   目标页内容就地挂载,首页 hero / 索引藏在模态下面(visibility 而非 display ——
+   display 切换会把 hero 的 CSS animation 从头重播,关闭模态回来时首页就会重新入场一遍)。
+   2026-07-27 v2「整块位移」:模态内容(#app 里除首页两块外的全部)由 HomePage 施加
+   同一段 transform,整体从行位置移入/移回 —— 标题即行文字本身,feed 跟着一起动,
+   不再有独立飞行的克隆。 */
+body.home-modal .home-hero,
+body.home-modal .home-index {
+    position: absolute;
+    visibility: hidden;
+    pointer-events: none;
+}
+/* 整块位移期间锁滚动(替代旧方案借用的 html.is-loading —— 那个还会把 feed 闸住,
+   v2 要求 feed 点击瞬间就入场)。滚动容器是 html:只锁 body 锁不住页面滚动,
+   用 :has 把锁挂到 html 上(站点已依赖 dvh / WAAPI 等现代特性,:has 同代)。 */
+body.home-modal-riding { overflow: hidden; }
+html:has(body.home-modal-riding) { overflow: hidden; }
+/* 关闭模态:feed / 菜单 / banner 随收起淡出(0.42s;下移 1.12s —— 列表先散,
+   淡完首页显形垫底)。标题行除外:标题就是即将归位的行文字,必须全程可见。
+   按 .home-ride-el(HomePage 递归标出的真实盒子)选择,不按 #app 直接子级 ——
+   Archive 的 .design-content 是 display:contents,没有盒子,opacity 写在它上面
+   完全不生效,卡片根本不会淡出。 */
+body.home-modal.home-modal-closing .home-ride-el:not(.page-title-row) {
+    opacity: 0 !important;
+    /* 退场 ease-in(加速离开),与入场的 ease-out 对仗 —— 出画干脆、入画柔和 */
+    transition: opacity var(--hover-color-dur) ease-in;
+}
+/* 位移期间保留元素各自的 translateY 入场(2026-07-27 定):卡片的 16px 升起 +
+   行/列错峰,正是独立 blog.html / archive.html 加载时的入场语言,用户要求模态
+   展开沿用同一套。曾一度限制成「只许淡入」—— 那是 display:contents 让整块位移
+   失效的时代,块本身不动,卡片自己的位移才显得像各走各的轨迹;块位移修好后,
+   16px 相对四百多像素的整体行程只是入场质感,不会打架。 */
+/* 位移期间提前建合成层(只在 riding 期间挂,不常驻占显存) */
+body.home-modal-riding .home-ride-el { will-change: transform; }
+/* 收起后半程(home-restoring):首页布局已换回,但模态组件要等落位才卸载 ——
+   先把模态内容从布局里拿掉,React 卸载提交后 HomePage 再摘本类。
+   写成「#app 里除首页两块以外全隐」而不是枚举类名:Archive 的 VIBEDESIGN banner
+   卡是 #app 直接子节点,最初按类名枚举漏掉了它,收起时 Contact 行下面拖出一整块
+   黑色 banner(2026-07-27 用户实测);整体否定选择,以后模态页加内容也不会再漏。
+   标题行必须豁免(:not(.page-title-row)):v2 里它就是下移中的行文字本体,
+   这条规则曾把它一并隐掉 —— 用户看到的就是「Blog 先消失、落位又闪现」。 */
+/* 2026-07-27 预载重构:改按 .home-ride-el(HomePage 标出的真实盒子)摘除,
+   不再按 #app 直接子级 —— 预载 wrapper 是 display:contents,按子级选会把
+   正在下移的标题行连同整页一起隐掉。 */
+body.home-restoring .home-ride-el:not(.page-title-row) { display: none; }
+/* 落位窗口(420ms → 落位)里 body 已不带 blog-page / works-page,标题行的排版
+   全部要在 home-restoring 下原样成立,否则下移途中样式塌掉(字号跳大、行散架)。
+   与上方 body.blog-page/.works-page 的同名规则保持同值 —— 改那边记得同步这里。 */
+body.home-restoring .page-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+body.home-restoring .page-title {
+    margin: 0 0 20px;
+    font-size: var(--index-label-size);
+    line-height: 1.15;
+    color: #181818;
+}
+body.design-page:not(.reading-page).home-restoring .page-title {
+    font-weight: var(--fw-normal, 400) !important;
+}
+body.home-restoring.theme-dark .page-title { color: #fff; }
 
 /* ========================================
    Cases(archive.html)—— 深色改版
@@ -2882,10 +2950,21 @@ html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + var(--hero-b
 body.blog-page .page-title,
 body.works-page .page-title {
     margin: 0 0 20px;   /* 标题下间距 2026-07-26 用户要求减半(原 40px) */
-    font-size: var(--fs-h2);   /* 小一档:h1 36px → h2 24px(2026-07-26 用户要求) */
+    /* 字号/行高与首页索引行完全同形(2026-07-27 用户要求):首页行 morph 飞到标题位时
+       起终点盒子一致,落位不缩放不跳。字号绑同一 token(当前 = --fs-h2 24px),
+       行高对齐索引行的 1.15(此前吃 h1 默认 1.5,同字号下 mask 高差 25%,就是「跳」)。 */
+    font-size: var(--index-label-size);
+    line-height: 1.15;
     color: #181818;
 }
-body.works-page .page-title { grid-column: 1 / -1; }
+/* 标题行(2026-07-27):标题 + 右侧「收起」箭头同行两端对齐;works 的 4 列网格里通栏 */
+body.blog-page .page-title-row,
+body.works-page .page-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+body.works-page .page-title-row { grid-column: 1 / -1; }
 /* 标题字重 regular:全局 :is(h1,…) 规则会压成 --fw-bold !important,这里更高特异性拉回 */
 body.design-page:not(.reading-page).blog-page .page-title,
 body.design-page:not(.reading-page).works-page .page-title {
@@ -2893,6 +2972,43 @@ body.design-page:not(.reading-page).works-page .page-title {
 }
 body.blog-page.theme-dark .page-title,
 body.works-page.theme-dark .page-title { color: #fff; }
+/* 「收起」箭头:与首页索引行行尾同一支箭头(同 path),旋转 135° 指向下 ——
+   展开/收起时它与行箭头之间用克隆平移 + 旋转互相变形,两端必须同源(2026-07-27)。
+   模态态点击反向 morph 回首页(独立页跳转)。字号跟标题同 token,1em 箭头与标题
+   字面同高;纵向 0.12em 内边距 = heading-rise-mask 的撇捺余量,与标题字面同轴。
+   描边规范见 style.css「UI icon 设计规范」。 */
+.page-collapse {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: 0;
+    margin: 0;
+    padding: 0.12em 0;
+    cursor: pointer;
+    color: #181818;
+    font-size: var(--index-label-size);
+    line-height: 1.15;
+    transition: opacity var(--hover-color-dur) ease;
+}
+.page-collapse:hover { opacity: 0.55; }   /* hover 灰一档,与顶栏非激活 tab 同语言 */
+body.blog-page.theme-dark .page-collapse,
+body.works-page.theme-dark .page-collapse { color: #fff; }
+.page-collapse svg {
+    display: block;
+    width: 1em;
+    height: 1em;
+    stroke: currentColor;
+    stroke-width: var(--icon-stroke, 1.5px);
+    fill: none;
+    stroke-linecap: butt;
+    stroke-linejoin: miter;
+    /* 旋转角是 morph 的终点角度:整块位移时 HomePage 用 WAAPI 把这支 svg 从 0°
+       转到这里的静态 135°(收起反向),两处必须同值 */
+    transform: rotate(135deg);
+}
+.page-collapse svg * { vector-effect: non-scaling-stroke; }
+/* v2 整块位移后不再有独立飞行的克隆(.home-morph-clone / .home-morph-arrow 已删):
+   标题/箭头是真实 DOM,深浅主题色由 blog-page / works-page 既有规则天然覆盖。 */
 
 /* banner 与全部作品拼成一个连续的 3 列网格。
    原结构:banner 与 4 个 .category-section 在 .design-layout 里平级,每个 section 各自
