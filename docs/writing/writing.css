@@ -2993,6 +2993,17 @@ body.article-modal .card-wrapper.article-slot,
 body.article-closing .card-wrapper.article-slot { visibility: hidden; }
 body.article-modal .card-wrapper.article-slot .article-flying-el,
 body.article-closing .card-wrapper.article-slot .article-flying-el { visibility: visible; }
+/* 槽位内 opacity 全程强制为 1。卡片的显现由入场系统的 .visible 态控制(基态
+   opacity:0,style.css),而 feed 在模态里塌高后,IntersectionObserver 会把视口外
+   的卡判为离场、摘掉 .visible —— 飞行件虽然钉成 fixed,但还是那几个 DOM 节点,
+   opacity 归 0 就整个隐形,而且 opacity 不像 visibility,子元素盖不回来。
+   实测恰好只有第一篇幸免:scrollTo(0) 后它的 rect 还在视口内没被摘
+   (2026-07-27 用户实测「除了第一篇,其他展开后顶部全空白,一上滑才出现」)。
+   通配无妨:非飞行件仍被上面的 visibility:hidden 罩着。 */
+body.article-modal .card-wrapper.article-slot,
+body.article-closing .card-wrapper.article-slot,
+body.article-modal .card-wrapper.article-slot *,
+body.article-closing .card-wrapper.article-slot * { opacity: 1 !important; }
 body.article-modal .design-content *:not(.article-flying-el),
 /* 收起时同样要冻:这时飞回去的是 feed 里那张卡片自己(它一路钉着没交接),
    一旦 article-modal 摘掉、wrapper 的入场 transform 复活,它又成了 fixed 的

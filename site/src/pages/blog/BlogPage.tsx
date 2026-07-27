@@ -480,6 +480,14 @@ export default function BlogPage() {
     window.scrollTo({ top: blogScrollRef.current, behavior: 'instant' as ScrollBehavior });
     /* 同展开:等 Blog 布局与滚动都恢复完再补 fixed 坐标的偏差 */
     flyers.forEach(({ el, from }) => correctPin(el, from));
+    /* 收起时列表必须整体在场:入场系统在 feed 塌高期间把视口外卡片的 .visible
+       摘了(见 CSS 槽位注释),不补的话收起过程背景是空的、落位后又错峰重播,
+       一轮新的闪动。全部瞬时置为已入场 —— article-closing 的 freeze 规则已把
+       transition 禁了,加类即终态,看不到过渡。 */
+    document.querySelectorAll<HTMLElement>('.design-content .card-wrapper').forEach((el) => {
+      el.classList.add('visible');
+      el.dataset.entered = '1';
+    });
 
     /* ③ 量目标卡片 —— 必须在 Blog 布局恢复之后 */
     const wrapper = document.querySelector<HTMLElement>(`.card-wrapper[data-slug="${slug}"]`);
