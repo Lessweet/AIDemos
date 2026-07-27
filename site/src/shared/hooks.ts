@@ -425,6 +425,14 @@ export function useHideNavOnScrollMobile() {
         lastScrollY = currentScrollY;
         return;
       }
+      /* 文章模态期间顶栏常驻:它是唯一的返回入口(左侧返回箭头),
+         滚到文章深处也必须点得到(2026-07-27 用户要求) */
+      if (document.body.classList.contains('article-modal')) {
+        header.classList.remove('header-hidden');
+        scrollDelta = 0;
+        lastScrollY = currentScrollY;
+        return;
+      }
       /* 手机端(≤600):order.design 手感 —— 方向一变立即响应(4px 死区),
          过了顶栏高度就可收起;桌面:沿用旧站 Smart Sticky(10px 累计、100px 起始) */
       const threshold = mq.matches ? 4 : 10;

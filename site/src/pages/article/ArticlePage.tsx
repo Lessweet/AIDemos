@@ -15,18 +15,29 @@ const fileOf = (slug: string) => `article-${slug}.html`;
 /* 当前 URL 的文章文件名(popstate 恢复用) */
 const currentUrlFile = () => (location.pathname.split('/').pop() || '').split('#')[0];
 
-export default function ArticlePage({ initialSlug }: { initialSlug: string }) {
+export default function ArticlePage({
+  initialSlug,
+  embedHost,
+}: {
+  initialSlug: string;
+  /* 嵌入模式(Blog 页里就地展开文章,feat/article-modal):独立入口页的挂载根是
+     div.reading-layout#app,嵌入时宿主换成模态里那层 wrapper —— 布局测量、滚轮锁、
+     站内链接拦截都基于它,不能写死 #app。嵌入时左栏清单也不渲染:那份清单就是
+     Blog 页本身,模态里再放一遍是重复(2026-07-27 用户定)。 */
+  embedHost?: HTMLElement | null;
+}) {
   const [slug, setSlug] = useState(initialSlug);
+  const embedded = embedHost !== undefined;
   const [listOpen, setListOpen] = useState(false);
   const layoutRef = useRef<HTMLDivElement | null>(null);
   const articleRef = useRef<HTMLElement | null>(null);
   const tocNavRef = useRef<HTMLElement | null>(null);
   const tocAsideRef = useRef<HTMLElement | null>(null);
 
-  /* 挂载根是入口 HTML 里的 div.reading-layout#app —— 取它做布局引用 */
+  /* 挂载根:独立页 = 入口 HTML 的 div.reading-layout#app;嵌入 = 传入的宿主 */
   useLayoutEffect(() => {
-    layoutRef.current = document.getElementById('app') as HTMLDivElement;
-  }, []);
+    layoutRef.current = (embedHost ?? document.getElementById('app')) as HTMLDivElement;
+  }, [embedHost]);
 
   /* ── writing.js initReader:布局测量 ──
      --reader-toc-top(列表/目录 sticky 顶)与 --reading-x/w/mid(整屏固定竖分割线) */
@@ -139,10 +150,12 @@ export default function ArticlePage({ initialSlug }: { initialSlug: string }) {
       const file = currentUrlFile();
       if (file.startsWith('article-')) switchTo(file, false);
     };
-    window.addEventListener('popstate', onPop);
+    /* 嵌入模式不监听 popstate:返回键要回到 Blog 列表,由 BlogPage 统一处理,
+       两边同时响应会打架 */
+    if (!embedded) window.addEventListener('popstate', onPop);
     return () => {
       layout.removeEventListener('click', onClick);
-      window.removeEventListener('popstate', onPop);
+      if (!embedded) window.removeEventListener('popstate', onPop);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -290,8 +303,8 @@ export default function ArticlePage({ initialSlug }: { initialSlug: string }) {
 
   return (
     <>
-      {/* ① 文章列表(master–detail 左栏) */}
-      <ReaderList items={readerList()} currentFile={fileOf(slug)} />
+      {/* ① 文章列表(master–detail 左栏);嵌入模式不渲染 —— 那份清单就是 Blog 页本身 */}
+      {!embedded && <ReaderList items={readerList()} currentFile={fileOf(slug)} />}
       {/* ③ 浮动目录(按 slug 重建) */}
       <aside aria-label="目录" className="article-toc" ref={(el) => (tocAsideRef.current = el)}>
         <div className="article-toc-title">目录</div>

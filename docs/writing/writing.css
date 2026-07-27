@@ -2936,6 +2936,181 @@ body.design-page:not(.reading-page).works-page .page-title {
 body.blog-page.theme-dark .page-title,
 body.works-page.theme-dark .page-title { color: #fff; }
 
+/* ============ Blog 页里的文章模态(feat/article-modal) ============
+   点卡片就地展开文章:body 换成阅读页外壳,Blog 的标题/筛选/feed 藏起来,
+   阅读页内容挂在 .blog-article-host(顶替独立页的 div.reading-layout#app)。
+   同层替换而非叠第二层 —— 文章页外壳与 Blog 差异极大(75 条 reading-page 规则、
+   不同挂载根、per-article 主题色),叠层会让 body 类切换与返回栈都失控。 */
+/* Blog 的标题 / 筛选 / feed 在模态里全部让位。
+   .page-title 与 .page-title-row 都要写:本分支的 BlogPage 标题没有外层 row
+   (那是另一条线的结构),只写 row 会漏掉标题、它继续占 56px,把文章整体下推
+   (2026-07-27 实测封面因此比顶栏下沿高 16px)。 */
+body.article-modal .page-title,
+body.article-modal .page-title-row,
+body.article-modal .design-menu { display: none; }
+/* feed 不能用 display:none —— 展开时飞过去的是卡片自己那份封面/标题/标签
+   (它们仍是 feed 的子节点,只是就地钉成了 fixed),display:none 会把它们一起
+   抹掉。改成脱流 + visibility 隐藏:不占高度,飞行件单独放行。
+   动的必须是卡片那一份,否则动态封面会出现两份 iframe 各播各的(2026-07-27)。 */
+body.article-modal .design-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+body.article-modal .article-flying-el { visibility: visible; }
+/* 外层 #app 是 main.design-layout,它的 flex / padding / min-height 会干扰阅读排版,
+   中性化掉让 .reading-layout 自己的规则接管 */
+body.article-modal #app {
+    display: block;
+    min-height: 0;
+    padding: 0;
+}
+/* 模态里没有左栏清单,所以不能吃 .reading-layout 在 ≥1000px 的两栏网格
+   (grid-template-columns: 340px minmax(0,1fr))—— 否则文章会落进 340px 的左列,
+   右边一大片空(2026-07-27 实测)。改回单栏,宽度/边距沿用窄屏那套。 */
+body.article-modal .blog-article-host {
+    display: block;
+    width: min(1280px, calc(100% - 48px));
+    /* 顶栏是 fixed、不占文档流,而 Blog 的标题在模态里已隐藏 —— host 必须自己
+       从顶栏下沿起算,否则内容(以及顶掉留白后的封面)会钻到顶栏后面。
+       --design-menu-top 由 nav-boot 写入 = 顶栏实际高度。 */
+    margin: var(--design-menu-top, 76px) auto 0;
+    padding: var(--nav-content-gap) 0 80px;
+}
+/* 右栏的左右内边距(72px)也是给两栏布局分隔用的,单栏不需要 */
+body.article-modal .blog-article-host .article-reading { padding: 0; }
+/* 关闭中(article-closing):文章内容退场,封面/标题/标签三件飞回卡片。
+   它们此时已是 fixed(JS 钉住当前位置),不占流;其余内容让位,Blog 的 feed
+   同帧恢复,三件从它上面缩回卡片。
+   注意用 visibility 而不是 display —— 标签挂在 .article-byline 里,父级
+   display:none 会连已脱流的飞行件一起抹掉,收起时标题/标签就整段不飞了
+   (2026-07-27 逐帧采到只有封面在动)。 */
+body.article-closing .blog-article-host .article-reading > *,
+body.article-closing .blog-article-host .article-toc,
+body.article-closing .blog-article-host .reader-list-toggle { visibility: hidden; }
+/* 放行必须写满同样深的选择器,否则特异性输给上面那条(3 类 vs 2 类),
+   飞行件照样被藏(2026-07-27 实测收起时标题/标签仍不飞)。 */
+body.article-closing .blog-article-host .article-reading .article-flying-el,
+body.article-closing .blog-article-host .article-reading > .article-flying-el { visibility: visible; }
+body.article-closing .blog-article-host {
+    margin: 0;
+    padding: 0;
+    height: 0;          /* 不撑开页面,Blog 布局立刻回到原样 */
+    overflow: hidden;   /* 让位的内容不再撑高;飞行件是 fixed,不受裁剪 */
+}
+/* 顶栏在关闭过程里保持 Blog 的底色,避免最后一帧从 tint 硬跳回灰白 */
+body.article-closing .header.home-nav { background: var(--site-bg) !important; }
+
+/* 单栏下标题/正文回到阅读列宽:≥1000px 的两栏规则把它们放开成 max-width:none
+   (那是给「右栏撑满」用的),模态里没有左栏,应当像独立页单列那样收窄居中。 */
+body.article-modal .blog-article-host .article-h1,
+body.article-modal .blog-article-host .article-byline,
+body.article-modal .blog-article-host .article-body,
+body.article-modal .blog-article-host .article-footer {
+    max-width: var(--reading-col);
+    margin-left: auto;
+    margin-right: auto;
+}
+/* 封面出血:模态里封面外面套了两层容器留白 —— #app(main.design-layout)每侧 24px
+   与 host 自己的居中留白每侧 24px,两层都顶掉才能齐到视口边缘。 */
+body.article-modal .article-cover {
+    --cover-bleed-x: 48px;
+    /* 顶部只需顶掉 host 自己的 padding-top;#app 已被中性化、Blog 标题也已隐藏 */
+    --cover-bleed-top: var(--nav-content-gap);
+}
+@media (max-width: 600px) {
+    /* 手机端两层容器:#app 每侧 24px(design-layout 的边距在手机端不缩)、
+       host 每侧 16px —— 合计 40px,不是想当然的 16+16(2026-07-27 实测差 8px)。 */
+    body.article-modal .blog-article-host { width: calc(100% - 32px); }
+    body.article-modal .article-cover { --cover-bleed-x: 40px; }
+}
+/* 顶栏的尺寸/按钮不需要补丁:模态里 blog-page 类保留着,那一整套规则原样生效
+   (2026-07-27 —— 此前摘掉 blog-page 再逐条补 article-modal,补漏了主题按钮,
+   按钮被压成 4px 挤到左上角)。
+   但底色要跟着走:每篇文章有自己的 --page-tint(阅读页的纸感底色),而 blog-page
+   的顶栏是固定的 --site-bg,两者不一致会在顶栏下沿留一道色差。 */
+body.article-modal .header.home-nav {
+    background: var(--page-tint, var(--site-bg)) !important;
+    /* 模态里顶栏常驻:手机端 useHideNavOnScrollMobile 会在下滑时把顶栏收起(走 top),
+       但这里顶栏是唯一的返回入口,滚到文章深处也得能点(2026-07-27 用户要求)。 */
+    top: 0 !important;
+    transform: none !important;
+}
+/* 返回箭头顶掉 logo 的位置:模态里用户要回的是文章列表,不是首页 */
+body.article-modal .header .site-title { display: none; }
+/* 右上角两个按钮(主题切换 / 汉堡)模态里不出现:阅读态只留「返回」一个出口,
+   顶栏越简单越好(2026-07-27 用户定) */
+body.article-modal .header .theme-toggle,
+body.article-modal .header .nav-toggle { display: none !important; }
+.article-modal-back {
+    position: fixed;
+    top: 0;
+    left: 24px;
+    z-index: 101;   /* 高于顶栏(100) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 72px;   /* 与顶栏等高,整块可点 */
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: #181818;
+}
+.article-modal-back svg {
+    display: block;
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    stroke-width: var(--icon-stroke, 1.5px);
+    fill: none;
+    stroke-linecap: butt;
+    stroke-linejoin: miter;
+}
+.article-modal-back svg * { vector-effect: non-scaling-stroke; }
+body.theme-dark .article-modal-back { color: #fff; }
+@media (max-width: 600px) {
+    .article-modal-back { left: 16px; }
+}
+/* FLIP 期间封面的 transform 由 WAAPI 独占:阅读页原有的入场过渡(translateY(22px)
+   → 0,1.5s)会和放大动画抢同一个属性,导致封面一边放大一边被往下推。
+   模态里封面直接以最终态在场,位移交给 FLIP。 */
+body.article-modal .article-h1,
+body.article-modal .article-eyebrow .a-tag,
+body.article-closing .article-h1,
+body.article-closing .article-eyebrow .a-tag,
+body.article-modal .article-cover,
+body.article-closing .article-cover {
+    will-change: transform;
+    opacity: 1;
+    /* 阅读页给封面挂了 CSS animation「article-rise」(translateY(22px) → 0,1.5s),
+       它和 FLIP 抢同一个 transform —— 封面会一边放大一边被往下推。
+       模态里封面以最终态在场,位移全部交给 FLIP。transition 一并关掉。 */
+    animation: none !important;
+    transition: none !important;
+}
+
+/* 标签自己被冻住还不够:它挂在 .article-byline / .article-eyebrow 里,父级跑
+   article-rise 会把它整体带走 —— 落位那帧标签往下弹 7px 再慢慢漂回来。
+   父链另起一条:这里绝不能像上面那样写 will-change: transform —— 它会让
+   byline 成为 fixed 后代的包含块,收起时钉成 fixed 的标签坐标被它劫持,
+   直接飞到文档三千像素外(2026-07-27 实测 y=3428)。 */
+body.article-modal .article-byline,
+body.article-closing .article-byline,
+body.article-modal .article-eyebrow,
+body.article-closing .article-eyebrow {
+    opacity: 1;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+}
+
 /* banner 与全部作品拼成一个连续的 3 列网格。
    原结构:banner 与 4 个 .category-section 在 .design-layout 里平级,每个 section 各自
    带一个 .category-grid —— 所以作品被切成 4 块互不相干的网格,banner 更在网格之外。
