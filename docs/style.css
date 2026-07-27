@@ -1379,13 +1379,16 @@ a {
     transition: color var(--hover-color-dur) ease;
 }
 
-.card-wrapper:hover .card-label {
-    color: var(--gray-500);
-}
+/* 触屏挡掉:点过之后 hover 会粘住,那张卡的文字一直是淡的(见 writing.css 同款注释) */
+@media (hover: hover) {
+    .card-wrapper:hover .card-label {
+        color: var(--gray-500);
+    }
 
-.card-wrapper:hover .card-date,
-.card-wrapper:hover .card-meta .card-tag {
-    color: var(--gray-300);
+    .card-wrapper:hover .card-date,
+    .card-wrapper:hover .card-meta .card-tag {
+        color: var(--gray-300);
+    }
 }
 
 /* 封面内的媒体元素:默认 1 倍,hover 时随变量放大,离开平滑恢复 */

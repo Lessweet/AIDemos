@@ -421,6 +421,10 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
      真实几何),最后 FLIP 回去。封面是 iframe,全程不搬动 DOM —— 一旦 appendChild
      到别处,iframe 会重新加载、画面闪空(2026-07-27)。 */
   const closeArticle = () => {
+    /* 收起过程中创建的动画(反向飞回那批)。fill:'both' 会一直占着 transform 与
+       颜色/字号,不清的话卡片落位后这些属性就被锁死,后续 CSS(hover、主题切换)
+       全推不动 —— 实测收起后被点那张卡上残留 6 条(2026-07-28)。finish 里统一撤。 */
+    const closingAnims: Animation[] = [];
     /* 封面若还没交接(展开后没滚动过),飞回去的就该是当初飞过来的那一份 ——
        它已经钉在封面位上,原路缩回卡片,全程没换过实例,零跳变。
        只有已经交接过(用户滚动过)才退回「拿文章封面飞」的老路。 */
@@ -432,6 +436,7 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
     const slug = article?.slug;
 
     const finish = () => {
+      closingAnims.forEach((a) => a.cancel());
       /* 槽位解锁(见 openArticle 里锁高的注释);与 unpin 同一同步块,不留空帧 */
       const slot = document.querySelector<HTMLElement>('.card-wrapper.article-slot');
       if (slot) {
@@ -558,7 +563,7 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       /* 封面:只有 transform 需要回。用当前 computed 的 matrix 起步,不重新量几何 */
       const cv = pendingCover.flyer;
       const cvFrom = getComputedStyle(cv).transform;
-      anims.push(
+      closingAnims.push(
         cv.animate(
           [
             { transform: cvFrom === 'none' ? 'translate(0px, 0px) scale(1, 1)' : cvFrom },
@@ -572,14 +577,14 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
          「先慢后快」,与定好的手感相反。 */
       pendingCover.rest.forEach(({ el, origin }) => {
         const c = getComputedStyle(el);
-        anims.push(
+        closingAnims.push(
           el.animate([{ transform: c.transform === 'none' ? 'translate(0px, 0px)' : c.transform }, { transform: 'translate(0px, 0px)' }], {
             duration: back,
             easing: COVER_EASE,
             fill: 'both',
           }),
         );
-        anims.push(
+        closingAnims.push(
           el.animate(
             [
               { fontSize: c.fontSize, lineHeight: c.lineHeight, letterSpacing: c.letterSpacing, width: c.width, color: c.color },
@@ -595,6 +600,9 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
           ),
         );
       });
+      /* 也并进 anims:onfinish 是绑在 anims 最后一条上的,不并的话这条路径下
+         anims 为空,收起会直接跳过动画当场结束。 */
+      anims.push(...closingAnims);
     }
 
     if (!anims.length) {

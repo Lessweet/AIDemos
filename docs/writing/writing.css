@@ -1706,9 +1706,13 @@ body.home-v2 .header-placeholder { height: 76px; }
     color: #969696;                 /* 与 .w-date 同色 */
     line-height: inherit;
 }
-/* hover 时与日期同步淡化 */
-.card-wrapper:hover .writing-info .w-meta .w-tags .a-tag {
-    color: var(--gray-300);
+/* hover 时与日期同步淡化。
+   触屏要挡掉:点一下之后 hover 态会粘在那张卡上不散,从文章模态收起回来时,
+   刚点过的卡标题/角标一直是淡的,旁边的卡却正常(2026-07-28 用户截图)。 */
+@media (hover: hover) {
+    .card-wrapper:hover .writing-info .w-meta .w-tags .a-tag {
+        color: var(--gray-300);
+    }
 }
 .writing-info .w-title {
     font-size: var(--fs-h3);         /* 卡片标题 20px */
@@ -1752,10 +1756,12 @@ body.home-v2 .header-placeholder { height: 76px; }
 
 /* 卡片字号(标题/简介/时间)已统一走 :root 字号 token,桌面/手机一致,无需断点覆盖 */
 
-/* hover 时封面下面的文字整体变灰 */
-.card-wrapper:hover .writing-info .w-title { color: var(--gray-500); }
-.card-wrapper:hover .writing-info .w-excerpt,
-.card-wrapper:hover .writing-info .w-date { color: var(--gray-300); }
+/* hover 时封面下面的文字整体变灰(同上,触屏挡掉,避免粘滞 hover) */
+@media (hover: hover) {
+    .card-wrapper:hover .writing-info .w-title { color: var(--gray-500); }
+    .card-wrapper:hover .writing-info .w-excerpt,
+    .card-wrapper:hover .writing-info .w-date { color: var(--gray-300); }
+}
 
 /* 填充式占位图(用于封面框内) */
 .img-ph.fill { min-height: 0; height: 100%; margin: 0; border: none; border-radius: 0; }
