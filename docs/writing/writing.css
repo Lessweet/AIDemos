@@ -3185,6 +3185,25 @@ body.article-closing .article-byline > span {
 body.article-morphing .article-byline > span:not(.article-flying-el) { opacity: 0; }
 /* 返回键同样等飞行落位再淡入。参考里 X 按钮也不是跟着卡片一起硬出现的 ——
    几何先到位,附属控件后跟,层次才拉得开。 */
+/* 模态里的文章封面:先铺卡片上那张静态图(--cover-still 由 BlogPage 下发),
+   动态版(iframe)压在上面、初始透明,加载好了才淡入。
+   这样落位那一刻两边是同一张图、像素级一致,彻底没有「换实例」这回事 ——
+   先前不管怎么对齐相位,只要落位要换实例就会闪(2026-07-27 用户定的方案)。 */
+body.article-modal .blog-article-host .article-cover,
+body.article-closing .blog-article-host .article-cover {
+    background-image: var(--cover-still, none);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+/* 模态里连动态版都不要了(2026-07-27 用户定):列表和文章用同一张静态图,
+   落位是同一张图的缩放,不存在任何形式的换实例。iframe 的 src 也不会被挂上,
+   等于这一屏一个 shader 都不跑。桌面独立文章页不受影响,那边照常是动态封面。 */
+body.article-modal .blog-article-host .article-cover iframe,
+body.article-modal .blog-article-host .article-cover video,
+body.article-closing .blog-article-host .article-cover iframe,
+body.article-closing .blog-article-host .article-cover video { display: none; }
+
 body.article-morphing .article-modal-back { opacity: 0; }
 body.article-modal .article-modal-back { transition: opacity 0.26s var(--ease); }
 

@@ -101,59 +101,14 @@ function unpin(el: HTMLElement) {
     .replace(/transition:[^;]+;?/, '');
 }
 
-/* 把 from 里每条 CSS 动画的进度抄到 to 的同一条上。跨域会抛 SecurityError
-   (本站封面同源,不会走到),文档没就绪时列表为空,都按「同步不了」处理。 */
-function syncCoverAnimations(from: HTMLIFrameElement | null, to: HTMLIFrameElement | null) {
-  if (!from || !to) return;
-  try {
-    const a = from.contentDocument?.getAnimations?.() ?? [];
-    const b = to.contentDocument?.getAnimations?.() ?? [];
-    if (!a.length || a.length !== b.length) return;
-    b.forEach((anim, i) => {
-      try {
-        anim.currentTime = a[i].currentTime;
-      } catch {
-        /* 单条对不上不影响其他 */
-      }
-    });
-  } catch {
-    /* 拿不到 contentDocument:放弃同步,交叉淡入兜底 */
-  }
-}
-
-/* 动态封面是 canvas shader,不是 CSS 动画:内部有个 shaderTime,从 HERO_CFG.time0
-   起按 __shaderRate(0.9)每秒推进,由自己的 rAF 驱动。两个实例各自从 time0 开始,
-   相位差 = 各自已运行的时长 —— 交接时就是用户说的「卡一下,从另一帧跳到另一帧」。
-   shaderTime 是闭包变量,外面改不了;但 time0 写在文档内联的 HERO_CFG 里,只要在
-   解析前改掉就行。封面是自包含的单文件(80K,无外部资源),所以取回文本、把 time0
-   换成卡片此刻的进度、用 srcdoc 挂上去 —— 新实例睁眼就在正确的相位上,是真的接着
-   播。取文本在飞行一开始就发,340ms 的飞行足够盖掉这次请求(还走缓存)。
-   列表行的缩略图是静态 png,没有源 iframe 可读,拿不到进度,只能交给交叉淡入。 */
-function coverPhase(win: (Window & { HERO_CFG?: { time0?: number }; __shaderRate?: number }) | null) {
-  const base = win?.HERO_CFG?.time0;
-  if (win == null || typeof base !== 'number') return null;
-  const rate = typeof win.__shaderRate === 'number' ? win.__shaderRate : 0.9;
-  return base + rate * (win.performance.now() / 1000);
-}
-
-/* 封面交接。三件事:
-
-   ① iframe 的 src 到这一刻才挂上。它和卡片封面是同一个 HTML,但这是第二个实例,
-      渲染要从零跑一遍(实测 40~50ms 一帧);飞行期间不加载,这一帧就落在静止
-      状态下,看不出来。
-
-   ② 能对齐进度的就对齐:<video> 直接把 currentTime 抄过去,接着放而不是从头。
-
-   ③ 对不齐的交叉淡入。动态封面(iframe)里跑的是它自己的 CSS/JS 动画,没有
-      外部接口能把进度设过去,两个实例必然各播各的;列表行的缩略图更是静态图,
-      和动态封面根本不同源。硬切就是用户说的「卡一下,从另一帧跳到另一帧」。
-      淡入盖不住内容不同,但盖得住那一下硬切。 */
+/* 封面交接。列表和文章用的是同一张静态图,落位那一刻两边像素级一致,所以交接
+   本身已经不会被看见了。仍然延后到「滚动或收起」才做,是因为飞行件是 fixed:
+   不交接就跟不上页面滚动。收起时压根不交接 —— 飞回去的还是同一份。 */
 function handoffCover(
   target: HTMLElement | null,
   flyer: HTMLElement | null,
   anims: Animation[] | null,
   ref: { current: (() => void) | null },
-  html: Promise<string | null> | null,
   pending: { current: PendingCover | null },
   rest: { el: HTMLElement; kind: string; target: HTMLElement; anims: Animation[]; origin: Landing }[],
 ) {
@@ -173,35 +128,10 @@ function handoffCover(
       if (flyer) unpin(flyer);
       return;
     }
-    /* 能同步的先同步,别只靠淡入盖 */
-    const src = flyer?.querySelector<HTMLVideoElement>('video');
-    const dst = target.querySelector<HTMLVideoElement>('video');
-    if (src && dst && Number.isFinite(src.currentTime)) {
-      try {
-        dst.currentTime = src.currentTime;
-      } catch {
-        /* 元数据还没就绪就设 currentTime 会抛,忽略即可 —— 下面的淡入照样兜底 */
-      }
-    }
-    syncCoverAnimations(
-      flyer?.querySelector<HTMLIFrameElement>('iframe') ?? null,
-      target.querySelector<HTMLIFrameElement>('iframe'),
-    );
     target.style.visibility = '';
-    const fade = target.animate([{ opacity: 0 }, { opacity: 1 }], {
-      duration: 180,
-      easing: 'ease-out',
-    });
-    if (flyer) {
-      flyer.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: 'ease-out' });
-      fade.onfinish = () => {
-        anims?.forEach((a) => a.cancel());
-        unpin(flyer);
-        flyer.style.opacity = '';
-      };
-    } else {
-      anims?.forEach((a) => a.cancel());
-    }
+    /* 不做交叉淡入:两边是同一张静态图,像素级一致,淡入反而让同样的画面重影一下 */
+    anims?.forEach((a) => a.cancel());
+    if (flyer) unpin(flyer);
   };
   const iframe = target?.querySelector<HTMLIFrameElement>('iframe[data-src]');
   /* 落位不交接。封面的实现五花八门:只有两个封面把 time0 写成字面量能被注入相位,
@@ -248,32 +178,9 @@ function handoffCover(
     arm();
     return;
   }
-  iframe.addEventListener(
-    'load',
-    // 再等两帧:load 只说明文档就绪,封面自己的首帧还没画上去
-    () => requestAnimationFrame(() => requestAnimationFrame(arm)),
-    { once: true },
-  );
-  const raw = iframe.dataset.src ?? '';
-  iframe.removeAttribute('data-src');
-  const phase = coverPhase(
-    (flyer?.querySelector<HTMLIFrameElement>('iframe')?.contentWindow ?? null) as never,
-  );
-  /* 挂源这件事不能受交接状态影响:先前这里写了 if (fired) return,超时一旦先到,
-     iframe 就再也拿不到源、封面全白(2026-07-27 实测 srcdoc 和 src 都是空的)。
-     交接早晚是观感问题,没有源是功能没了。 */
-  void (async () => {
-    if (html && phase != null) {
-      const text = await html.catch(() => null);
-      const patched = text?.replace(/"time0":\s*[0-9.]+/, `"time0":${phase.toFixed(2)}`);
-      // patched === text 说明没找到 time0 字段(封面换了写法),退回原路
-      if (text && patched && patched !== text) {
-        iframe.srcdoc = patched;
-        return;
-      }
-    }
-    iframe.src = raw; // 对不齐相位:照常加载,交叉淡入兜底
-  })();
+  /* 动态封面在模态里彻底不用了(CSS 里 display:none),src 也就不必挂 ——
+     data-src 留着不动,等于这一屏一个 shader 都不跑。 */
+  arm();
 }
 
 /* 把元素就地钉成 fixed。left/top 直接写视口坐标是不够的:只要任何一个祖先带了
@@ -394,8 +301,6 @@ export default function BlogPage() {
      (2026-07-27 用户实测「能看出没有联动,是两个独立的」)。 */
   /* 封面交接的「立即完成」句柄:iframe 画完或超时后自行清空 */
   const handoffRef = useRef<(() => void) | null>(null);
-  /* 封面 HTML 的取回:飞行一开始就发,落位时用来注入对齐后的 time0 */
-  const coverHtmlRef = useRef<Promise<string | null> | null>(null);
   /* 尚未交接的封面(展开后没滚动过就收起时,直接拿它原路飞回) */
   const pendingCoverRef = useRef<PendingCover | null>(null);
   const flyingRef = useRef<{
@@ -428,12 +333,6 @@ export default function BlogPage() {
     const wrapper = coverEl.closest<HTMLElement>('.card-wrapper');
     /* 卡片封面是 iframe 时,现在就把它的 HTML 取回来(走缓存),落位时要用它注入
        对齐后的 time0(见 handoffCover)。列表行是 <img>,没有可对齐的源,跳过。 */
-    const srcFrame = coverEl.querySelector<HTMLIFrameElement>('iframe');
-    coverHtmlRef.current = srcFrame?.src
-      ? fetch(srcFrame.src)
-          .then((r) => (r.ok ? r.text() : null))
-          .catch(() => null)
-      : null;
     const items = (
       [
         [coverEl, 'cover'],
@@ -458,6 +357,13 @@ export default function BlogPage() {
        按钮被压成 4px 挤到左上角。Blog 自己的 feed 网格由 .article-modal 的
        display:none 规则关掉即可(2026-07-27 用户:顶栏两个按钮要和首页一样)。 */
     body.classList.add('writing-page', 'reading-page', 'article-modal');
+    /* 文章封面的垫底图 = 卡片上那张,两边同图才能无缝落位。
+       取 img 已解析的绝对地址,不要自己拼相对路径 —— pushState 之后文档 URL 变成
+       /writing/article-x.html,相对基准跟着变,拼出来会是 writing/writing/...
+       (2026-07-27 实测)。 */
+    const stillSrc = coverEl.querySelector<HTMLImageElement>('img');
+    const still = stillSrc?.currentSrc || stillSrc?.src;
+    if (still) body.style.setProperty('--cover-still', `url("${still}")`);
     body.classList.add('article-morphing'); // 飞行期间:byline 里不飞的部分先不出现
     body.setAttribute('data-tint', shell.tint);
     if (shell.accent) body.setAttribute('data-accent', shell.accent);
@@ -485,6 +391,7 @@ export default function BlogPage() {
     const pendingCover = pendingCoverRef.current;
     if (pendingCover) pendingCover.disarm();
     else handoffRef.current?.();
+
     const body = document.body;
     const slug = article?.slug;
 
@@ -509,6 +416,7 @@ export default function BlogPage() {
       body.removeAttribute('data-tint');
       body.removeAttribute('data-accent');
       body.style.removeProperty('--page-tint');
+      body.style.removeProperty('--cover-still');
       document.title = 'VibeUX';
       articleHostRef.current = null;
       setHostReady(false);
@@ -516,6 +424,9 @@ export default function BlogPage() {
     };
 
     const host = articleHostRef.current;
+    /* 动态版退场,露出底下那张静态图 —— 飞回卡片时两边又是同一张图。
+       淡出时长与飞行同档(CSS 里定),落位时正好已经透明。 */
+    host?.querySelector('.article-cover')?.classList.remove('cover-live');
     if (!host || !slug) {
       finish();
       window.scrollTo({ top: blogScrollRef.current, behavior: 'instant' as ScrollBehavior });
@@ -699,7 +610,6 @@ export default function BlogPage() {
         cover?.el ?? null,
         cover?.anims ?? null,
         handoffRef,
-        coverHtmlRef.current,
         pendingCoverRef,
         pairs.filter((pr) => pr.kind !== 'cover'),
       );
@@ -791,43 +701,16 @@ export default function BlogPage() {
                     openArticle(a.slug, e.currentTarget);
                   }}
                 >
-                  {!a.blogCover ? (
-                    /* 少数几篇没有做动态封面(voices / figma-agent / genie),
-                       用阅读器那张缩略图填大封面位,object-fit 裁成同样的 16:9 */
-                    <img
-                      src={`writing/${a.listCover}`}
-                      alt=""
-                      loading="lazy"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    />
-                  ) : a.blogCover.type === 'video' ? (
-                    <video
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      poster={a.blogCover.poster}
-                      src={a.blogCover.src}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        display: 'block',
-                      }}
-                    />
-                  ) : (
-                    <iframe
-                      loading="lazy"
-                      src={a.blogCover.src}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        border: 0,
-                        display: 'block',
-                        pointerEvents: 'none',
-                      }}
-                    />
-                  )}
+                  {/* 列表一律用静态封面图。动态封面(iframe/video)留给文章页 ——
+                      两边都是同一张图时,落位那一刻是像素级一致,不存在换实例的
+                      跳变;文章页的动态版在落位之后才淡入(2026-07-27 用户定)。
+                      顺带把列表页的 10 个 shader iframe 全省了。 */}
+                  <img
+                    src={`writing/${a.listCover}`}
+                    alt=""
+                    loading="lazy"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
                 </a>
                 <div className="card-info writing-info">
                   <h3 className="w-title">{a.title}</h3>
