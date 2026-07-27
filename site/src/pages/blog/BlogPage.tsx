@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { blogCards } from '../../content/articles';
 import { CatIcon } from '../../shared/catIcons';
-import PageTitle from '../../shared/PageTitle';
+import PageTitle, { RISE_CHAR_STEP } from '../../shared/PageTitle';
 import PageCollapse from '../../shared/PageCollapse';
 import {
   useStickyMenu,
@@ -31,7 +31,8 @@ const BIG_COVERS_MOBILE = 6;
 const SMALL_MQ = '(max-width: 800px)';
 
 /* modalTitle(test/page-interaction 实验):首页模态内嵌时由 HomePage 传入 ——
-   'held' = 标题按住不入场(等 FLIP 克隆飞到位),'revealed' = 克隆落位后瞬时显形。
+   标题随整块从索引行位置平移上来,本身就是那行字的延续,不再自己播逐字升起:
+   'held' = 位移期间按住,'revealed' = 瞬时显形。
    独立 blog.html 入口不传,标题走自己的 per-character rise,行为与线上一致。 */
 export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'revealed' }) {
   const [filter, setFilter] = useState<Filter>('all');
@@ -64,7 +65,11 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
     <>
       <div className="page-title-row">
         <PageTitle text="Blog" held={!!modalTitle} revealed={modalTitle === 'revealed'} />
-        <PageCollapse modal={!!modalTitle} held={modalTitle === 'held'} />
+        <PageCollapse
+          modal={!!modalTitle}
+          held={modalTitle === 'held'}
+          riseDelay={4 * RISE_CHAR_STEP}
+        />
       </div>
       <aside aria-label="Writing 分类" className="design-menu">
         {FILTERS.map((f) => (

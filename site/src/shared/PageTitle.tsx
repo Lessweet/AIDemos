@@ -2,12 +2,16 @@
  * 页面标题(Blog / Archive 共用一套,2026-07-22):
  * per-character-rise 入场(35ms/字,复用 style.css heading-rise 通用样式);
  * 刷新恢复滚动位置(不在页顶)时直接以完成态渲染,避免滑回顶部撞见半程动画。
- * held 模式(首页 → Blog 模态,test/page-interaction):标题不自己入场,由父级的
- * FLIP 克隆飞到标题位后把 revealed 置真 —— 此时要「瞬时显形」接住克隆落位,
- * 逐字过渡全部关掉,否则克隆消失后标题还要再淡入一遍,中间会空一拍。
+ * held 模式(首页 → Blog/Archive 模态,test/page-interaction):标题不自己入场 ——
+ * 它随整块从索引行位置平移上来,本身就是那行字的延续,再播一次逐字升起会重影;
+ * 逐字过渡一并关掉,revealed 时瞬时显形。
  */
 import { useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
+
+/* 逐字升起的字符步长。标题行右侧的收起箭头按「标题的下一个字符」接着升起,
+   延迟 = 字数 × 本值,两处共用这一个数(见 PageCollapse 的 riseDelay)。 */
+export const RISE_CHAR_STEP = 35;
 
 export default function PageTitle({
   text,
@@ -49,7 +53,7 @@ export default function PageTitle({
             className="heading-rise-char"
             style={
               {
-                '--d': `${i * 35}ms`,
+                '--d': `${i * RISE_CHAR_STEP}ms`,
                 ...(held ? { transition: 'none' } : null),
               } as CSSProperties
             }

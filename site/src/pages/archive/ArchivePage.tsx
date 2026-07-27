@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import LikeButton from '../../shared/LikeButton';
 import HeadingRise from '../../shared/HeadingRise';
-import PageTitle from '../../shared/PageTitle';
+import PageTitle, { RISE_CHAR_STEP } from '../../shared/PageTitle';
 import PageCollapse from '../../shared/PageCollapse';
 import { PIXEL_PATHS } from './pixelIcons';
 import {
@@ -101,7 +101,8 @@ function VideoCard(props: {
 }
 
 /* modalTitle(test/page-interaction 实验):首页模态内嵌时由 HomePage 传入 ——
-   'held' = 标题按住不入场(等 FLIP 克隆飞到位),'revealed' = 克隆落位后瞬时显形。
+   标题随整块从索引行位置平移上来,本身就是那行字的延续,不再自己播逐字升起:
+   'held' = 位移期间按住,'revealed' = 瞬时显形。
    独立 archive.html 入口不传,标题走自己的 per-character rise,行为与线上一致。 */
 export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'revealed' }) {
   const [modalSrc, setModalSrc] = useState<string | null>(null);
@@ -137,7 +138,11 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
     <>
       <div className="page-title-row">
         <PageTitle text="Archive" held={!!modalTitle} revealed={modalTitle === 'revealed'} />
-        <PageCollapse modal={!!modalTitle} held={modalTitle === 'held'} />
+        <PageCollapse
+          modal={!!modalTitle}
+          held={modalTitle === 'held'}
+          riseDelay={7 * RISE_CHAR_STEP}
+        />
       </div>
       {/* VIBEDESIGN banner:置于顶部做 hero,三套样式轮播。
           与作品卡同构(card-wrapper + card-info):下方显示名称与时间(2026-07-22) */}

@@ -86,6 +86,22 @@ const MODAL_PAGES: Record<ModalTarget, { href: string; bodyClass: string; label:
    下限约束:必须小于 morphTiming 的最短时长(560ms),布局恢复才来得及在落位前发生。
    CSS 侧的淡出时长(writing.css .home-modal-closing)与这里同值 —— 一起改。 */
 const HOME_RESTORE_MS = 420;
+/* 首页入场大致收尾后,把两个模态页隐藏挂载做后台预载(2026-07-27 用户要求
+   「展开前内容就该是完整的」)。点击才加载的话,7 个 iframe + 10 个视频要靠
+   「赶在位移落位前备齐」,热缓存下勉强赶得上(实测 840ms < 1385ms),冷启动
+   就会看到内容陆续补上。延迟到入场之后再开始:太早会与 loader / hero 抢带宽。
+   注意这与被否掉的骨架图方案无关 —— 骨架是「位移期间不给 src、拿灰块顶着」,
+   这里是「提前把内容备好」,展开时直接展示。 */
+const PRELOAD_DELAY_MS = 1500;
+/* 预载后 DOM 里同时躺着两页,所有针对模态内容的查询都必须限定在激活页内 ——
+   document.querySelector 会命中第一个(隐藏那页),隐藏元素的 rect 全是 0,
+   位移起终点、fixed 接力、首屏批次全会算错(2026-07-27 加回预载时实测:
+   收起会多出一个差 53px 的中间布局)。 */
+const ACTIVE_CLASS = 'home-modal-active';
+const inActive = <T extends Element>(sel: string) =>
+  document.querySelector<T>(`.${ACTIVE_CLASS} ${sel}`);
+const allInActive = <T extends Element>(sel: string) =>
+  Array.from(document.querySelectorAll<T>(`.${ACTIVE_CLASS} ${sel}`));
 /* 恢复时 hero(含署名)的显形:整块一起淡入 1s(骨架前定稿;其后的 1.5s /
    依次错峰 / 不淡入等尝试随 2026-07-27 完整回滚一并撤销)。 */
 const HOME_HERO_FADE_MS = 1000;
@@ -150,6 +166,9 @@ function rideEls(): HTMLElement[] {
         el.classList.add('home-ride-el');
         out.push(el);
       }
+      /* d === 'none' 的整支跳过:那是未激活的预载页(常驻挂载、隐藏),
+         既不参与位移,也不该被打上 .home-ride-el —— 打了会被收起时的
+         淡出/摘除规则误伤,下次激活它就是隐形的。 */
     });
   };
   walk(app);
@@ -172,6 +191,13 @@ export default function HomePage() {
   const [modal, setModal] = useState<ModalState>(null);
   const morphFrom = useRef<DOMRect | null>(null);
   const rideAnimsRef = useRef<Animation[]>([]);
+
+  /* 后台预载:入场收尾后挂载两个模态页(隐藏),内容提前备好 */
+  const [preloaded, setPreloaded] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setPreloaded(true), PRELOAD_DELAY_MS);
+    return () => clearTimeout(t);
+  }, []);
 
   const openModal = (target: ModalTarget) => (e: MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -210,7 +236,7 @@ export default function HomePage() {
     body.classList.remove('home-landing');
     body.classList.add(page.bodyClass, 'home-modal', 'home-modal-riding');
     window.scrollTo(0, 0);
-    const titleMask = document.querySelector<HTMLElement>('.page-title .heading-rise-mask');
+    const titleMask = inActive<HTMLElement>('.page-title .heading-rise-mask');
     const from = morphFrom.current;
     const els = rideEls();
     if (!titleMask || !from || !els.length) {
@@ -224,10 +250,8 @@ export default function HomePage() {
        拿到零延迟的 icon 卡反超;点名 banner 首发后,其余卡片又显得「没跟块一起动」——
        收敛为按最终位置划首屏、整批首发。)
        此刻 transform 动画尚未挂上,量到的就是落位后的自然位置。 */
-    const firstWave = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        '.design-menu, .design-banner-frame, .section-divider h2, .card-wrapper',
-      ),
+    const firstWave = allInActive<HTMLElement>(
+      '.design-menu, .design-banner-frame, .section-divider h2, .card-wrapper',
     ).filter((el) => {
       /* 零尺寸 = 藏在 display:none 支路里(如 works-page 的区块标题),不参与首发 */
       const r = el.getBoundingClientRect();
@@ -293,7 +317,7 @@ export default function HomePage() {
         timing,
       ),
     );
-    const collapseSvg = document.querySelector<SVGSVGElement>('.page-collapse svg');
+    const collapseSvg = inActive<SVGSVGElement>('.page-collapse svg');
     if (collapseSvg) {
       anims.push(
         collapseSvg.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(135deg)' }], {
@@ -348,11 +372,40 @@ export default function HomePage() {
       : [];
     rowParts.forEach((el) => (el.style.visibility = 'hidden'));
 
+    /* 落位接力时标题行被改成 fixed(见 restoreTimer),这些 inline 样式必须还原 ——
+       预载让两页常驻不卸载,残留会留到下一次展开:标题行还挂着 top:0 就跑到页顶,
+       又因脱离文档流让位移起点算错、整块从右下角移入(2026-07-27 用户实测第二次
+       展开的大 bug)。以前模态关闭即卸载,残留随组件消失,所以没暴露。 */
+    let landedTitleRow: HTMLElement | null = null;
+    const clearTitleRowInline = () => {
+      if (!landedTitleRow) return;
+      const st = landedTitleRow.style;
+      st.position = '';
+      st.top = '';
+      st.left = '';
+      st.width = '';
+      st.margin = '';
+      landedTitleRow = null;
+    };
+
     let finished = false;
     const finishClose = () => {
       if (finished) return;
       finished = true;
+      /* 第一步必须先把激活页藏起来,再做任何清理 ——
+         摘掉 position:fixed 的那一刻 transform 还挂在元素上,而这个值是按 fixed
+         坐标系算的,回到文档流后叠加它会把标题行甩到页面外(实测 y 从 665 跳到
+         1556),这一帧被绘制就是用户看到的「闪一下」。与缓动无关:删掉弹性落位后
+         依旧存在(2026-07-27 逐帧采样定位)。
+         隐藏用 inline display —— React 下次渲染这个 wrapper 时会用 style prop
+         覆盖回来,不会残留。 */
+      const activeWrap = document.querySelector<HTMLElement>(`.${ACTIVE_CLASS}`);
+      if (activeWrap) activeWrap.style.display = 'none';
+      /* 同一同步块内完成交接:标题行隐去、行文字显形,浏览器不会在中间绘制 */
       rowParts.forEach((el) => (el.style.visibility = ''));
+      rideAnimsRef.current.forEach((a) => a.cancel());
+      rideAnimsRef.current = [];
+      clearTitleRowInline();
       body.classList.remove('home-modal-riding');
       setModal(null);
     };
@@ -372,8 +425,8 @@ export default function HomePage() {
          再把 currentTime 拨到已流逝的 HOME_RESTORE_MS —— 接进同一条曲线的
          同一时刻,速度零断差(此前用「剩余路程的新 ease-out」接力,新曲线从头
          起步速度陡,落位前会抖一下,2026-07-27 用户实测)。 */
-      const titleRow = document.querySelector<HTMLElement>('.page-title-row');
-      const tMask = document.querySelector<HTMLElement>('.page-title .heading-rise-mask');
+      const titleRow = inActive<HTMLElement>('.page-title-row');
+      const tMask = inActive<HTMLElement>('.page-title .heading-rise-mask');
       if (rideActive && titleRow && tMask && from) {
         const rowRect = titleRow.getBoundingClientRect();
         const mNow = new DOMMatrixReadOnly(getComputedStyle(titleRow).transform);
@@ -383,6 +436,7 @@ export default function HomePage() {
         rideAnimsRef.current.forEach((a) => {
           if (a.effect && (a.effect as KeyframeEffect).target === titleRow) a.cancel();
         });
+        landedTitleRow = titleRow;
         titleRow.style.position = 'fixed';
         titleRow.style.top = '0';
         titleRow.style.left = '0';
@@ -426,7 +480,7 @@ export default function HomePage() {
     }, HOME_RESTORE_MS);
 
     const from = morphFrom.current; /* 首页行位置(打开时记录,scroll=0 的视口坐标) */
-    const titleMask = document.querySelector<HTMLElement>('.page-title .heading-rise-mask');
+    const titleMask = inActive<HTMLElement>('.page-title .heading-rise-mask');
     const els = rideEls();
     let fallbackTimer: number | undefined;
     if (!titleMask || !from || !els.length) {
@@ -455,7 +509,11 @@ export default function HomePage() {
     rideActive = true;
     rideStart = { x: curX, y: startY };
     rideEnd = { x: dx, y: dy };
-    /* 时长按剩余行程算(半空接力时行程短、时长按比例短),速度与展开一致 */
+    /* 时长按剩余行程算(半空接力时行程短、时长按比例短),速度与展开一致。
+       曾试过过冲式弹性落位(--ease-spring),2026-07-27 移除:落点行上下都紧邻
+       另一行、行距只有 83px,过冲 25px 时标题行会压到邻行上晃一下(用户读作
+       「闪一下」),收到看不出闪的 2px 又已经完全读不出弹性 —— 这个场景没有
+       可用区间,统一回 ease-out。 */
     const timing = morphTiming(Math.hypot(dx - curX, dy - startY));
     rideTiming = timing;
     const anims = els.map((el) =>
@@ -467,7 +525,7 @@ export default function HomePage() {
         { ...timing, fill: 'forwards' },
       ),
     );
-    const collapseSvg = document.querySelector<SVGSVGElement>('.page-collapse svg');
+    const collapseSvg = inActive<SVGSVGElement>('.page-collapse svg');
     if (collapseSvg) {
       /* 与展开对称:旋转压到位移时长的 ARROW_SPIN_RATIO,不拖 ease-out 的角度长尾 */
       anims.push(
@@ -483,6 +541,7 @@ export default function HomePage() {
     return () => {
       clearTimeout(restoreTimer);
       if (fallbackTimer) clearTimeout(fallbackTimer);
+      clearTitleRowInline(); // 中断兜底:fixed 残留会毁掉下一次展开
       /* 用 ref 而不是局部 anims:restore 时接力的 landAnim 也在 ref 里,一并清 */
       rideAnimsRef.current.forEach((a) => a.cancel());
       rideAnimsRef.current = [];
@@ -668,15 +727,29 @@ export default function HomePage() {
       {/* Blog / Archive 全屏模态:与首页同住 #app,body.blog-page / works-page 让线上样式原样生效。
           整块位移方案:标题/收起箭头从首帧就显形 —— 它们起步时与被点击的行像素重合,
           本身就是行文字/行箭头的延续('revealed' = 瞬时显形,不播逐字入场) */}
-      {/* Blog / Archive 全屏模态:点击时挂载(骨架/预载方案 2026-07-27 全部回滚,
-          回到直接挂载 —— 用户指定「回到骨架图之前的版本」)。
+      {/* Blog / Archive 全屏模态:两页常驻挂载(预载完成后),用 display 切换激活 ——
+          展开时内容早已加载完,直接展示、按 pillar 节奏依次升起。
+          display:contents 让激活页的子项保持 #app 直接子级(works-page 的网格依赖
+          这一点,rideEls 的 walker 也会穿透它);未激活的那页 display:none 不占布局,
+          iframe 内的 rAF 循环被浏览器自动暂停,不耗帧。
+          关闭后不卸载:滑出视口的卡片由 pillar 复位,再次展开照常重播入场且即点即现。
           标题/收起箭头从首帧就显形,它们是行文字/行箭头的延续。 */}
-      {modal &&
-        (modal.target === 'blog' ? (
-          <BlogPage modalTitle="revealed" />
-        ) : (
-          <ArchivePage modalTitle="revealed" />
-        ))}
+      {(preloaded || modal) && (
+        <>
+          <div
+            className={modal?.target === 'blog' ? ACTIVE_CLASS : undefined}
+            style={{ display: modal?.target === 'blog' ? 'contents' : 'none' }}
+          >
+            <BlogPage modalTitle="revealed" />
+          </div>
+          <div
+            className={modal?.target === 'archive' ? ACTIVE_CLASS : undefined}
+            style={{ display: modal?.target === 'archive' ? 'contents' : 'none' }}
+          >
+            <ArchivePage modalTitle="revealed" />
+          </div>
+        </>
+      )}
     </>
   );
 }

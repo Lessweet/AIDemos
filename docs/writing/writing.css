@@ -3007,6 +3007,15 @@ body.works-page.theme-dark .page-collapse { color: #fff; }
     transform: rotate(135deg);
 }
 .page-collapse svg * { vector-effect: non-scaling-stroke; }
+/* 独立页(直接访问 blog.html / archive.html)时,箭头复用 heading-rise 从基线下方
+   升起,延迟接在标题末字之后(PageCollapse 的 riseDelay,2026-07-27 用户要求)。
+   遮罩要按 1em 见方留出升起的行程 —— .heading-rise-mask 的通用样式是给文字用的,
+   inline-flex 会被 svg 的 display:block 撑成实际高度,这里补一条把它按住。 */
+.page-collapse.heading-rise .heading-rise-mask {
+    display: block;
+    line-height: 0;   /* 消掉 inline 基线余隙,遮罩与 1em 的箭头等高 */
+}
+.page-collapse.heading-rise .heading-rise-char { display: block; }
 /* v2 整块位移后不再有独立飞行的克隆(.home-morph-clone / .home-morph-arrow 已删):
    标题/箭头是真实 DOM,深浅主题色由 blog-page / works-page 既有规则天然覆盖。 */
 
