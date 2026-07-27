@@ -85,7 +85,7 @@ const MODAL_PAGES: Record<ModalTarget, { href: string; bodyClass: string; label:
    块继续下移落进已经在场的行里。
    下限约束:必须小于 morphTiming 的最短时长(560ms),布局恢复才来得及在落位前发生。
    CSS 侧的淡出时长(writing.css .home-modal-closing)与这里同值 —— 一起改。 */
-const HOME_RESTORE_MS = 420;
+const HOME_RESTORE_MS = 320;
 /* 首页入场大致收尾后,把两个模态页隐藏挂载做后台预载(2026-07-27 用户要求
    「展开前内容就该是完整的」)。点击才加载的话,7 个 iframe + 10 个视频要靠
    「赶在位移落位前备齐」,热缓存下勉强赶得上(实测 840ms < 1385ms),冷启动
@@ -105,12 +105,14 @@ const allInActive = <T extends Element>(sel: string) =>
 /* 恢复时 hero(含署名)的显形:整块一起淡入 1s(骨架前定稿;其后的 1.5s /
    依次错峰 / 不淡入等尝试随 2026-07-27 完整回滚一并撤销)。 */
 const HOME_HERO_FADE_MS = 1000;
-/* morph 的时长/缓动从 token 读(--page-morph-dur / --ease-soft),展开收起同一组:
-   ease-out —— 点击立即起步、长尾滑行落位(用户定的,不要 in-out 的缓起)。
+/* morph 的时长/缓动从 token 读(--page-morph-dur / --ease),展开收起同一组:
+   easeOutQuad —— 立即起步、末端滑行,但初速度只有 --ease-soft 的 40%
+   (用户:不要缓起,但起步别那么猛)。
    时长按行程缩放、速度恒定(2026-07-27 用户定):Blog / Archive 行位置不同,
    固定时长会让 Archive(行更靠下、行程更长)明显更快。--page-morph-dur 定义为
-   「基准行程 MORPH_REF_PX 的时长」,实际时长线性缩放,夹在 0.5×–1.6× 之间
-   (下限 0.5× = 560ms 必须大于 HOME_RESTORE_MS,收起的布局恢复才来得及在落位前发生)。
+   「基准行程 MORPH_REF_PX 的时长」,实际时长线性缩放,夹在 0.8×–1.3× 之间
+   (下限 0.8× = 440ms 必须大于 HOME_RESTORE_MS=320,收起的布局恢复才来得及在落位前
+   发生;上限 1.3× 是从 1.6× 收来的 —— 大窗口下行程长,1.6× 会把时长顶到 1.3 秒)。
    系统开了减弱动效就不飞了,直接落位(与 CSS 侧 prefers-reduced-motion 规则同一态度)。 */
 const MORPH_REF_PX = 420;
 /* 箭头旋转占位移时长的比例:同一条 ease-out 里,前 40% 时间转掉 85% 的角度,
@@ -127,10 +129,10 @@ function morphTiming(distance?: number) {
   const duration =
     distance === undefined
       ? base
-      : Math.min(base * 1.6, Math.max(base * 0.5, (base * distance) / MORPH_REF_PX));
+      : Math.min(base * 1.3, Math.max(base * 0.8, (base * distance) / MORPH_REF_PX));
   return {
     duration,
-    easing: rootCs.getPropertyValue('--ease-soft').trim() || 'cubic-bezier(0.22, 1, 0.36, 1)',
+    easing: rootCs.getPropertyValue('--ease').trim() || 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
   };
 }
 
@@ -401,6 +403,18 @@ export default function HomePage() {
          覆盖回来,不会残留。 */
       const activeWrap = document.querySelector<HTMLElement>(`.${ACTIVE_CLASS}`);
       if (activeWrap) activeWrap.style.display = 'none';
+      /* 卡片入场态复位:预载让模态页常驻不卸载,卡片会停在上次的 .visible +
+         entered,下次展开就「一开始全在场」,依次上移的入场动画看着像没了
+         (2026-07-27 用户实测)。pillar 自己的复位观察器在收起期间被冻结(防止
+         下移时卡片被逐个瞬灭),等冻结解除时 wrapper 已 display:none,复位回调
+         不会再来 —— 这里主动收尾。瞬时完成(禁过渡)且页面已不可见,看不到。 */
+      activeWrap?.querySelectorAll<HTMLElement>('.card-wrapper, .design-menu, .design-banner-frame, .section-divider h2').forEach((el) => {
+        el.style.transition = 'none';
+        el.classList.remove('visible', 'heading-rise-in', 'enter-from-above');
+        delete el.dataset.entered;
+        void el.offsetWidth;
+        el.style.transition = '';
+      });
       /* 同一同步块内完成交接:标题行隐去、行文字显形,浏览器不会在中间绘制 */
       rowParts.forEach((el) => (el.style.visibility = ''));
       rideAnimsRef.current.forEach((a) => a.cancel());

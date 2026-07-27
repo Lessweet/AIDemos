@@ -2893,7 +2893,7 @@ html:has(body.home-modal-riding) { overflow: hidden; }
 body.home-modal.home-modal-closing .home-ride-el:not(.page-title-row) {
     opacity: 0 !important;
     /* 退场 ease-in(加速离开),与入场的 ease-out 对仗 —— 出画干脆、入画柔和 */
-    transition: opacity var(--hover-color-dur) ease-in;
+    transition: opacity 0.32s ease-in;
 }
 /* 位移期间保留元素各自的 translateY 入场(2026-07-27 定):卡片的 16px 升起 +
    行/列错峰,正是独立 blog.html / archive.html 加载时的入场语言,用户要求模态
