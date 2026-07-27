@@ -149,6 +149,21 @@ export default function ArticlePage({ initialSlug }: { initialSlug: string }) {
   const slugRef = useRef(slug);
   slugRef.current = slug;
 
+  /* 标签(eyebrow)位置归一化:13 篇 fragment 有两种结构 —— 4 篇把标签写在 byline 内
+     (与日期/阅读时长同排),9 篇是独立元素排在标题上方。样式规则是按前者写的
+     (body.reading-page .article-byline .article-eyebrow),后者命中不了,标签就还
+     留在标题上方(2026-07-27 用户实测)。
+     这里在渲染后把独立的那种移进 byline 最前 —— 不改 fragment:它们由
+     extract-articles.mjs 生成,手改会被重跑覆盖。按 slug 重跑,与目录重建同批。 */
+  useLayoutEffect(() => {
+    const root = articleRef.current;
+    const byline = root?.querySelector('.article-byline');
+    if (!root || !byline) return;
+    root.querySelectorAll(':scope > .article-eyebrow').forEach((eyebrow) => {
+      byline.insertBefore(eyebrow, byline.firstChild);
+    });
+  }, [slug]);
+
   /* ── writing.js initTOC:从正文 h2/h3 生成目录 + scrollspy(逐行移植,按 slug 重建) ── */
   useLayoutEffect(() => {
     const toc = tocNavRef.current;
