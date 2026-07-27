@@ -412,14 +412,6 @@ export default function BlogPage() {
       if (slot) {
         slot.style.height = '';
         slot.classList.remove('article-slot');
-        /* 摘要不参与飞行,槽位一解锁它是瞬间现形的,生硬 —— 补一段淡入,
-           与展开侧 byline 剩余部分落位淡入同一手法(2026-07-28 用户要求)。
-           WAAPI 不吃 freeze 规则的 transition:none,摘类后也不受入场过渡干扰。 */
-        slot
-          .querySelectorAll<HTMLElement>('.w-excerpt')
-          .forEach((el) =>
-            el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' }),
-          );
       }
       /* 原路飞回的那份要还原:它是 feed 里的真实节点,不还原就一直钉着 */
       if (pendingCover) {
@@ -576,6 +568,26 @@ export default function BlogPage() {
       finish();
       return;
     }
+    /* 摘要淡入提前到飞行中段(2026-07-28 用户要求):不等落位,飞行走到 ~40%
+       就开始淡,落位时已到大半,收尾更连贯。飞行期间槽位罩着它 —— visibility
+       继承 hidden、opacity 通配强制 1(通配已排除 .w-excerpt)—— 所以这里内联
+       visibility 放行,WAAPI 推 opacity;播完清内联,交还给槽位/入场态。 */
+    window.setTimeout(
+      () => {
+        wrapper?.querySelectorAll<HTMLElement>('.w-excerpt').forEach((el) => {
+          el.style.visibility = 'visible';
+          const a = el.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: 260,
+            easing: 'ease-out',
+          });
+          a.onfinish = () => {
+            el.style.visibility = '';
+          };
+        });
+      },
+      Math.round(morphMs(true) * 0.4),
+    );
+
     anims[anims.length - 1].onfinish = () => {
       hidden.forEach((el) => (el.style.visibility = ''));
       finish(); // 文章整体卸载,飞行件随之消失
