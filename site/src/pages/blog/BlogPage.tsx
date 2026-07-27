@@ -40,7 +40,14 @@ type ArticleState = { slug: string; phase: 'morph' | 'open' | 'closing' } | null
 /* 封面放大的时长与缓动。ease-out:点击立即起步、末端滑行落位。
    420ms:620 实测偏慢(2026-07-27 用户「要更快」)—— 手机端位移距离本来就短,
    放大要跟手。 */
-const COVER_MORPH_MS = 420;
+/* 飞行时长的真值在 style.css 的 --article-morph-dur —— 顶栏底色的过渡也读它,
+   两处同步才不会「颜色先到位、元素还在飞」。读不到时兜底 420。 */
+const morphMs = () => {
+  const v = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--article-morph-dur'),
+  );
+  return Number.isFinite(v) && v > 0 ? v * 1000 : 420;
+};
 const COVER_EASE = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
 /* 模态只在手机端(SMALL_MQ)启用 —— 桌面点卡片照常跳转到独立文章页,那边是
    「左列表 + 右正文」的两栏阅读布局(2026-07-27 用户定)。 */
@@ -50,6 +57,96 @@ const COVER_EASE = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
    标题两端字号差一倍(18→36)且换行位置不同,scale 到落位那一帧字号会猛跳一截
    —— 用户实测「看着是两套」。所以文字改成真动 font-size / width,让它一路真实
    重排,落位与目标逐像素吻合;代价是每帧重排一个元素,420ms 内可接受。 */
+/* 文章侧的日期:fragment 里 byline 是 <div.article-eyebrow> + 裸 <span>日期 +
+   <span>阅读时长,日期没有 class。取 byline 下第一个不在 eyebrow 里的 span。 */
+function articleDateEl(host: HTMLElement): HTMLElement | null {
+  const byline = host.querySelector('.article-byline');
+  if (!byline) return null;
+  return (
+    [...byline.querySelectorAll<HTMLElement>(':scope > span')].find(
+      (el) => !el.closest('.article-eyebrow'),
+    ) ?? null
+  );
+}
+
+/* 飞行件复位:摘掉钉住用的内联样式,让它回到自己原本的排版里。 */
+function unpin(el: HTMLElement) {
+  el.classList.remove('article-flying-el');
+  el.style.cssText = el.style.cssText
+    .replace(/position:[^;]+;?/, '')
+    .replace(/left:[^;]+;?/, '')
+    .replace(/top:[^;]+;?/, '')
+    .replace(/width:[^;]+;?/, '')
+    .replace(/height:[^;]+;?/, '')
+    .replace(/margin:[^;]+;?/, '')
+    .replace(/z-index:[^;]+;?/, '')
+    .replace(/transform-origin:[^;]+;?/, '');
+}
+
+/* 封面交接:挂上 iframe 的 src,等它真正画出一帧再让文章封面顶替飞行件。
+   iframe 与卡片封面是同一个 HTML,但这是第二个实例,渲染要从零跑一遍
+   (实测 40~50ms 一帧)。飞行期间不加载、落位后再加载,这一帧就落在静止
+   状态下,看不出来。超时兜底,避免 iframe 加载失败时封面永远不露面。 */
+function handoffCover(
+  target: HTMLElement | null,
+  flyer: HTMLElement | null,
+  anim: Animation | null,
+  ref: { current: (() => void) | null },
+) {
+  const settle = () => {
+    ref.current = null;
+    if (target) target.style.visibility = '';
+    anim?.cancel(); // 先显形再撤 fill,同一同步块内完成,不留空帧
+    if (flyer) unpin(flyer);
+  };
+  const iframe = target?.querySelector<HTMLIFrameElement>('iframe[data-src]');
+  if (!iframe) {
+    settle();
+    return;
+  }
+  let fired = false;
+  const go = () => {
+    if (fired) return;
+    fired = true;
+    clearTimeout(timer);
+    settle();
+  };
+  ref.current = go;
+  const timer = window.setTimeout(go, 900);
+  iframe.addEventListener(
+    'load',
+    // 再等两帧:load 只说明文档就绪,封面自己的首帧还没画上去
+    () => requestAnimationFrame(() => requestAnimationFrame(go)),
+    { once: true },
+  );
+  iframe.src = iframe.dataset.src ?? '';
+  iframe.removeAttribute('data-src');
+}
+
+/* 把元素就地钉成 fixed。left/top 直接写视口坐标是不够的:只要任何一个祖先带了
+   transform / filter / will-change,它就成了 fixed 的包含块,坐标会相对它算 ——
+   Blog 列表行的入场动画正是这种,实测飞行件跑到视口外 2400px 处(2026-07-27)。
+   所以钉完再量一次,把偏差反补回去。校正分两趟做(先全钉、再全补),避免
+   读写交替反复触发重排。 */
+function pin(el: HTMLElement, r: DOMRect, z: string) {
+  el.style.position = 'fixed';
+  el.style.left = `${r.left}px`;
+  el.style.top = `${r.top}px`;
+  el.style.width = `${r.width}px`;
+  el.style.height = `${r.height}px`;
+  el.style.margin = '0';
+  el.style.zIndex = z;
+  el.style.transformOrigin = 'top left';
+  el.classList.add('article-flying-el');
+}
+function correctPin(el: HTMLElement, r: DOMRect) {
+  const now = el.getBoundingClientRect();
+  const dx = now.left - r.left;
+  const dy = now.top - r.top;
+  if (Math.abs(dx) > 0.5) el.style.left = `${r.left - dx}px`;
+  if (Math.abs(dy) > 0.5) el.style.top = `${r.top - dy}px`;
+}
+
 type Landing = { left: number; top: number; width: number; height: number; fs: number };
 function flightFrames(el: HTMLElement, from: DOMRect, to: Landing, kind: string): Keyframe[] {
   const shift = `translate(${to.left - from.left}px, ${to.top - from.top}px)`;
@@ -75,6 +172,8 @@ export default function BlogPage() {
      关键:动的必须是卡片上那一份,不是文章里的新元素 —— 动态封面是 iframe,
      两份 iframe 的动画进度不同步,让新元素从卡片位置放大,一眼就能看出是两个东西
      (2026-07-27 用户实测「能看出没有联动,是两个独立的」)。 */
+  /* 封面交接的「立即完成」句柄:iframe 画完或超时后自行清空 */
+  const handoffRef = useRef<(() => void) | null>(null);
   const flyingRef = useRef<{ items: { el: HTMLElement; from: DOMRect; kind: string }[] } | null>(null);
   const blogScrollRef = useRef(0);
   const cards = blogCards();
@@ -118,21 +217,12 @@ export default function BlogPage() {
         [coverEl, 'cover'],
         [wrapper?.querySelector<HTMLElement>('.w-title, .bl-title') ?? null, 'title'],
         [wrapper?.querySelector<HTMLElement>('.a-tag') ?? null, 'tag'],
+        [wrapper?.querySelector<HTMLElement>('.w-date, .bl-date') ?? null, 'date'],
       ] as [HTMLElement | null, string][]
     )
       .filter(([el]) => !!el)
       .map(([el, kind]) => ({ el: el as HTMLElement, from: (el as HTMLElement).getBoundingClientRect(), kind }));
-    items.forEach(({ el, from }) => {
-      el.style.position = 'fixed';
-      el.style.left = `${from.left}px`;
-      el.style.top = `${from.top}px`;
-      el.style.width = `${from.width}px`;
-      el.style.height = `${from.height}px`;
-      el.style.margin = '0';
-      el.style.zIndex = '95'; // 低于顶栏(100)
-      el.style.transformOrigin = 'top left';
-      el.classList.add('article-flying-el'); // 配合 CSS 在隐藏的 feed 里单独露脸
-    });
+    items.forEach(({ el, from }) => pin(el, from, '95')); // 95:低于顶栏(100)
     flyingRef.current = { items };
 
     const body = document.body;
@@ -141,6 +231,7 @@ export default function BlogPage() {
        按钮被压成 4px 挤到左上角。Blog 自己的 feed 网格由 .article-modal 的
        display:none 规则关掉即可(2026-07-27 用户:顶栏两个按钮要和首页一样)。 */
     body.classList.add('writing-page', 'reading-page', 'article-modal');
+    body.classList.add('article-morphing'); // 飞行期间:byline 里不飞的部分先不出现
     body.setAttribute('data-tint', shell.tint);
     if (shell.accent) body.setAttribute('data-accent', shell.accent);
     document.title = shell.title;
@@ -149,6 +240,10 @@ export default function BlogPage() {
        (style.css,给锚点跳转用),不覆盖的话这次归零会变成一段平滑滚动 ——
        用户看到的就是「展开时页面自己在滚」(2026-07-27 实测滚动曲线在减速)。 */
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    /* 校正必须放在最后:带 transform 的祖先(列表行的入场动画)会随页面滚动,
+       上面的归零一走,先前算好的 fixed 坐标又整体偏了两千像素。等布局全部
+       落定再补(2026-07-27 实测 top 仍停在 2218)。 */
+    items.forEach(({ el, from }) => correctPin(el, from));
     setArticle({ slug, phase: 'morph' });
   };
 
@@ -157,11 +252,20 @@ export default function BlogPage() {
      真实几何),最后 FLIP 回去。封面是 iframe,全程不搬动 DOM —— 一旦 appendChild
      到别处,iframe 会重新加载、画面闪空(2026-07-27)。 */
   const closeArticle = () => {
+    /* 封面交接可能还挂着(iframe 未画完就被收起)——先立即结掉,
+       否则待会儿要飞回去的文章封面还是 visibility:hidden 的。 */
+    handoffRef.current?.();
     const body = document.body;
     const slug = article?.slug;
 
     const finish = () => {
-      body.classList.remove('writing-page', 'reading-page', 'article-modal', 'article-closing');
+      body.classList.remove(
+        'writing-page',
+        'reading-page',
+        'article-modal',
+        'article-closing',
+        'article-morphing',
+      );
       body.removeAttribute('data-tint');
       body.removeAttribute('data-accent');
       body.style.removeProperty('--page-tint');
@@ -185,6 +289,7 @@ export default function BlogPage() {
         [host.querySelector<HTMLElement>('.article-cover'), 'cover'],
         [host.querySelector<HTMLElement>('.article-h1'), 'title'],
         [host.querySelector<HTMLElement>('.article-eyebrow .a-tag'), 'tag'],
+        [articleDateEl(host), 'date'],
       ] as [HTMLElement | null, string][]
     )
       .filter(([el]) => !!el)
@@ -192,24 +297,18 @@ export default function BlogPage() {
          当场上移一个封面高(实测 203px),起点就量歪了(2026-07-27)。 */
       .map(([el, kind]) => ({ el: el as HTMLElement, from: (el as HTMLElement).getBoundingClientRect(), kind }))
       .map(({ el, from, kind }) => {
-        const e = el;
-        e.style.position = 'fixed';
-        e.style.left = `${from.left}px`;
-        e.style.top = `${from.top}px`;
-        e.style.width = `${from.width}px`;
-        e.style.height = `${from.height}px`;
-        e.style.margin = '0';
-        e.style.zIndex = '90'; // 低于顶栏(100),缩回时从顶栏下穿过
-        e.style.transformOrigin = 'top left';
-        e.classList.add('article-flying-el'); // 让位的文章内容里单独放行这三件
-        return { el: e, from, kind };
+        pin(el, from, '90'); // 90:低于顶栏(100),缩回时从顶栏下穿过
+        return { el, from, kind };
       });
+
 
     /* ② 其余文章内容退场 + 恢复 Blog 布局与滚动位置 */
     body.classList.add('article-closing');
     body.classList.remove('article-modal');
     /* 同上:瞬时归位,否则收起时页面又会平滑滚一段 */
     window.scrollTo({ top: blogScrollRef.current, behavior: 'instant' as ScrollBehavior });
+    /* 同展开:等 Blog 布局与滚动都恢复完再补 fixed 坐标的偏差 */
+    flyers.forEach(({ el, from }) => correctPin(el, from));
 
     /* ③ 量目标卡片 —— 必须在 Blog 布局恢复之后 */
     const wrapper = document.querySelector<HTMLElement>(`.card-wrapper[data-slug="${slug}"]`);
@@ -220,7 +319,9 @@ export default function BlogPage() {
           null)
         : kind === 'title'
           ? (wrapper?.querySelector<HTMLElement>('.w-title, .bl-title') ?? null)
-          : (wrapper?.querySelector<HTMLElement>('.a-tag') ?? null);
+          : kind === 'tag'
+            ? (wrapper?.querySelector<HTMLElement>('.a-tag') ?? null)
+            : (wrapper?.querySelector<HTMLElement>('.w-date, .bl-date') ?? null);
 
     const anims: Animation[] = [];
     const hidden: HTMLElement[] = [];
@@ -232,9 +333,10 @@ export default function BlogPage() {
       const to: Landing = { left: r.left, top: r.top, width: r.width, height: r.height, fs: parseFloat(getComputedStyle(target).fontSize) };
       target.style.visibility = 'hidden'; // 落位前卡片这份不露脸
       hidden.push(target);
+      /* 收起不需要延迟交接:文章封面早画好了,飞的就是它 */
       anims.push(
         el.animate(flightFrames(el, from, to, kind), {
-          duration: COVER_MORPH_MS,
+          duration: morphMs(),
           easing: COVER_EASE,
           fill: 'both',
         }),
@@ -269,8 +371,11 @@ export default function BlogPage() {
         ? host.querySelector<HTMLElement>('.article-cover')
         : kind === 'title'
           ? host.querySelector<HTMLElement>('.article-h1')
-          : host.querySelector<HTMLElement>('.article-eyebrow .a-tag');
+          : kind === 'tag'
+            ? host.querySelector<HTMLElement>('.article-eyebrow .a-tag')
+            : articleDateEl(host);
 
+    const pairs: { el: HTMLElement; kind: string; target: HTMLElement; anim: Animation }[] = [];
     const anims: Animation[] = [];
     const hidden: HTMLElement[] = [];
     flying.items.forEach(({ el, from, kind }) => {
@@ -282,13 +387,13 @@ export default function BlogPage() {
       /* 文章侧先藏起来,避免与飞行中的源元素重影 */
       target.style.visibility = 'hidden';
       hidden.push(target);
-      anims.push(
-        el.animate(flightFrames(el, from, to, kind), {
-          duration: COVER_MORPH_MS,
-          easing: COVER_EASE,
-          fill: 'both',
-        }),
-      );
+      const anim = el.animate(flightFrames(el, from, to, kind), {
+        duration: morphMs(),
+        easing: COVER_EASE,
+        fill: 'both',
+      });
+      anims.push(anim);
+      pairs.push({ el, kind, target, anim });
     });
 
     if (!anims.length) {
@@ -296,24 +401,38 @@ export default function BlogPage() {
       return;
     }
     anims[anims.length - 1].onfinish = () => {
-      /* 同一同步块内交接:文章侧显形、飞行件复位,中间不留可见帧 */
-      hidden.forEach((el) => (el.style.visibility = ''));
-      flying.items.forEach(({ el }) => {
-        el.classList.remove('article-flying-el');
-        el.style.cssText = el.style.cssText
-          .replace(/position:[^;]+;?/, '')
-          .replace(/left:[^;]+;?/, '')
-          .replace(/top:[^;]+;?/, '')
-          .replace(/width:[^;]+;?/, '')
-          .replace(/height:[^;]+;?/, '')
-          .replace(/margin:[^;]+;?/, '')
-          .replace(/z-index:[^;]+;?/, '')
-          .replace(/transform-origin:[^;]+;?/, '');
+      /* 同一同步块内交接:文章侧显形、飞行件复位,中间不留可见帧。
+         封面例外 —— 它的 iframe 到这一刻才开始加载(飞行期间被摘了 src),
+         这会儿交接等于换上一张白图。留着飞行件顶在原位,等它画出来再换。 */
+      pairs.forEach(({ el, kind, target, anim }) => {
+        if (kind === 'cover') return;
+        target.style.visibility = '';
+        anim.cancel(); // 清掉 fill 保持的 transform,元素才能回到自己的排版
+        unpin(el);
       });
+      const cover = pairs.find((pr) => pr.kind === 'cover');
+      handoffCover(cover?.target ?? null, cover?.el ?? null, cover?.anim ?? null, handoffRef);
       flyingRef.current = null;
+      /* byline 里不参与飞行的部分(阅读时长)在飞行期间被压住,落位后淡入 ——
+         否则同一行里一半已就位、一半还在半路飞,读起来是两件事。
+         走 WAAPI 而不是 CSS:这些 span 被上面的 guard 打了 transition:none
+         !important(为了不让入场动画带偏日期),CSS 过渡在这里推不动。 */
+      document.body.classList.remove('article-morphing');
+      const landed = new Set<HTMLElement>(hidden); // 飞行目标:已经飞到位,不该再淡入一次
+      host.querySelectorAll<HTMLElement>('.article-byline > span').forEach((el) => {
+        if (landed.has(el)) return;
+        el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' });
+      });
       done();
     };
-    return () => anims.forEach((a) => a.cancel());
+    /* 封面若还挂着交接(handoffRef 非空),这里不能 cancel —— 它的终态全靠
+       fill 顶着,一取消就当场弹回卡片原位,而文章封面还没显形,中间会空一帧
+       (2026-07-27 实测 fly@72 跳回 fly@182)。 */
+    return () =>
+      pairs.forEach(({ kind, anim }) => {
+        if (kind === 'cover' && handoffRef.current) return;
+        anim.cancel();
+      });
   }, [article, hostReady]);
 
   /* 返回键 / Esc 关闭 */

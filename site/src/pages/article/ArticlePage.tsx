@@ -15,6 +15,18 @@ const fileOf = (slug: string) => `article-${slug}.html`;
 /* 当前 URL 的文章文件名(popstate 恢复用) */
 const currentUrlFile = () => (location.pathname.split('/').pop() || '').split('#')[0];
 
+/* 嵌入(Blog 模态)时把封面 iframe 的 src 挪到 data-src,由 BlogPage 在共享元素
+   飞完之后再挂上。封面与卡片是同一个 HTML,但这是它的第二个实例 —— 资源走缓存,
+   渲染(跑封面自己的动画、首次绘制)仍要从零来一遍,实测正好在飞行中段砸出一帧
+   40~50ms;摘掉它,展开/收起全程满帧(2026-07-27)。
+   独立文章页不动:那里没有飞行,封面越早出来越好。 */
+function deferCover(html: string): string {
+  return html.replace(
+    /(<div class="article-cover"><iframe[^>]*?)\ssrc=/,
+    '$1 data-src=',
+  );
+}
+
 export default function ArticlePage({
   initialSlug,
   embedHost,
@@ -314,7 +326,7 @@ export default function ArticlePage({
       <article
         className="article-reading"
         ref={(el) => (articleRef.current = el)}
-        dangerouslySetInnerHTML={{ __html: FRAGMENTS[slug] }}
+        dangerouslySetInnerHTML={{ __html: embedded ? deferCover(FRAGMENTS[slug]) : FRAGMENTS[slug] }}
       />
       {/* ≤1440 单栏:列表收成顶部「文章 ▾」下拉开关(仅该断点 CSS 显示) */}
       <button

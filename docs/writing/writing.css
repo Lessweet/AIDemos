@@ -2956,14 +2956,29 @@ body.article-modal .design-menu { display: none; }
    抹掉。改成脱流 + visibility 隐藏:不占高度,飞行件单独放行。
    动的必须是卡片那一份,否则动态封面会出现两份 iframe 各播各的(2026-07-27)。 */
 body.article-modal .design-content {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    /* 塌高度而不是 position:absolute —— 脱流会让整个 feed 在收起时重新参与流式
+       布局,实测收起起手有一帧 41ms(JS 只占 2.5ms,其余全在重排/重绘)。
+       height:0 + overflow:hidden 同样不占高度,但子元素的相对布局不变,恢复
+       时浏览器能复用。飞行件是 fixed,不受祖先 overflow 裁剪。 */
+    height: 0;
+    overflow: hidden;
     visibility: hidden;
     pointer-events: none;
 }
 body.article-modal .article-flying-el { visibility: visible; }
+/* 飞行件的祖先一律不许带 transform:只要祖先有 transform(卡片入场动画正在跑的
+   那个),它就成了 fixed 的包含块,而且是「会动的」包含块 —— 飞行件的视口位置
+   被它一路拖着走,轨迹抖、落位还差 22px(2026-07-27 实测停在 94 而目标 72)。
+   校正只能补一次静态偏差,补不了动态的,所以直接把 feed 里除飞行件之外的
+   transform / animation 全冻掉。feed 此时已隐藏,冻了不影响观感。
+   :not(.article-flying-el) 是关键 —— 飞行件自己的 transform 归 WAAPI 管,
+   这里一旦连它也 !important 掉,就彻底不动了。 */
+body.article-modal .design-content *:not(.article-flying-el) {
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+}
 /* 外层 #app 是 main.design-layout,它的 flex / padding / min-height 会干扰阅读排版,
    中性化掉让 .reading-layout 自己的规则接管 */
 body.article-modal #app {
@@ -3005,14 +3020,19 @@ body.article-closing .blog-article-host {
     overflow: hidden;   /* 让位的内容不再撑高;飞行件是 fixed,不受裁剪 */
 }
 /* 顶栏在关闭过程里保持 Blog 的底色,避免最后一帧从 tint 硬跳回灰白 */
-body.article-closing .header.home-nav { background: var(--site-bg) !important; }
+body.article-closing .header.home-nav {
+    background: var(--site-bg) !important;
+    transition: background-color var(--article-morph-dur) var(--ease) !important;
+}
 /* 整页底层同步回 Blog 底色 —— 阅读页的底是 ::before 那一块 fixed 满屏,收起时
    它若还停在文章的 --page-tint,顶栏(上面这条已切回 --site-bg)和页面底就差一道色。
    底色是近白的 #f9f9f9 时差 7 个色阶看不出,加深到 #f2f2f2 后就露馅了(2026-07-27)。
    2s 的 transition 也要关掉,否则色差会挂着慢慢褪、比硬跳更显眼。 */
 body.writing-page.design-page.article-closing::before {
     background: var(--site-bg);
-    transition: none;
+    /* 原本关掉 transition 是为了消除与顶栏的色差 —— 现在顶栏也走同一时长同一
+       缓动,两者一起渐变回 Blog 底色,既不留色差也不硬跳。 */
+    transition: background-color var(--article-morph-dur) var(--ease);
 }
 
 /* 单栏下标题/正文回到阅读列宽:≥1000px 的两栏规则把它们放开成 max-width:none
@@ -3045,6 +3065,9 @@ body.article-modal .article-cover {
    的顶栏是固定的 --site-bg,两者不一致会在顶栏下沿留一道色差。 */
 body.article-modal .header.home-nav {
     background: var(--page-tint, var(--site-bg)) !important;
+    /* 与共享元素飞行同一时长(同一个 token),颜色和元素一起到位。
+       硬切会让顶栏先变色、元素还在半路,读起来像两件事各干各的。 */
+    transition: background-color var(--article-morph-dur) var(--ease) !important;
     /* 模态里顶栏常驻:手机端 useHideNavOnScrollMobile 会在下滑时把顶栏收起(走 top),
        但这里顶栏是唯一的返回入口,滚到文章深处也得能点(2026-07-27 用户要求)。 */
     top: 0 !important;
@@ -3121,6 +3144,22 @@ body.article-closing .article-eyebrow {
     animation: none !important;
     transition: none !important;
 }
+
+/* byline 里的日期(裸 span,fragment 不给 class)也要飞,所以它自己这条
+   只关 animation / transition —— 绝不能跟着父链写 transform: none !important,
+   那会连 WAAPI 的飞行 transform 一起盖掉,日期就钉在原地不动了
+   (2026-07-27 实测 anims=1 但 transform 恒为 none)。 */
+body.article-modal .article-byline > span,
+body.article-closing .article-byline > span {
+    opacity: 1;
+    animation: none !important;
+    transition: none !important;
+}
+
+/* 飞行途中:byline 里没参与飞行的部分(阅读时长)先压住。同一行里一半已就位、
+   一半还在飞,读起来是两件事。落位后由 JS 用 WAAPI 淡入(CSS 过渡被上面那条
+   transition:none 挡住,推不动)。 */
+body.article-morphing .article-byline > span:not(.article-flying-el) { opacity: 0; }
 
 /* banner 与全部作品拼成一个连续的 3 列网格。
    原结构:banner 与 4 个 .category-section 在 .design-layout 里平级,每个 section 各自
