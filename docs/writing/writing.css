@@ -843,7 +843,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
 /* 手机端:标题组上下间距同步缩小并保持一致(封面下 = byline 下 = 40px) */
 @media (max-width: 600px) {
     .article-reading .article-cover { margin-bottom: 40px; }
-    body.reading-page .article-byline { margin-bottom: 40px; }
+    body.reading-page .article-byline { margin-bottom: 60px; }   /* 2026-07-28 用户定 60(段落间距仍 40) */
     /* 标签组:手机端字号/内边距/间距同步收小,与缩小后的标题比例协调 */
     body.reading-page .article-eyebrow { gap: 6px; margin-bottom: 14px; }
     body.reading-page .article-eyebrow .a-tag { padding: 3px 8px; }   /* 填充 chip,手机端内边距略收;字号与桌面统一 */
