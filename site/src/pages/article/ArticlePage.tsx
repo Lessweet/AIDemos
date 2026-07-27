@@ -149,6 +149,18 @@ export default function ArticlePage({ initialSlug }: { initialSlug: string }) {
   const slugRef = useRef(slug);
   slugRef.current = slug;
 
+  /* 标题换行归一化:fragment 把源标题里的「,」写成了 <br/>(如「验证循环<br/>把手动
+     检查写进 Skill」),9 篇都是这个模式。左对齐版式要求按容器宽度自然折行,所以把
+     <br/> 还原成「,」。不能用 CSS 的 br{display:none} —— 那样换行没了、逗号也没了。
+     同样不改 fragment:它们由 extract-articles.mjs 生成,手改会被重跑覆盖。 */
+  useLayoutEffect(() => {
+    const h1 = articleRef.current?.querySelector('.article-h1');
+    if (!h1) return;
+    h1.querySelectorAll('br').forEach((br) => {
+      br.replaceWith(document.createTextNode('，'));
+    });
+  }, [slug]);
+
   /* 标签(eyebrow)位置归一化:13 篇 fragment 有两种结构 —— 4 篇把标签写在 byline 内
      (与日期/阅读时长同排),9 篇是独立元素排在标题上方。样式规则是按前者写的
      (body.reading-page .article-byline .article-eyebrow),后者命中不了,标签就还
