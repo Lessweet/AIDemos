@@ -81,6 +81,9 @@
        收起 0.24s 也照参考的比例(它约 480/250)—— 展开要交代来龙去脉,收起只是让路。 */
     --article-morph-dur: 0.48s;
     --article-morph-back-dur: 0.24s;
+    /* 标题单独一档:比其余三件(封面/tag/日期)快一点先落位,读起来是标题领着走
+       (2026-07-28 用户要求)。只作用于展开;收起四件仍同档,一起收更利落。 */
+    --article-morph-title-dur: 0.42s;
 
     /* 页面级 morph(首页 Blog/Archive 行展开为全屏模态时的整块位移,
        test/page-interaction 实验):跨越半个屏幕的大位移,与卡片抬升同属

@@ -47,7 +47,16 @@ const morphMs = (back = false) => {
       back ? '--article-morph-back-dur' : '--article-morph-dur',
     ),
   );
-  return Number.isFinite(v) && v > 0 ? v * 1000 : back ? 240 : 340;
+  return Number.isFinite(v) && v > 0 ? v * 1000 : back ? 240 : 480;
+};
+/* 展开时标题走自己那一档(略快,先落位);其余三件用通档。
+   收起不分档 —— 四件一起收更利落。 */
+const morphMsFor = (kind: string) => {
+  if (kind !== 'title') return morphMs();
+  const v = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--article-morph-title-dur'),
+  );
+  return Number.isFinite(v) && v > 0 ? v * 1000 : 420;
 };
 /* 起步果断、尾段长收 —— 贴近参考里那种「一下就到位、最后轻轻停住」的手感。
    先前用的 easeOutQuad(0.25,0.46,0.45,0.94)全程温吞,起步不够干脆。 */
@@ -670,7 +679,7 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       /* 文章侧先藏起来,避免与飞行中的源元素重影 */
       target.style.visibility = 'hidden';
       hidden.push(target);
-      const group = flightAnims(el, from, to, kind, morphMs());
+      const group = flightAnims(el, from, to, kind, morphMsFor(kind));
       anims.push(...group);
       pairs.push({ el, kind, target, anims: group, origin });
     });
