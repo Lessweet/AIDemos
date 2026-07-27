@@ -800,11 +800,18 @@ body.reading-page .article-eyebrow-top .a-tag {
 /* H1 桌面 / 手机统一 = --fs-h1(48px),不再分断点 */
 /* tag、byline 维持基准值(手机端有单独的尺寸/内边距微调,见下方 ≤600 段)。 */
 
-/* 标题组(标题 / 发布时间·阅读时长)整体居中 —— 所有断点统一。
-   2026-07-27 一度改左对齐 + 屏蔽 fragment 里的 <br>,用户否掉:标题组维持线上原样
-   (居中、逗号处按 <br> 换行),本轮唯一的版式变化是它挪到了封面下方。 */
-body.reading-page .article-h1 { text-align: center; }
-body.reading-page .article-byline { text-align: center; justify-content: center; }
+/* 标题组(标题 / 发布时间·阅读时长)整体左对齐 —— 所有断点统一。
+   这一处 2026-07-27 反复过两轮:先改左对齐、被要求改回线上的居中、最终又定回左对齐。
+   最后这次是有前提的 —— 为「Blog 卡片 → 文章详情」的共享元素联动做准备:卡片标题是
+   18px 左对齐自然折行,详情标题居中 + <br> 强制换行的话,morph 中间态会出现「一行字
+   正在裂成两行」的错乱;两端都左对齐 + 自然折行后,就只剩字号差异(18 → 36),
+   可以用 scale 平滑过渡。 */
+body.reading-page .article-h1 { text-align: left; }
+body.reading-page .article-byline { text-align: left; justify-content: flex-start; }
+/* 标题的自然折行由 ArticlePage 在渲染后把 <br/> 还原成「,」实现 —— 不能用 CSS
+   屏蔽 br:fragment 里的 <br/> 是「顶替逗号」而非额外换行(源标题「验证循环,把手动
+   检查写进 Skill」被写成「验证循环<br/>把手动检查写进 Skill」),display:none 会
+   连标点一起吃掉(2026-07-27 实测)。 */
 
 /* 标签组移进 byline:与日期/阅读时长同排,标签在前。撤掉 eyebrow 作为独立块的宽度/居中/下间距,
    让它以 inline flex item 身份坐在 byline 这一行里(byline 的 20px gap 分隔标签组与日期)。 */
@@ -812,7 +819,7 @@ body.reading-page .article-byline .article-eyebrow {
     width: auto;
     max-width: none;
     margin: 0;
-    justify-content: center;
+    justify-content: flex-start;
 }
 /* eyebrow 标签与日期/阅读时长同款:剥掉胶囊底,继承 byline 的等宽灰字(#969696、14px)。
    多带一个 .article-byline 提高优先级,盖过共用 chip 块与手机端 padding 覆盖。 */
