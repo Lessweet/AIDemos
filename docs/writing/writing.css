@@ -3028,7 +3028,10 @@ body.article-modal #app {
    右边一大片空(2026-07-27 实测)。改回单栏,宽度/边距沿用窄屏那套。 */
 body.article-modal .blog-article-host {
     display: block;
-    width: min(1280px, calc(100% - 48px));
+    /* 宽度吃满 #app —— #app(main.design-layout)已经给了每侧 24px,与首页 / Blog
+       同一条内容边距。host 自己再套一层 calc(100% - 48px) 的话每侧就变 40px,
+       比首页多出 16(2026-07-28 用户实测「左右空白太多」)。 */
+    width: 100%;
     /* 顶栏是 fixed、不占文档流,而 Blog 的标题在模态里已隐藏 —— host 必须自己
        从顶栏下沿起算,否则内容(以及顶掉留白后的封面)会钻到顶栏后面。
        --design-menu-top 由 nav-boot 写入 = 顶栏实际高度。 */
@@ -3084,18 +3087,21 @@ body.article-modal .blog-article-host .article-footer {
     margin-left: auto;
     margin-right: auto;
 }
-/* 封面出血:模态里封面外面套了两层容器留白 —— #app(main.design-layout)每侧 24px
-   与 host 自己的居中留白每侧 24px,两层都顶掉才能齐到视口边缘。 */
+/* 封面出血:host 现在吃满 #app,只剩 #app(main.design-layout)每侧 24px 这一层
+   留白要顶掉,封面即齐到视口边缘。 */
 body.article-modal .article-cover {
-    --cover-bleed-x: 48px;
+    --cover-bleed-x: 24px;
+    /* 封面到标题的间距与左右边距同值(2026-07-28 用户要求统一) */
+    margin-bottom: 24px;
     /* 顶部只需顶掉 host 自己的 padding-top;#app 已被中性化、Blog 标题也已隐藏 */
     --cover-bleed-top: var(--nav-content-gap);
 }
 @media (max-width: 600px) {
-    /* 手机端两层容器:#app 每侧 24px(design-layout 的边距在手机端不缩)、
-       host 每侧 16px —— 合计 40px,不是想当然的 16+16(2026-07-27 实测差 8px)。 */
-    body.article-modal .blog-article-host { width: calc(100% - 32px); }
-    body.article-modal .article-cover { --cover-bleed-x: 40px; }
+    /* host 吃满 #app,内容边距全部由 #app 那一层的每侧 24px 提供 —— 与首页 / Blog
+       同一条(2026-07-28 用户要求统一;此前 host 自己再套 16px,合计 40px)。
+       封面出血相应只顶掉这一层。 */
+    body.article-modal .blog-article-host { width: 100%; }
+    body.article-modal .article-cover { --cover-bleed-x: 24px; }
 }
 /* 顶栏的尺寸/按钮不需要补丁:模态里 blog-page 类保留着,那一整套规则原样生效
    (2026-07-27 —— 此前摘掉 blog-page 再逐条补 article-modal,补漏了主题按钮,
