@@ -3012,6 +3012,16 @@ body.design-page:not(.reading-page).blog-page .page-title,
 body.design-page:not(.reading-page).works-page .page-title {
     font-weight: var(--fw-normal, 400) !important;
 }
+/* 文章模态展开/收起期间 body 会带上 reading-page,上面那条 :not(.reading-page) 当场
+   失配,Blog 标题回落到全局 h1 的 bold。展开时它是 display:none 看不见,但收起时
+   article-modal 已经摘掉、标题重新可见 —— 那 240ms 是粗的,动画一结束跳回细,
+   看起来就是「回到 Feed 时 Blog 字重变了」(2026-07-28 用户实测)。这里拉回同值。 */
+body.blog-page.article-modal .page-title,
+body.blog-page.article-closing .page-title,
+body.works-page.article-modal .page-title,
+body.works-page.article-closing .page-title {
+    font-weight: var(--fw-normal, 400) !important;
+}
 body.blog-page.theme-dark .page-title,
 body.works-page.theme-dark .page-title { color: #fff; }
 /* 「收起」箭头:与首页索引行行尾同一支箭头(同 path),旋转 135° 指向下 ——
