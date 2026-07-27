@@ -574,7 +574,15 @@ export default function BlogPage() {
        visibility 放行,WAAPI 推 opacity;播完清内联,交还给槽位/入场态。 */
     window.setTimeout(
       () => {
-        wrapper?.querySelectorAll<HTMLElement>('.w-excerpt').forEach((el) => {
+        const fadeEls = [...(wrapper?.querySelectorAll<HTMLElement>('.w-excerpt') ?? [])];
+        /* 没有文章封面飞回来(该篇没做封面)时,卡片自己的封面也走淡入,
+           否则它要等槽位解锁才瞬现。有封面飞回时绝不能加 —— 卡片封面是落点,
+           正藏着等飞行件落位,中途显形会和飞行中的封面重影。 */
+        if (!pendingCover && !flyers.some((f) => f.kind === 'cover')) {
+          const cardCover = wrapper?.querySelector<HTMLElement>('.writing-card');
+          if (cardCover) fadeEls.push(cardCover);
+        }
+        fadeEls.forEach((el) => {
           el.style.visibility = 'visible';
           const a = el.animate([{ opacity: 0 }, { opacity: 1 }], {
             duration: 260,
@@ -626,7 +634,14 @@ export default function BlogPage() {
     const hidden: HTMLElement[] = [];
     flying.items.forEach(({ el, from, origin, kind }) => {
       const target = targetOf(kind);
-      if (!target) return;
+      if (!target) {
+        /* 文章里没有这一件的落点(个别文章没做封面,fragment 里无 .article-cover,
+           目前只有 app-shape-for-ai)。不飞,当场解钉回槽位(槽位 hidden 罩住)。
+           不解钉的话它永远钉在 fixed 上,收起后悬浮在列表上盖住别的卡
+           (2026-07-28 SiriAI 实测)。 */
+        unpin(el);
+        return;
+      }
       const to = readLanding(target);
       if (!to.width || !to.height) return;
       /* 文章侧先藏起来,避免与飞行中的源元素重影 */
