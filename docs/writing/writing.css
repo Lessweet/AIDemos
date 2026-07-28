@@ -3280,6 +3280,15 @@ body.article-modal .header .site-title { display: none; }
    顶栏越简单越好(2026-07-27 用户定) */
 body.article-modal .header .theme-toggle,
 body.article-modal .header .nav-toggle { display: none !important; }
+/* 桌面版的横向导航(Blog / Archive / Contact)同样让位。
+   模态在 ≤800px 启用,而顶栏要更窄才收成汉堡 —— 中间那段宽度里模态开着、导航
+   却还是桌面版,关闭键就压在 Contact 上(2026-07-28 用户截图「关闭和 Tab 不会
+   同时出现」)。阅读态只留关闭这一个出口,和上面两个按钮同一个道理。 */
+/* 藏整个 .nav-collapse:导航被它包着(它自己是 display:contents,没有盒子),
+   里面是 nav.nav-cats(Blog/Archive)和 div.header-right(Contact)。
+   只写 .nav-cats / .header-connect 命不中 Contact —— 后者在 .header-right 里。
+   主题按钮和汉堡是顶栏的直接子元素,不在这层里,仍由上面那条管。 */
+body.article-modal .header .nav-collapse { display: none !important; }
 /* 关闭键与顶栏右侧那两个圆钮同一套外观:36×36 白色圆底(深色主题 #1A1A1A)。
    尺寸/底色/深色值都对齐 .theme-toggle 与 .nav-toggle,改那边时这里一并核对。
    放右侧 —— 顶栏右边本来就是那两个圆钮的位置,模态里它们让位给它(2026-07-27)。 */
