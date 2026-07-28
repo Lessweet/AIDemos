@@ -99,6 +99,29 @@ type PendingCover = {
   disarm: () => void;
 };
 
+/* 摘要入场。点关闭的那一刻就该开跑 —— 关闭键走的是 history.back(),要等浏览器
+   派发 popstate 才进 closeArticle,中间几十毫秒是白等的;而 closeArticle 里还压着
+   flyers 构建、correctPin、scrollTo 一串同步活,轮到摘要时飞行都起步了。
+   提前到点击瞬间,摘要就能在收起动画之前先亮起来,不会出现「卡片中间缺一块」
+   (2026-07-28 用户:「点击模态页关闭的时机就触发摘要入场动画」)。
+   幂等:标记挂在元素上,popstate 兜底再调一次也不会重播。 */
+function startExcerptFade(slug: string | undefined) {
+  if (!slug) return;
+  const wrapper = document.querySelector<HTMLElement>(`.card-wrapper[data-slug="${slug}"]`);
+  wrapper?.querySelectorAll<HTMLElement>('.w-excerpt').forEach((el) => {
+    if (el.dataset.fading === '1') return;
+    el.dataset.fading = '1';
+    el.style.visibility = 'visible';
+    /* 从 0 起:有了这段提前量,收起动画开始时它已经淡到大半,不再需要
+       靠 0.35 的起点去补空白。280ms + 极陡 ease-out,前四分之一走完八成。 */
+    const a = el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, easing: TYPE_RUSH });
+    a.onfinish = () => {
+      el.style.visibility = '';
+      delete el.dataset.fading;
+    };
+  });
+}
+
 /* 飞行件复位:摘掉钉住用的内联样式,让它回到自己原本的排版里。 */
 function unpin(el: HTMLElement) {
   el.classList.remove('article-flying-el');
@@ -683,30 +706,23 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
        一起淡回来,被点那张卡也在其中。
        飞行期间槽位用 visibility 罩着它(opacity 通配已排除 .w-excerpt),这里
        内联放行 visibility、用 WAAPI 推 opacity;播完清内联交还槽位/入场态。 */
-    {
-      const fadeEls = [...(wrapper?.querySelectorAll<HTMLElement>('.w-excerpt') ?? [])];
-      /* 没有封面飞回来(该篇没做封面)时,卡片封面也并进来一起淡 —— 否则它要等
-         槽位解锁才瞬现。有封面飞回时绝不能加:卡片封面是落点,正藏着等飞行件。 */
-      if (!pendingCover && !flyers.some((f) => f.kind === 'cover')) {
-        const cardCover = wrapper?.querySelector<HTMLElement>('.writing-card');
-        if (cardCover) fadeEls.push(cardCover);
-      }
-      fadeEls.forEach((el) => {
-        el.style.visibility = 'visible';
-        /* 从 0.35 起淡,不从 0 —— 同一张卡里日期/标题都没被槽位藏过、全程 op=1,
-           只有摘要要淡入。若从 0 起,开头那几十毫秒它是纯空白,而下面的日期已经
-           在位,看起来就是卡片中间缺了一块(2026-07-28 用户截图)。从 0.35 起步
-           一上来就有字,再补足到 1,既有淡入感又不留空洞。
-           280ms + 极陡 ease-out:前四分之一走完八成,飞行(240ms)还没落位时就已
-           基本到位。 */
-        const a = el.animate([{ opacity: 0.35 }, { opacity: 1 }], {
+    /* 兜底:系统返回手势 / Esc 没有「点击」这一步,这里补一次。已经跑过的会被
+       startExcerptFade 内部的标记挡掉,不会重播。 */
+    startExcerptFade(slug);
+    /* 该篇没做封面时,卡片封面也要淡入 —— 它没有飞行件来落位,否则要等槽位解锁
+       才瞬现。有封面飞回时绝不能加:卡片封面是落点,正藏着等飞行件。 */
+    if (!pendingCover && !flyers.some((f) => f.kind === 'cover')) {
+      const cardCover = wrapper?.querySelector<HTMLElement>('.writing-card');
+      if (cardCover) {
+        cardCover.style.visibility = 'visible';
+        const a = cardCover.animate([{ opacity: 0 }, { opacity: 1 }], {
           duration: 280,
           easing: TYPE_RUSH,
         });
         a.onfinish = () => {
-          el.style.visibility = '';
+          cardCover.style.visibility = '';
         };
-      });
+      }
     }
 
     anims[anims.length - 1].onfinish = () => {
@@ -815,8 +831,11 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
     if (!article) return;
     const onPop = () => closeArticle();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && (history.state as { articleModal?: string } | null)?.articleModal)
-        history.back();
+      if (e.key !== 'Escape') return;
+      if (!(history.state as { articleModal?: string } | null)?.articleModal) return;
+      /* 同关闭键:先起摘要淡入再返回(见 startExcerptFade 的注释) */
+      startExcerptFade(article.slug);
+      history.back();
     };
     window.addEventListener('popstate', onPop);
     window.addEventListener('keydown', onKey);
@@ -941,7 +960,12 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
           type="button"
           className="article-modal-back"
           aria-label="关闭文章"
-          onClick={() => history.back()}
+          onClick={() => {
+            /* 点击瞬间先起摘要淡入,再交给 history.back() —— 等 popstate 回来才开始
+               就晚了几十毫秒(见 startExcerptFade 的注释) */
+            startExcerptFade(article.slug);
+            history.back();
+          }}
         >
           {/* 关闭叉:方头直角、currentColor、non-scaling-stroke —— 走全站 icon 规范 */}
           <svg viewBox="0 0 24 24" aria-hidden="true">
