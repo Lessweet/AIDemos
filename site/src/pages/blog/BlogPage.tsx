@@ -693,9 +693,13 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       }
       fadeEls.forEach((el) => {
         el.style.visibility = 'visible';
+        /* 280ms + 极陡 ease-out(TYPE_RUSH):起步本来就在 0ms,慢的是时长 —— 420ms
+           的 ease-out 要到一半才明显,人已经看完飞行了它还在淡。换成前四分之一
+           就走完八成,飞行(240ms)还没落位时它已基本到位(2026-07-28 用户要求
+           「简介出现的时机提早一点」)。 */
         const a = el.animate([{ opacity: 0 }, { opacity: 1 }], {
-          duration: 420,
-          easing: 'ease-out',
+          duration: 280,
+          easing: TYPE_RUSH,
         });
         a.onfinish = () => {
           el.style.visibility = '';
