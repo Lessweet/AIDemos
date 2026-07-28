@@ -49,6 +49,14 @@ const morphMs = (back = false) => {
   );
   return Number.isFinite(v) && v > 0 ? v * 1000 : back ? 240 : 480;
 };
+/* 收起的整篇淡出单独一档(--article-fade-out-dur),不借用 back-dur —— 后者是给
+   「封面飞回卡片」调的快档,整屏溶解用它太急(见 style.css 那里的注释)。 */
+const fadeOutMs = () => {
+  const v = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--article-fade-out-dur'),
+  );
+  return Number.isFinite(v) && v > 0 ? v * 1000 : 340;
+};
 /* 展开时标题走自己那一档(略快,先落位);其余三件用通档。
    收起不分档 —— 四件一起收更利落。 */
 const morphMsFor = (kind: string) => {
@@ -535,14 +543,29 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
        正文的空隙里透上来。也不能图省事用 --page-bg:那是深色主题的值(#0a0a0a),
        浅色下会铺出一块黑;::before 拿到的是当前主题 + 当前 data-tint 的最终底色。 */
     const hr = host.getBoundingClientRect();
+    /* padding 也要在切类之前量下来一起钉死。article-closing 里有一条
+       .blog-article-host { margin:0; padding:0 }(给「让位飞回」用的),源码在
+       模态那条之后、特异性相同,切类那一刻会把 host 的 padding-top
+       (--nav-content-gap)抹掉 —— 里头的封面当场上移 48px(实测 top 72 → 24),
+       看着就是「先跳一下再淡出」(2026-07-28 用户手机实测)。
+       内联钉死比在 CSS 里拼特异性稳:淡出期间没有任何规则能动它的内部排版。 */
+    const hostPad = getComputedStyle(host).padding;
     host.style.position = 'fixed';
+    host.style.padding = hostPad;
     host.style.left = `${hr.left}px`;
     host.style.top = `${hr.top}px`;
     host.style.width = `${hr.width}px`;
     host.style.height = `${hr.height}px`;
     host.style.margin = '0';
     host.style.zIndex = '90';
-    host.style.overflow = 'hidden';
+    /* overflow 必须显式写 visible,而且不能图省事写 hidden。
+       封面是靠负的横向 margin「出血」到视口边缘的,比 host 本身宽 2×24px;host 一旦
+       overflow:hidden,出血那两条当场被裁掉 —— 画面上就是封面从通栏缩成正文列宽,
+       而 getBoundingClientRect 报的仍是 430(盒子没变、只是没画出来),所以光量几何
+       查不出来(2026-07-28 用户手机实测「封面还是缩了」)。
+       写 visible 而不是留空,是因为 article-closing 里还有一条
+       .blog-article-host{overflow:hidden}(给「让位飞回」用的),不压住它照样裁。 */
+    host.style.overflow = 'visible';
     const pageBg = [
       getComputedStyle(body, '::before').backgroundColor,
       getComputedStyle(body).backgroundColor,
@@ -600,7 +623,7 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
     if (backBtn) fading.push(backBtn);
     const outs = fading.map((el) =>
       el.animate([{ opacity: 1 }, { opacity: 0 }], {
-        duration: morphMs(true),
+        duration: fadeOutMs(),
         easing: TYPE_EASE,
         fill: 'both',
       }),

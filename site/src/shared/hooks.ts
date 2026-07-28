@@ -422,10 +422,27 @@ export function useScrollLag() {
     let cleared = true;
     const K = 0.9; // 位移系数
     const MAX = 56; // 单卡最大拖开距离
+    /* 一帧位移超过这个数就不是滚动手势,而是程序化瞬移(文章模态开合都会
+       scrollTo 回原位)。60Hz 下 240px/帧 ≈ 14400px/s,再快的甩动也到不了。 */
+    const JUMP = 240;
     const tick = () => {
       const y = window.scrollY;
       const d = y - prev;
       prev = y;
+      /* 瞬移只更新基准,不产生拖影。不挡的话:收起时 scrollTo 一次跳几百上千像素,
+         这里当成超快滚动给每张卡写上 translateY(封顶 56px),而此刻 Feed 的
+         transform 正被 article-modal/closing 的 `transform:none !important` 冻着、
+         看不见;等 finish 摘掉类,这些值一齐生效 —— 整屏卡片先跳出来再缓回 0,
+         就是「整个 Feed 抖动了一下」(2026-07-28 用户手机实测,实测跳 18.8px)。 */
+      if (Math.abs(d) > JUMP) {
+        smooth = 0;
+        if (!cleared) {
+          parts.forEach((els) => els.forEach((el) => (el.style.transform = '')));
+          cleared = true;
+        }
+        raf = requestAnimationFrame(tick);
+        return;
+      }
       smooth += (d - smooth) * 0.18; // 平滑滚动速度 → 拖影量
       if (Math.abs(smooth) < 0.05) {
         smooth = 0;
