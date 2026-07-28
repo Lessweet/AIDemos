@@ -3202,6 +3202,11 @@ body.article-closing .blog-article-host {
     height: 0;          /* 不撑开页面,Blog 布局立刻回到原样 */
     overflow: hidden;   /* 让位的内容不再撑高;飞行件是 fixed,不受裁剪 */
 }
+/* 深色主题:收起时顶栏与页面底层都要回到深色底(--page-bg),不是浅色的 --site-bg ——
+   否则收起过程会先亮成浅色再跳回深色(2026-07-28)。 */
+body.theme-dark.article-closing .header.home-nav { background: var(--page-bg) !important; }
+body.theme-dark.writing-page.design-page.article-closing::before { background: var(--page-bg); }
+
 /* 顶栏在关闭过程里保持 Blog 的底色,避免最后一帧从 tint 硬跳回灰白 */
 body.article-closing .header.home-nav {
     background: var(--site-bg) !important;

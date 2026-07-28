@@ -409,10 +409,13 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
        works-page)枚举,摘掉就得逐条补 article-modal —— 先前那样做漏了主题按钮,
        按钮被压成 4px 挤到左上角。Blog 自己的 feed 网格由 .article-modal 的
        display:none 规则关掉即可(2026-07-27 用户:顶栏两个按钮要和首页一样)。 */
-    /* 底色起点:先顶成 Blog 的 --site-bg,让 ::before 以它渲染一帧,下一帧再撤掉,
-       颜色才有得过渡(见 writing.css 里同款注释)。不这样做它就是瞬切。 */
-    const siteBg = getComputedStyle(body).getPropertyValue('--site-bg').trim();
-    if (siteBg) body.style.setProperty('--page-tint', siteBg);
+    /* 底色起点:先顶成「页面此刻真正的底色」,让 ::before 以它渲染一帧,下一帧再撤掉,
+       颜色才有得过渡(见 writing.css 里同款注释)。
+       取 body 的 computed 背景而不是 --site-bg —— 后者是浅色主题的固定值,深色主题下
+       页面底其实是 #0a0a0a,写死浅色就会在展开第一帧闪一下白
+       (2026-07-28 用户实测深色下「跳得扎眼」)。 */
+    const startBg = getComputedStyle(body).backgroundColor;
+    if (startBg && startBg !== 'rgba(0, 0, 0, 0)') body.style.setProperty('--page-tint', startBg);
     body.classList.add('writing-page', 'reading-page', 'article-modal');
     /* 文章封面的垫底图 = 卡片上那张,两边同图才能无缝落位。
        取 img 已解析的绝对地址,不要自己拼相对路径 —— pushState 之后文档 URL 变成
