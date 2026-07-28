@@ -558,7 +558,14 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
     host.style.height = `${hr.height}px`;
     host.style.margin = '0';
     host.style.zIndex = '90';
-    host.style.overflow = 'hidden';
+    /* overflow 必须显式写 visible,而且不能图省事写 hidden。
+       封面是靠负的横向 margin「出血」到视口边缘的,比 host 本身宽 2×24px;host 一旦
+       overflow:hidden,出血那两条当场被裁掉 —— 画面上就是封面从通栏缩成正文列宽,
+       而 getBoundingClientRect 报的仍是 430(盒子没变、只是没画出来),所以光量几何
+       查不出来(2026-07-28 用户手机实测「封面还是缩了」)。
+       写 visible 而不是留空,是因为 article-closing 里还有一条
+       .blog-article-host{overflow:hidden}(给「让位飞回」用的),不压住它照样裁。 */
+    host.style.overflow = 'visible';
     const pageBg = [
       getComputedStyle(body, '::before').backgroundColor,
       getComputedStyle(body).backgroundColor,
