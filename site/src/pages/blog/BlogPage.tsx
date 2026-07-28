@@ -693,11 +693,13 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       }
       fadeEls.forEach((el) => {
         el.style.visibility = 'visible';
-        /* 280ms + 极陡 ease-out(TYPE_RUSH):起步本来就在 0ms,慢的是时长 —— 420ms
-           的 ease-out 要到一半才明显,人已经看完飞行了它还在淡。换成前四分之一
-           就走完八成,飞行(240ms)还没落位时它已基本到位(2026-07-28 用户要求
-           「简介出现的时机提早一点」)。 */
-        const a = el.animate([{ opacity: 0 }, { opacity: 1 }], {
+        /* 从 0.35 起淡,不从 0 —— 同一张卡里日期/标题都没被槽位藏过、全程 op=1,
+           只有摘要要淡入。若从 0 起,开头那几十毫秒它是纯空白,而下面的日期已经
+           在位,看起来就是卡片中间缺了一块(2026-07-28 用户截图)。从 0.35 起步
+           一上来就有字,再补足到 1,既有淡入感又不留空洞。
+           280ms + 极陡 ease-out:前四分之一走完八成,飞行(240ms)还没落位时就已
+           基本到位。 */
+        const a = el.animate([{ opacity: 0.35 }, { opacity: 1 }], {
           duration: 280,
           easing: TYPE_RUSH,
         });
