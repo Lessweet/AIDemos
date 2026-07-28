@@ -201,8 +201,8 @@
             } catch (e) {}
             docEl.classList.add('is-loading');
             var t0 = Date.now();
-            var pct = 0, sim = 0, finished = false;
-            var fill, num, digits, trickle;
+            var pct = 0, loaded = 0, total = 0, counted = [], finished = false;
+            var fill, num, digits;
             /* ── 数字轮播(odometer)────────────────────────────────────────
                不按「整数一跳换一个字」来做,而是每个数位一条 0-9 的竖条、按连续值滚动:
                个位直接跟着 disp 走(一直在滚),十位/百位只在低位快进位时(小数部分 >0.9)
@@ -346,6 +346,10 @@
                没有任何东西能让揭幕延后或提前。要恢复成真正的下限,得把闸加回来,
                且只等 img、不等 iframe/video(那 19 个重家伙才是当初拖到 8s 的元凶)。 */
             var MIN_MS = 5000;
+            /* 只防死等:某个资源卡死、load/error 都不触发时,不至于把人困在幕布后面。
+               给得比 MIN_MS 宽裕得多 —— 正常网络走不到这里,真走到了说明确实有东西
+               挂了,那时候放人进去也比继续等着强。 */
+            var FAILSAFE_MS = 20000;
             function setPct(p) {
                 p = Math.round(p);
                 pct = p;   /* 收尾扫到 100 也要写回 pct:轮播的目标值只认它 */
@@ -372,7 +376,6 @@
             function finish() {
                 if (finished) return;
                 finished = true;
-                clearInterval(trickle);
                 var loader = document.getElementById('page-loader');
                 var remaining = Math.max(0, MIN_MS - (Date.now() - t0));
                 var from = pct, tFinish = Date.now();
@@ -420,21 +423,42 @@
                     digits[d].appendChild(makeSlot());
                 }
                 showNumber();
-                /* logo animation 立刻走完自己那一档,不再被内容拖着(2026-07-28 用户定:
-                   「先立刻加载 logo animation,再预加载内容」)。
-                   先前是三条闸取最先满足者:全部 iframe/img/video 都 load、window.load、
-                   8s 硬上限,再叠 MIN_MS 的地板。首页为了预载把 Blog/Archive 常驻挂载,
-                   于是开局就有 19 个媒体元素(10 视频 + 9 iframe,每个 iframe 还是独立
-                   文档)全被算进这道闸 —— 网络稍慢就一路走到 8s,用户实测「延迟很久」。
-                   现在 finish 立即调用:它内部仍按 MIN_MS 把进度扫到 100 再揭幕,
-                   动画时长一点没少;内容照旧在后台继续预载,只是不再挡着揭幕。
-                   trickle 保留:MIN_MS 这一段里数字还是要有跳动感。 */
-                finish();
-                trickle = setInterval(function () {
-                    sim += (90 - sim) * 0.045;
-                    render(sim);
-                }, 180);
+                /* 规则(2026-07-28 用户定):最短 5 秒 + 等资源加载完 + 进度走势就是
+                   资源加载的进度。三条一起,所以这里重新按真实加载来驱动:
+
+                   · 进度 = loaded / total,不再有凭空往上爬的 trickle(那是模拟值,
+                     与「进度走势就是资源加载的进度」直接冲突)。
+                   · finish() 只在全部资源 load 完时调用 —— MIN_MS 是下限不是定值,
+                     资源慢就等更久,由 finish 内部的 remaining 兜住下限那一头。
+                   · FAILSAFE_MS 只防死等:某个资源卡死/永不触发 load 时不至于把人
+                     困在幕布后面。给得比 MIN_MS 宽裕得多,正常网络不会碰到它 ——
+                     先前那版 8s 太紧,首页 19 个媒体元素(10 视频 + 9 iframe,每个
+                     iframe 还是独立文档)稍慢就撞上,用户实测「延迟很久」。 */
+                var els = [].slice.call(document.querySelectorAll('iframe, img, video'));
+                total = els.length;
+                function mark() {
+                    if (counted.indexOf(this) !== -1) return;   /* load 与 error 都绑了,只算一次 */
+                    counted.push(this);
+                    loaded++;
+                    render(loaded / total * 100);
+                    if (loaded >= total) finish();
+                }
+                els.forEach(function (el) {
+                    var tag = el.tagName;
+                    if (tag === 'IMG') {
+                        if (el.complete) { mark.call(el); return; }
+                    } else if (tag === 'VIDEO') {
+                        if (el.readyState >= 2) { mark.call(el); return; }
+                        el.addEventListener('loadeddata', mark, { once: true });
+                        el.addEventListener('error', mark, { once: true });
+                        return;
+                    }
+                    el.addEventListener('load', mark, { once: true });
+                    el.addEventListener('error', mark, { once: true });
+                });
+                if (!total) finish();
             });
+            setTimeout(finish, FAILSAFE_MS);
         })();
     </script>
 <header class="header home-nav" data-active="writing" id="site-nav"></header>
