@@ -154,12 +154,12 @@
 <link href="writing/writing.css?v=428" rel="stylesheet"/>
 <!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁 -->
 <script src="nav-boot.js?v=9"></script>
-  <script type="module" crossorigin src="/assets/index-f3KNIpc3.js"></script>
+  <script type="module" crossorigin src="/assets/index-DSA0nzfc.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/index-BOwIwFzp.js">
   <link rel="modulepreload" crossorigin href="/assets/hooks-BECGPdDe.js">
-  <link rel="modulepreload" crossorigin href="/assets/article-content-DP58uPh5.js">
-  <link rel="modulepreload" crossorigin href="/assets/ArticlePage-CsLFJj03.js">
-  <link rel="modulepreload" crossorigin href="/assets/BlogPage-BSTMA7Ns.js">
+  <link rel="modulepreload" crossorigin href="/assets/article-content-BI2hkWEC.js">
+  <link rel="modulepreload" crossorigin href="/assets/ArticlePage-C6m9Oon1.js">
+  <link rel="modulepreload" crossorigin href="/assets/BlogPage-yoOpK2hh.js">
   <link rel="modulepreload" crossorigin href="/assets/ArchivePage-nNd06XtP.js">
 </head>
 <!-- 复用 design-page 的 pillar 布局(左侧二级导航 + 右侧分模块),Writing 与 Design 页对称 -->
@@ -356,11 +356,15 @@
                 showNumber();
             }
             /* 弹簧是渐近收敛的,固定等一个时长有可能在它还差半格时就把画面抬走
-               (实测差 0.024 格 ≈ 3px,肉眼看得出没对正)。所以等 tick 把 disp 吸附到 100 的
-               那一帧,再停 HOLD_MS 让人看清对齐后的 100%,然后才上滑。
-               ALIGN_MAX 是兜底:万一 rAF 被后台标签页挂起,不能就这么卡住不走。 */
+               (实测差 0.024 格 ≈ 3px,肉眼看得出没对正)。
+               2026-07-28:进度数字自 07-22 起就 visibility:hidden 了(见上方 .pl-num),
+               等一个看不见的弹簧收敛纯属白等 —— 实测这段占 0.35~2s。现在直接进入
+               HOLD_MS 停顿再上滑;弹簧引擎保留(收尾时序里别处还读 pct),只是不再等它。
+               哪天数字重新露出来,把 waitAligned 改回 true 即可。 */
             var HOLD_MS = 550, ALIGN_MAX = 2000;
+            var waitAligned = false;   /* 数字不可见时无需等对齐 */
             function whenAligned(cb) {
+                if (!waitAligned) { setTimeout(cb, HOLD_MS); return; }
                 var t0a = Date.now();
                 (function poll() {
                     if (aligned || Date.now() - t0a > ALIGN_MAX) { setTimeout(cb, HOLD_MS); return; }
