@@ -135,6 +135,10 @@ function handoffCover(
       target.style.visibility = '';
       group.forEach((a) => a.cancel());
       unpin(el);
+      /* 落位时给卡片那份打的 visibility:hidden 要在这里摘 —— unpin 是按属性名
+         正则剥内联样式的,不含 visibility。漏了的话这张卡的标题/标签/日期回到
+         列表里仍然是隐形的。 */
+      el.style.visibility = '';
     });
     if (!target) {
       anims?.forEach((a) => a.cancel());
@@ -194,18 +198,6 @@ function handoffCover(
   /* 动态封面在模态里彻底不用了(CSS 里 display:none),src 也就不必挂 ——
      data-src 留着不动,等于这一屏一个 shader 都不跑。 */
   arm();
-}
-
-/* 收起时的飞行起点钳到视口边缘。滚动过再关闭的话,文章那几件早已滚出视野
-   (实测滚 700px 后封面 top=-628、标题 -362),照原样起飞就是穿越整整 900px 冲回
-   卡片位,240ms 内跑完 —— 用户看到的是「缩一下放一下、闪过去」(2026-07-28)。
-   钳到上边缘外一个身位:方向感还在(从上方回来),距离却减半,速度就正常了。
-   元素本来就在视野外看不见,起点挪一挪没有违和。 */
-function clampToViewport(r: DOMRect): DOMRect {
-  const vh = window.innerHeight;
-  const top = Math.max(-r.height, Math.min(vh, r.top));
-  if (top === r.top) return r;
-  return { ...r.toJSON(), top, bottom: top + r.height, y: top } as DOMRect;
 }
 
 /* 把元素就地钉成 fixed。left/top 直接写视口坐标是不够的:只要任何一个祖先带了
@@ -478,6 +470,7 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
         pendingCover.rest.forEach(({ el, target, anims: g }) => {
           g.forEach((a) => a.cancel());
           unpin(el);
+          el.style.visibility = ''; // 落位时打的 hidden(见 morph 的 onfinish)
           target.style.visibility = ''; // 文章那份随卸载消失,还原以免残留
         });
       }
@@ -508,177 +501,119 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       return;
     }
 
-    /* ① 把文章侧的封面/标题/标签就地钉成 fixed:这三份继续留在屏幕上飞回卡片,
-       同样保证全程只有一份可见(见 morph 处的注释)。 */
-    const flyers = (
-      [
-        /* 还没交接的话,四件都还是卡片那份、都还钉着,原路飞回即可 —— 一件都不要
-           去 host 里取。取了会得到文章那份(此刻 visibility:hidden),等于又钉起
-           一套看不见的元素跟着飞(2026-07-27 实测收起时两套同时在飞)。 */
-        [pendingCover ? null : host.querySelector<HTMLElement>('.article-cover'), 'cover'],
-        [pendingCover ? null : host.querySelector<HTMLElement>('.article-h1'), 'title'],
-        [pendingCover ? null : host.querySelector<HTMLElement>('.article-eyebrow .a-tag'), 'tag'],
-        [pendingCover ? null : articleDateEl(host), 'date'],
-      ] as [HTMLElement | null, string][]
-    )
-      .filter(([el]) => !!el)
-      /* 先把三份几何全测完再钉 —— 边测边钉会互相污染:封面一旦脱流,后面的标题
-         当场上移一个封面高(实测 203px),起点就量歪了(2026-07-27)。 */
-      .map(([el, kind]) => ({
-        el: el as HTMLElement,
-        from: clampToViewport((el as HTMLElement).getBoundingClientRect()),
-        kind,
-      }))
-      .map(({ el, from, kind }) => {
-        pin(el, from, '90'); // 90:低于顶栏(100),缩回时从顶栏下穿过
-        return { el, from, kind };
+    /* ① 释放所有还钉着的飞行件。它们是 fixed,不释放就不会跟着 host 一起淡,
+       会一直挂在屏幕上;而且它们是 feed 里的真实节点,不还原列表就缺一块。
+       落位时给卡片那份打过 visibility:hidden(见 morph 的 onfinish),unpin 按属性
+       名剥内联样式、不含 visibility,得单独摘。 */
+    const release = (el: HTMLElement) => {
+      unpin(el);
+      el.style.visibility = '';
+    };
+    if (pendingCover) {
+      pendingCover.anims?.forEach((a) => a.cancel());
+      release(pendingCover.flyer);
+      pendingCover.rest.forEach(({ el, anims: g }) => {
+        g.forEach((a) => a.cancel());
+        release(el);
       });
+      pendingCoverRef.current = null;
+    }
+    /* 文章侧四件在飞行期间被 visibility:hidden 罩着(封面到这一刻可能还罩着)。
+       整篇要淡出,少一件就是画面上一个洞,统一放行。 */
+    host
+      .querySelectorAll<HTMLElement>(
+        '.article-cover, .article-h1, .article-eyebrow .a-tag, .article-byline > span',
+      )
+      .forEach((el) => (el.style.visibility = ''));
+    /* ② 先把模态整块就地钉成 fixed,再动 Blog 布局 —— 顺序不能反。
+       article-closing 带着 .blog-article-host { height:0; overflow:hidden }(那是给
+       Feed 让位用的),先收布局再量,量到的就是个零高盒子(实测 rect 高度 0),钉住它
+       等于钉了个空盒,整屏全白(2026-07-28)。
+       钉住之后 host 脱流,后面恢复 Feed 布局怎么重排都不会把它带偏。
+       底色从 body::before 取 —— 页面底色画在那个伪元素上,body 自身
+       background-color 是透明的(实测 rgba(0,0,0,0)),不铺底的话底下的 Feed 会从
+       正文的空隙里透上来。也不能图省事用 --page-bg:那是深色主题的值(#0a0a0a),
+       浅色下会铺出一块黑;::before 拿到的是当前主题 + 当前 data-tint 的最终底色。 */
+    const hr = host.getBoundingClientRect();
+    host.style.position = 'fixed';
+    host.style.left = `${hr.left}px`;
+    host.style.top = `${hr.top}px`;
+    host.style.width = `${hr.width}px`;
+    host.style.height = `${hr.height}px`;
+    host.style.margin = '0';
+    host.style.zIndex = '90';
+    host.style.overflow = 'hidden';
+    const pageBg = [
+      getComputedStyle(body, '::before').backgroundColor,
+      getComputedStyle(body).backgroundColor,
+    ].find((c) => c && !/^rgba\(0, 0, 0, 0\)$|^transparent$/.test(c));
+    host.style.background =
+      pageBg ?? getComputedStyle(document.documentElement).getPropertyValue('--site-bg').trim();
+    /* article-closing 会把 .article-reading 的直接子级整组 visibility:hidden ——
+       那是给「四件飞回」设计的(内容让位、只留飞行件),改成整块淡出后这条会让正文
+       当场消失、根本淡不起来。内联放行,压得住类选择器;host 随 finish 卸载,不用善后。 */
+    host
+      .querySelectorAll<HTMLElement>('.article-reading > *, .article-toc, .reader-list-toggle')
+      .forEach((el) => (el.style.visibility = 'visible'));
 
-
-    /* ② 其余文章内容退场 + 恢复 Blog 布局与滚动位置 */
+    /* ③ Feed 就位,之后全程不再动一下 —— 用户要求「模态所有元素淡出后,下层的
+       Feed 保持原位」。host 已经钉成 fixed,这一步的重排碰不到它。
+       必须抢在淡出之前做:history.back() 会触发浏览器自带的 popstate 滚动恢复
+       (scrollRestoration 默认 auto),不先把 Blog 布局收回来,页面会在淡出期间自己
+       跳到文章深处(2026-07-28 实测冻帧停在正文中段的 PPT 截图那一屏)。
+       槽位同时解锁,被点的那张卡这一刻就该正常待在 Feed 里。 */
     body.classList.add('article-closing');
     body.classList.remove('article-modal');
-    /* 同上:瞬时归位,否则收起时页面又会平滑滚一段 */
     window.scrollTo({ top: blogScrollRef.current, behavior: 'instant' as ScrollBehavior });
-    /* 同展开:等 Blog 布局与滚动都恢复完再补 fixed 坐标的偏差 */
-    flyers.forEach(({ el, from }) => correctPin(el, from));
-    /* 收起时列表必须整体在场:入场系统在 feed 塌高期间把视口外卡片的 .visible
-       摘了(见 CSS 槽位注释),不补的话收起过程背景是空的、落位后又错峰重播,
-       一轮新的闪动。全部瞬时置为已入场 —— article-closing 的 freeze 规则已把
-       transition 禁了,加类即终态,看不到过渡。 */
     document.querySelectorAll<HTMLElement>('.design-content .card-wrapper').forEach((el) => {
       el.classList.add('visible');
       el.dataset.entered = '1';
-      /* 整个列表柔和回归,不只是被点那张卡的摘要。
-         此前只让摘要淡入,但周围所有卡片是「唰」一下同时出现的,那一下比 260ms 的
-         摘要淡入抢眼得多,淡入就被淹没了 —— 用户连着三次反馈「看不出淡入」
-         (2026-07-28)。让视口内的卡片一起淡,单张卡的层次才浮得出来。
-         视口外的跳过:看不见,白费一次合成。 */
-      if (el.classList.contains('article-slot')) return;
-      const r = el.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > window.innerHeight) return;
-      el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: 'ease-out' });
     });
-
-    /* ③ 量目标卡片 —— 必须在 Blog 布局恢复之后 */
-    const wrapper = document.querySelector<HTMLElement>(`.card-wrapper[data-slug="${slug}"]`);
-    const landing = (kind: string) =>
-      kind === 'cover'
-        ? (wrapper?.querySelector<HTMLElement>('.writing-card') ??
-          wrapper?.querySelector<HTMLElement>('.bl-thumb') ??
-          null)
-        : kind === 'title'
-          ? (wrapper?.querySelector<HTMLElement>('.w-title, .bl-title') ?? null)
-          : kind === 'tag'
-            ? (wrapper?.querySelector<HTMLElement>('.a-tag') ?? null)
-            : (wrapper?.querySelector<HTMLElement>('.w-date, .bl-date') ?? null);
-
-    const anims: Animation[] = [];
-    const hidden: HTMLElement[] = [];
-    flyers.forEach(({ el, from, kind }) => {
-      const target = landing(kind);
-      if (!target) return;
-      const to = readLanding(target);
-      if (!to.width || !to.height) return;
-      target.style.visibility = 'hidden'; // 落位前卡片这份不露脸
-      hidden.push(target);
-      /* 收起不需要延迟交接:文章封面早画好了,飞的就是它 */
-      anims.push(...flightAnims(el, from, to, kind, morphMs(true)));
-    });
-
-    /* 还钉着的那份:不重新量几何 —— 它现在的位置就是展开动画的终态,
-       直接从当前 transform 补一段回到 translate(0,0)(pin 时的 left/top
-       就是卡片原位)。不能先 cancel 展开动画再量,cancel 会撤掉 fill、
-       当场弹回卡片位。 */
-    if (pendingCover) {
-      const back = morphMs(true);
-      /* 封面:只有 transform 需要回。用当前 computed 的 matrix 起步,不重新量几何 */
-      const cv = pendingCover.flyer;
-      const cvFrom = getComputedStyle(cv).transform;
-      closingAnims.push(
-        cv.animate(
-          [
-            { transform: cvFrom === 'none' ? 'translate(0px, 0px) scale(1, 1)' : cvFrom },
-            { transform: 'translate(0px, 0px) scale(1, 1)' },
-          ],
-          { duration: back, easing: COVER_EASE, fill: 'both' },
-        ),
-      );
-      /* 文字三件:排版也要跟着回到卡片那一套,所以照 origin 快照补一条。
-         不用 anim.reverse() —— 反向播放会把 ease-out 变成 ease-in,收起就成了
-         「先慢后快」,与定好的手感相反。 */
-      pendingCover.rest.forEach(({ el, origin }) => {
-        const c = getComputedStyle(el);
-        closingAnims.push(
-          el.animate([{ transform: c.transform === 'none' ? 'translate(0px, 0px)' : c.transform }, { transform: 'translate(0px, 0px)' }], {
-            duration: back,
-            easing: COVER_EASE,
-            fill: 'both',
-          }),
-        );
-        // 颜色平滑(不重排)
-        closingAnims.push(
-          el.animate([{ color: c.color }, { color: origin.color }], {
-            duration: back,
-            easing: TYPE_EASE,
-            fill: 'both',
-          }),
-        );
-        // 字号/行高/字距:同展开,抖动挤到起步(见 flightAnims 里的注释)
-        closingAnims.push(
-          el.animate(
-            [
-              { fontSize: c.fontSize, lineHeight: c.lineHeight, letterSpacing: c.letterSpacing, width: c.width },
-              {
-                fontSize: `${origin.fs}px`,
-                lineHeight: origin.lh,
-                letterSpacing: origin.ls,
-                width: `${origin.width}px`,
-              },
-            ],
-            { duration: back, easing: TYPE_RUSH, fill: 'both' },
-          ),
-        );
-      });
-      /* 也并进 anims:onfinish 是绑在 anims 最后一条上的,不并的话这条路径下
-         anims 为空,收起会直接跳过动画当场结束。 */
-      anims.push(...closingAnims);
-    }
-
-    if (!anims.length) {
-      hidden.forEach((el) => (el.style.visibility = ''));
-      finish();
-      return;
-    }
-    /* 摘要与列表其余卡片同时淡入(2026-07-28)。此前它延后到飞行 40% 才起步,
-       比周围晚 100ms —— 邻卡已经淡到三成它才开始,慢半拍地跟在整体后面,就被
-       淹没了,用户连着几次反馈「看不出淡入」。现在同起同收,收起 = 整个列表
-       一起淡回来,被点那张卡也在其中。
-       飞行期间槽位用 visibility 罩着它(opacity 通配已排除 .w-excerpt),这里
-       内联放行 visibility、用 WAAPI 推 opacity;播完清内联交还槽位/入场态。 */
     {
-      const fadeEls = [...(wrapper?.querySelectorAll<HTMLElement>('.w-excerpt') ?? [])];
-      /* 没有封面飞回来(该篇没做封面)时,卡片封面也并进来一起淡 —— 否则它要等
-         槽位解锁才瞬现。有封面飞回时绝不能加:卡片封面是落点,正藏着等飞行件。 */
-      if (!pendingCover && !flyers.some((f) => f.kind === 'cover')) {
-        const cardCover = wrapper?.querySelector<HTMLElement>('.writing-card');
-        if (cardCover) fadeEls.push(cardCover);
+      const slot = document.querySelector<HTMLElement>('.card-wrapper.article-slot');
+      if (slot) {
+        slot.style.height = '';
+        slot.classList.remove('article-slot');
       }
-      fadeEls.forEach((el) => {
-        el.style.visibility = 'visible';
-        const a = el.animate([{ opacity: 0 }, { opacity: 1 }], {
-          duration: 420,
-          easing: 'ease-out',
-        });
-        a.onfinish = () => {
-          el.style.visibility = '';
-        };
-      });
     }
+    /* tint 不在这里摘 —— 页面底层的色彩交接 CSS 已经安排好了:
+       body.writing-page.design-page.article-closing::before 会带 transition 渐变回
+       --site-bg,时长与收起同档(见 writing.css 的注释)。
+       试过在这里提前 removeAttribute('data-tint'),那反而是倒退:模态此刻还完全
+       不透明,文章里吃 --page-tint 的元素会当场变色,等于在淡出的第一帧塞进一次跳变。
+       留给 finish 摘就行,那时 ::before 已经渐变到位、模态也已经淡到 0。 */
 
-    anims[anims.length - 1].onfinish = () => {
-      hidden.forEach((el) => (el.style.visibility = ''));
-      finish(); // 文章整体卸载,飞行件随之消失
+    /* ④ 模态里所有元素同一条曲线、同一段时间一起淡 —— 不拆件、不做任何位移。
+       关闭键 .article-modal-back 是 fixed + z101、挂在 host 外面,不单独收进来就会
+       在整篇淡走之后还满不透明地杵在右上角(2026-07-28 用户实测「不对,是模态页
+       整体所有元素同时淡出」)。
+       收起不再做「封面/标题/标签/日期飞回卡片」的联动(2026-07-28 用户定):那套要
+       飞行件逐项复刻卡片排版,还要在封面仍钉着(已脱流)的布局里量落点 —— 量到的
+       卡片标题是 y=192(封面框内)而不是真实的 y=408,标题就飞进封面底下(封面
+       z95 > 文字 z90)全程看不见,等解钉重排才跳到真位置,表现为「没有联动、闪一下
+       出现」。
+       曲线用 TYPE_EASE 而不是 COVER_EASE:后者是给位移调的、极度前重,实测 240ms
+       里跑到 90ms 时 opacity 已经掉到 0.18,看着就是「唰一下没了」,正是要避开的
+       那种闪。淡出要的是匀速的过程感。 */
+    const fading: HTMLElement[] = [host];
+    const backBtn = document.querySelector<HTMLElement>('.article-modal-back');
+    if (backBtn) fading.push(backBtn);
+    const outs = fading.map((el) =>
+      el.animate([{ opacity: 1 }, { opacity: 0 }], {
+        duration: morphMs(true),
+        easing: TYPE_EASE,
+        fill: 'both',
+      }),
+    );
+    /* 刻意不并进 closingAnims —— finish 的第一件事就是把里面的动画全 cancel,
+       而这两条的终态 opacity:0 正是靠 fill:'both' 顶着的:一 cancel 就当场弹回
+       opacity:1,模态和关闭键在 React 卸载之前又整块显形一帧,表现为「关闭模态回到
+       Feed 的瞬间闪动一下」(2026-07-28 用户实测)。
+       落幕前顺手把 opacity 写成内联值,这样即便将来有谁去 cancel,它们也还是不可见。
+       两者都随 finish 一起卸载,不用善后。 */
+    outs[0].onfinish = () => {
+      fading.forEach((el) => (el.style.opacity = '0'));
+      finish();
     };
   };
 
@@ -737,13 +672,31 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       return;
     }
     anims[anims.length - 1].onfinish = () => {
-      /* 同一同步块内交接:文章侧显形、飞行件复位,中间不留可见帧。
-         封面例外 —— 它的 iframe 到这一刻才开始加载(飞行期间被摘了 src),
-         这会儿交接等于换上一张白图。留着飞行件顶在原位,等它画出来再换。 */
-      /* 四件一起延后交接。封面延后是因为换实例必闪(见 handoffCover);标题/tag/
-         日期虽然两边渲染一致,但它们和封面同处一个画面 —— 封面还钉着、文字却已
-         换成文章那份,滚动时就会一个跟着滚一个不跟。索性同一时机一起换。
-         于是「展开、看一眼、收起」这条路径上一次交接都不发生。 */
+      /* 文字三件:落位即换脸 —— 文章侧显形、卡片那份就地藏起来。
+         注意「藏」不是「解钉」:飞行件继续钉在原位、动画继续 fill 顶着,收起时
+         原路飞回全靠它们(解钉的后果见 closeArticle 里那段长注释)。
+         为什么要换:这三件曾经跟着封面一起延后到「滚动或收起」才交接,理由写的是
+         「两边渲染一致,不如同一时机一起换」—— 那个「一致」靠不住,而且靠不住在
+         一个很脆的地方。飞行件的落位宽度只由 fill:'both' 的动画顶着,底下压着
+         pin() 写进去的卡片宽度(实测 256.95px,目标 382px);高度更是被 pin 锁死在
+         卡片那一行(25px),flightAnims 从不动它。fill 一旦没顶住,元素当场回落到
+         257px —— 24px 字号下标题正好断成两行,第二行还溢出 25px 的盒子压到 byline
+         上。2026-07-28 用户在 iPhone 上实测到的正是这一幕:「标题一开始是两行的,
+         上滑一点就自动变成 1 行」,而那一下「上滑」就是触发交接的 scroll;断行位置
+         与 257px 逐字吻合。(iOS 具体哪一步没顶住没能在真机上定位 —— 桌面 Chromium
+         复现不出,fill 顶得住。)
+         真身是普通 DOM:没有内联宽度、不靠动画顶着、text-wrap 之类的属性也不用另
+         行复刻,换行在任何引擎上都对。把「正确性依赖 WAAPI fill」这份脆弱整个去掉,
+         而不是去追平某一条属性。 */
+      pairs
+        .filter((pr) => pr.kind !== 'cover')
+        .forEach(({ el, target }) => {
+          target.style.visibility = '';
+          el.style.visibility = 'hidden';
+        });
+      /* 封面仍旧延后:它的实现五花八门(iframe/video/随机 time0),换实例必闪 ——
+         理由见 handoffCover 里的长注释,等「滚动或收起」再换。
+         文字三件照旧留在 rest 里:收起要靠它们原路飞回(见 closeArticle 的注释)。 */
       const cover = pairs.find((pr) => pr.kind === 'cover');
       handoffCover(
         cover?.target ?? null,
