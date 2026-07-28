@@ -3844,3 +3844,8 @@ body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-le
     transition: none;
 }
 }
+
+/* 滚出视口的内嵌网页:visibility:hidden 让浏览器把它的 rAF 降频/暂停,同时
+   保留布局尺寸(不塌、不触发重排)。由 usePauseOffscreenMedia 挂/摘。
+   不用 display:none —— 那会让 iframe 尺寸归零,滚回来要重新布局甚至重载。 */
+.media-idle { visibility: hidden; }

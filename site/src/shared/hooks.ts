@@ -516,3 +516,117 @@ export function useHideNavOnScrollMobile() {
     };
   }, []);
 }
+
+/* 视口外的媒体一律停下来:Archive 上有 10 个 autoplay loop 的 <video> 和 9 个
+   内嵌 <iframe>(各跑各的 rAF)。它们滚出视野后浏览器不会自动停 —— 只有
+   display:none 才会暂停文档,而这里只是滚出视口。同时活跃十几路,手机滚起来就卡
+   (2026-07-28 用户录屏:滚动中大量停滞,LCP 25s)。
+
+   视频:进视口 play()、出视口 pause();不动 src,恢复时接着播不用重新缓冲。
+   iframe:出视口挂 .media-idle(CSS visibility:hidden),浏览器随即把它的 rAF
+   降频/暂停;进视口摘掉即恢复。不卸 src —— 卸了回来要整页重载,更慢更闪。 */
+export function usePauseOffscreenMedia() {
+  useEffect(() => {
+    const onEntry = (e: IntersectionObserverEntry) => {
+      const el = e.target as HTMLElement;
+      if (el instanceof HTMLVideoElement) {
+        /* play() 返回 promise,被打断会抛 AbortError —— 快速滚动时很常见,吞掉 */
+        if (e.isIntersecting) void el.play().catch(() => {});
+        else if (!el.paused) el.pause();
+      } else {
+        el.classList.toggle('media-idle', !e.isIntersecting);
+      }
+    };
+    /* 视频用零边距:多一路解码就多一分卡,不需要预热(它本来就在缓冲里,
+       进视口 play() 立刻有画面)。留 200px 余量的话,视口外那两三个仍在解码
+       —— 实测「视口外仍在播 2 个」正是这么来的(2026-07-28)。 */
+    const ioTight = new IntersectionObserver((es) => es.forEach(onEntry), { rootMargin: '0px' });
+    /* iframe 给一点提前量:它要重新起 rAF、跑首帧,贴边切换会看到一下空白 */
+    const ioLoose = new IntersectionObserver((es) => es.forEach(onEntry), { rootMargin: '150px 0px' });
+
+    /* 挂载时扫一次不够 —— Archive 的卡片是按入场节奏渐进渲染的,useEffect 跑的
+       那一刻很多 <video> 还不在 DOM 里,从没被 observe 过,于是 autoplay 一路播到底
+       (2026-07-28 实测:从首页展开后 10 个视频全在播、且全在视口外,最长帧 779ms)。
+       改成持续接管:新出现的媒体一律补 observe。已 observe 的重复调用是空操作。 */
+    const seen = new WeakSet<Element>();
+    const claim = (root: ParentNode) => {
+      root.querySelectorAll<HTMLElement>('video, iframe').forEach((el) => {
+        if (seen.has(el)) return;
+        seen.add(el);
+        (el instanceof HTMLVideoElement ? ioTight : ioLoose).observe(el);
+        /* 补 observe 之前它可能已经在播了:IO 的首次回调只在下一帧到,先按当前
+           位置判一次,避免视口外的多播这一帧。 */
+        if (el instanceof HTMLVideoElement) {
+          const r = el.getBoundingClientRect();
+          if ((r.bottom <= 0 || r.top >= window.innerHeight) && !el.paused) el.pause();
+        }
+      });
+    };
+    claim(document);
+
+    /* display:none → contents 这一下,IO 不会重新判定。首页把 Blog/Archive 常驻挂载
+       在隐藏容器里做预载,useEffect 早在那时就跑完了 —— 元素尺寸全为 0、IO 判为
+       不可见并一直保持这个判定;展开时既没有新节点(MutationObserver 不触发),
+       display 变化也不是 IO 的触发条件。于是 autoplay 一路播到底
+       (2026-07-28 实测:从首页展开 Archive 后 10 个视频全在播且全在首屏之下,
+       最长帧 1233ms)。
+       解法:重新 observe 一遍 —— IO 对已观察元素再 observe 会立刻重发一次判定。
+       用 rAF 等布局落定,否则量到的还是隐藏时的空盒子。 */
+    /* 一帧只排一次。一次交互里 body 子树的 style/class 可能连改几十处(文章模态
+       收起就是:body 切类、host 写一串内联、每张卡加 .visible、飞行件 unpin),
+       不合并的话每一处都排一个 rAF,每个 rAF 又把全页 video/iframe 重新 observe
+       一遍 —— 几十倍的空转。 */
+    let pending = false;
+    const recheck = () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(() => {
+        pending = false;
+        document.querySelectorAll<HTMLElement>('video, iframe').forEach((el) => {
+          (el instanceof HTMLVideoElement ? ioTight : ioLoose).observe(el);
+        });
+      });
+    };
+    /* 监听祖先 style/class 变化 —— 模态展开就是切这两样 */
+    const displayMo = new MutationObserver((records) => {
+      /* 模态开合的过渡帧里一律不插手。重新 observe 会让 IO 立刻重发判定,进而
+         play()/pause()、给 iframe 切 .media-idle(visibility:hidden)。而那几帧
+         正好是「模态整篇淡出、底下 Feed 保持原位」在跑 —— 底下卡片闪一下,会透过
+         正在变透明的模态被看见,与「整个过程中不要有闪动」直接冲突。
+         过渡结束后布局还会再动,自然有新的 mutation 把这一轮补上,不会漏判。 */
+      const cls = document.body.classList;
+      if (cls.contains('article-morphing') || cls.contains('article-closing')) return;
+      /* 滤掉自己引起的:onEntry 给 iframe 切 .media-idle 本身就是一次 class 变化,
+         不滤就是 recheck → onEntry → mutation → recheck 的自激。 */
+      if (records.every((r) => (r.target as HTMLElement).matches?.('video, iframe'))) return;
+      recheck();
+    });
+    displayMo.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['style', 'class'],
+      subtree: true,
+    });
+
+    const mo = new MutationObserver((records) => {
+      records.forEach((rec) =>
+        rec.addedNodes.forEach((n) => {
+          if (n.nodeType !== 1) return;
+          const el = n as HTMLElement;
+          if (el.matches?.('video, iframe')) {
+            seen.add(el);
+            (el instanceof HTMLVideoElement ? ioTight : ioLoose).observe(el);
+          }
+          claim(el);
+        }),
+      );
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      mo.disconnect();
+      displayMo.disconnect();
+      ioTight.disconnect();
+      ioLoose.disconnect();
+    };
+  }, []);
+}
