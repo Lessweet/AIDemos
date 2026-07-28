@@ -64,6 +64,9 @@ const COVER_EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
 /* 排版属性专用:两端略缓、中段匀速。字号变化要的是「一路缩下去」的过程感,
    不能像位移那样前段冲刺(见 flightAnims 的注释)。 */
 const TYPE_EASE = 'cubic-bezier(0.4, 0.05, 0.35, 1)';
+/* 字号专用:极陡的 ease-out(easeOutExpo 一路),约前四分之一时间走完八成变化。
+   字号每变一帧就重排一帧,把这段抖动挤到起步、让收尾只剩纯位移(见 flightAnims)。 */
+const TYPE_RUSH = 'cubic-bezier(0.16, 1, 0.3, 1)';
 /* 模态只在手机端(SMALL_MQ)启用 —— 桌面点卡片照常跳转到独立文章页,那边是
    「左列表 + 右正文」的两栏阅读布局(2026-07-27 用户定)。 */
 
@@ -297,17 +300,19 @@ function flightAnims(
       easing: TYPE_EASE,
       fill: 'both',
     }),
-    /* 字号/行高/字距:每变一次就要重排一次文字。逐帧变的话一次飞行要重排十几次,
-       3x DPR 上肉眼能看出抖(2026-07-28 用户实测屏幕上也能看到)。改成 steps 分档,
-       重排降到 4 次;两端只差 1.33 倍(18↔24),每档 1.5px,跳变小到看不出来。
+    /* 字号/行高/字距:每变一次就要重排一次文字,3x DPR 上逐帧变肉眼能看出抖。
+       试过 steps 分档,更糟 —— 跳变比抖动显眼(2026-07-28 用户实测「太卡」)。
+       现在仍连续变,但用极陡的 ease-out 把变化压到起步那一小段:那时位移最快、
+       字最小,重排的抖动被大位移盖住;后半程字号已经到位,只剩纯 transform 位移,
+       全程最显眼的收尾阶段是完全平滑的。
        为什么不用 transform: scale —— 那会把宽度一起放大 1.33 倍撑出容器,而两端
-       容器同宽,文字的换行位置就全错了。 */
+       容器同宽,文字的换行位置会全错。 */
     el.animate(
       [
         { fontSize: c.fontSize, lineHeight: c.lineHeight, letterSpacing: c.letterSpacing, width: `${from.width}px` },
         { fontSize: `${to.fs}px`, lineHeight: to.lh, letterSpacing: to.ls, width: `${to.width}px` },
       ],
-      { duration: dur, easing: 'steps(4, end)', fill: 'both' },
+      { duration: dur, easing: TYPE_RUSH, fill: 'both' },
     ),
   ];
 }
@@ -616,7 +621,7 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
             fill: 'both',
           }),
         );
-        // 字号/行高/字距分档(每次都要重排,见 flightAnims 里的注释)
+        // 字号/行高/字距:同展开,抖动挤到起步(见 flightAnims 里的注释)
         closingAnims.push(
           el.animate(
             [
@@ -628,7 +633,7 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
                 width: `${origin.width}px`,
               },
             ],
-            { duration: back, easing: 'steps(4, end)', fill: 'both' },
+            { duration: back, easing: TYPE_RUSH, fill: 'both' },
           ),
         );
       });
