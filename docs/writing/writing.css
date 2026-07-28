@@ -3227,17 +3227,28 @@ body.writing-page.design-page.article-closing::before {
 
 /* 单栏下标题/正文回到阅读列宽:≥1000px 的两栏规则把它们放开成 max-width:none
    (那是给「右栏撑满」用的),模态里没有左栏,应当像独立页单列那样收窄居中。 */
+/* article-closing 也要带上:收起已改成「模态整篇淡出」,淡出期间模态还完整地
+   摆在屏幕上,排版一条都不能变(2026-07-28 用户手机实测)。 */
 body.article-modal .blog-article-host .article-h1,
 body.article-modal .blog-article-host .article-byline,
 body.article-modal .blog-article-host .article-body,
-body.article-modal .blog-article-host .article-footer {
+body.article-modal .blog-article-host .article-footer,
+body.article-closing .blog-article-host .article-h1,
+body.article-closing .blog-article-host .article-byline,
+body.article-closing .blog-article-host .article-body,
+body.article-closing .blog-article-host .article-footer {
     max-width: var(--reading-col);
     margin-left: auto;
     margin-right: auto;
 }
 /* 封面出血:host 现在吃满 #app,只剩 #app(main.design-layout)每侧 24px 这一层
    留白要顶掉,封面即齐到视口边缘。 */
-body.article-modal .article-cover {
+/* article-closing 一并带上 —— 漏了它,收起那一刻出血失效,封面当场从通栏缩回
+   正文列宽,然后才开始淡,看着就是「先跳一下再淡出」(2026-07-28 用户手机实测)。
+   这条规则原本只写 article-modal 是对的:那时收起走的是「封面飞回卡片」,本来
+   就该缩;改成整篇淡出之后,淡出期间必须保持模态原样。 */
+body.article-modal .article-cover,
+body.article-closing .article-cover {
     --cover-bleed-x: 24px;
     /* 封面到标题的间距与左右边距同值(2026-07-28 用户要求统一) */
     margin-bottom: 24px;
@@ -3248,8 +3259,10 @@ body.article-modal .article-cover {
     /* host 吃满 #app,内容边距全部由 #app 那一层的每侧 24px 提供 —— 与首页 / Blog
        同一条(2026-07-28 用户要求统一;此前 host 自己再套 16px,合计 40px)。
        封面出血相应只顶掉这一层。 */
-    body.article-modal .blog-article-host { width: 100%; }
-    body.article-modal .article-cover { --cover-bleed-x: 24px; }
+    body.article-modal .blog-article-host,
+    body.article-closing .blog-article-host { width: 100%; }
+    body.article-modal .article-cover,
+    body.article-closing .article-cover { --cover-bleed-x: 24px; }
 }
 /* 顶栏的尺寸/按钮不需要补丁:模态里 blog-page 类保留着,那一整套规则原样生效
    (2026-07-27 —— 此前摘掉 blog-page 再逐条补 article-modal,补漏了主题按钮,
