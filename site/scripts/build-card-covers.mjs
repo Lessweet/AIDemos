@@ -29,7 +29,9 @@ const blocks = src.split(/\n {2}\{\n/).slice(1);
 
 const jobs = [];
 for (const b of blocks) {
-  if (!b.includes('inBlogGrid: true')) continue;
+  /* 不再只挑 inBlogGrid —— 阅读器左栏(ReaderList)列的是全部文章,同样吃 cardCover。
+     没有 listCover 的自然跳过(figma-agent / genie 没配封面图,左栏走「封面」占位)。
+     2026-07-28:先前只压 Blog 网格里的,于是 voices 在左栏还在拉 3MB 原图。 */
   const slug = b.match(/slug: '([^']+)'/)?.[1];
   const cover = b.match(/listCover: '([^']+)'/)?.[1];
   if (!slug || !cover) continue;
@@ -39,7 +41,7 @@ for (const b of blocks) {
 }
 
 if (!jobs.length) {
-  console.error('没有找到任何 inBlogGrid 文章的 listCover');
+  console.error('没有找到任何配了 listCover 的文章');
   process.exit(1);
 }
 
