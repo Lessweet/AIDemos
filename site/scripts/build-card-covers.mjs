@@ -1,11 +1,14 @@
 /**
  * Blog 卡片封面压缩 —— 从每篇的 listCover 压出 1200px 宽的 webp,输出到
- * docs/writing/assets/_cards/<slug>.webp,供 articles.ts 的 cardCover 引用。
+ * docs/writing/assets/cards/<slug>.webp,供 articles.ts 的 cardCover 引用。
  *
  * 为什么需要:listCover 是设计原图(最大 6MB、3240px 宽),它原本只喂阅读器左栏
  * 那个小缩略图,没人在意体积。2026-07-28 把 Blog 卡片封面改成静态图后直接复用了它,
  * 于是 Blog 首屏要拉 30MB —— 用户报「封面加载不出来」。卡片实际只显示 382px 宽,
  * 3x 屏也只要 1146px,1200/q85 足够且几乎看不出差别(29.8MB → 540KB)。
+ *
+ * 目录名不能以下划线开头:GitHub Pages 的 Jekyll 会跳过 _ 开头的目录,
+ * 图片会 404(2026-07-28 上线后实测)。
  *
  * 用法:node site/scripts/build-card-covers.mjs
  * 依赖:cwebp(brew install webp)
@@ -17,7 +20,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const OUT_DIR = join(ROOT, 'docs/writing/assets/_cards');
+const OUT_DIR = join(ROOT, 'docs/writing/assets/cards');
 const WIDTH = 1200;
 const QUALITY = 85;
 
