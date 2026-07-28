@@ -22,6 +22,7 @@ import {
   useHeaderAlwaysVisible,
   useHideNavOnScrollMobile,
   useAppReady,
+  usePauseOffscreenMedia,
 } from '../../shared/hooks';
 
 const PixelIcon = ({ d }: { d: string }) => (
@@ -110,6 +111,7 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
   useHeaderAlwaysVisible();
   useStickyMenu();
   useScrollProgress();
+  usePauseOffscreenMedia();
   useNavSolidOnScroll();
   useNavSpy();
   usePillarEntrance();

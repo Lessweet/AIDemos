@@ -516,3 +516,42 @@ export function useHideNavOnScrollMobile() {
     };
   }, []);
 }
+
+/* 视口外的媒体一律停下来:Archive 上有 10 个 autoplay loop 的 <video> 和 9 个
+   内嵌 <iframe>(各跑各的 rAF)。它们滚出视野后浏览器不会自动停 —— 只有
+   display:none 才会暂停文档,而这里只是滚出视口。同时活跃十几路,手机滚起来就卡
+   (2026-07-28 用户录屏:滚动中大量停滞,LCP 25s)。
+
+   视频:进视口 play()、出视口 pause();不动 src,恢复时接着播不用重新缓冲。
+   iframe:出视口挂 .media-idle(CSS visibility:hidden),浏览器随即把它的 rAF
+   降频/暂停;进视口摘掉即恢复。不卸 src —— 卸了回来要整页重载,更慢更闪。 */
+export function usePauseOffscreenMedia() {
+  useEffect(() => {
+    const vids = Array.from(document.querySelectorAll<HTMLVideoElement>('video'));
+    const frames = Array.from(document.querySelectorAll<HTMLIFrameElement>('iframe'));
+    if (!vids.length && !frames.length) return;
+
+    const onEntry = (e: IntersectionObserverEntry) => {
+      const el = e.target as HTMLElement;
+      if (el instanceof HTMLVideoElement) {
+        /* play() 返回 promise,被打断会抛 AbortError —— 快速滚动时很常见,吞掉 */
+        if (e.isIntersecting) void el.play().catch(() => {});
+        else if (!el.paused) el.pause();
+      } else {
+        el.classList.toggle('media-idle', !e.isIntersecting);
+      }
+    };
+    /* 视频用零边距:多一路解码就多一分卡,不需要预热(它本来就在缓冲里,
+       进视口 play() 立刻有画面)。留 200px 余量的话,视口外那两三个仍在解码
+       —— 实测「视口外仍在播 2 个」正是这么来的(2026-07-28)。 */
+    const ioTight = new IntersectionObserver((es) => es.forEach(onEntry), { rootMargin: '0px' });
+    /* iframe 给一点提前量:它要重新起 rAF、跑首帧,贴边切换会看到一下空白 */
+    const ioLoose = new IntersectionObserver((es) => es.forEach(onEntry), { rootMargin: '150px 0px' });
+    vids.forEach((v) => ioTight.observe(v));
+    frames.forEach((f) => ioLoose.observe(f));
+    return () => {
+      ioTight.disconnect();
+      ioLoose.disconnect();
+    };
+  }, []);
+}
