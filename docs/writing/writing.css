@@ -685,9 +685,45 @@ body.reading-page .reading-layout .reader-list { padding-top: 0; }
 /* 版式:标题组(标题/日期)置顶,封面接在标题组之后、正文之前(按 HTML 自然顺序)。
    封面上接 byline(byline 下边距 72px),自身下边距 72px 隔开正文,上下对称。 */
 .article-reading { display: flex; flex-direction: column; }
-.article-reading .article-cover { margin: 0 0 24px; }   /* 封面下→正文 间距(收紧);上间距由 byline 提供 */
-/* 标题组下方间距 = 上方,精确对齐:byline 底边距 72,并清零正文首段默认上边距,避免叠加 */
-body.reading-page .article-body > *:first-child { margin-top: 0; }
+/* 封面置于标题组之上(2026-07-27 用户要求):HTML 里它排在 byline 之后,
+   父级已是 flex column,用 order 换序即可,不必改 13 篇 fragment 的结构
+   (fragment 由 extract-articles.mjs 生成,改了会被重跑覆盖)。 */
+.article-reading .article-cover {
+    order: -1;
+    /* 通栏 hero:撑满整个右栏(阅读区)的外缘,不跟标题/正文的 --reading-col 收窄
+       —— 2026-07-27 用户圈图明确「展示区域」指的是右栏全宽。
+       右栏自身有 padding(桌面 64/72),负边距把这层内边距顶掉,让封面真正齐边;
+       顶部同样上提,封面直接贴住右栏顶。变量在下方按断点覆盖。 */
+    /* 出血量 = 封面上方 / 左右各有多少内边距要顶掉,按断点不同:
+       · 单列(<1000):左右要顶掉 .reading-layout 的居中留白(width 是
+         calc(100% - 48px),故每侧 24px;≤600 改 32px 容器 → 每侧 16px),
+         封面齐到视口边缘;顶部留白来自 .reading-layout 的 padding-top
+         (= --nav-content-gap),顶掉才能像宽屏那样贴住顶栏下沿。
+       · 两栏(≥1000):.reading-layout 的 padding-top 为 0,改由右栏自己的
+         padding 72/64 提供 —— 见下方 min-width:1000px 的覆盖。 */
+    --cover-bleed-x: 24px;
+    --cover-bleed-top: var(--nav-content-gap);
+    width: auto;
+    max-width: none;
+    margin: calc(-1 * var(--cover-bleed-top)) calc(-1 * var(--cover-bleed-x)) 56px;
+    border-radius: 0;   /* 齐边通栏,不留圆角(另见下方带 !important 的覆盖) */
+}
+/* ≥1000px 两栏布局下右栏有 padding 72/64,出血量与之同值。
+   必须写在上面那条默认值「之后」—— 两者特异性相同(0,2,0),靠顺序决胜;
+   放进上方的 min-width:1000px 块里会被后面的默认值 0 覆盖(2026-07-27 实测)。 */
+@media (max-width: 600px) {
+    .article-reading .article-cover { --cover-bleed-x: 16px; }   /* 容器 calc(100% - 32px) */
+}
+@media (min-width: 1000px) {
+    .article-reading .article-cover { --cover-bleed-x: 72px; --cover-bleed-top: 64px; }
+}
+/* 清零正文首段的上边距,避免与 byline 的下边距叠加(40 + 40 = 80,而段落之间只有
+   40 —— 用户实测「角标栏下面的间距比段落间距大」)。
+   必须带上 style + * 这一条:fragment 里 .article-body 的第一个子元素是内联
+   <style>,:first-child 命中的是它,真正的首段排在第二个,原来那条规则从来没生效过
+   (2026-07-28)。两条都留,兼容没有内联 style 的 fragment。 */
+body.reading-page .article-body > *:first-child,
+body.reading-page .article-body > style:first-child + * { margin-top: 0; }
 
 /* 文章详情页:标题上方标签组(eyebrow)—— 圆角矩形描边黑色 tag,左对齐、与标题同左缘。
    一处覆盖三篇文章及 article-template 后续生成的页面;justify-content 压过模板内联的居中。 */
@@ -755,7 +791,7 @@ body.reading-page .article-eyebrow-top .a-tag {
 }
 
 /* 标题组(标题 / 署名)收窄到与正文段落同宽,左缘与下方正文对齐
-   (封面仍保持满宽 hero) */
+   (封面不在此列 —— 它是通栏 hero,撑满整个右栏,见 .article-reading .article-cover) */
 .article-eyebrow,
 .article-h1,
 .article-byline {
@@ -769,9 +805,18 @@ body.reading-page .article-eyebrow-top .a-tag {
 /* H1 桌面 / 手机统一 = --fs-h1(48px),不再分断点 */
 /* tag、byline 维持基准值(手机端有单独的尺寸/内边距微调,见下方 ≤600 段)。 */
 
-/* 标题组(标题 / 发布时间·阅读时长)整体居中 —— 所有断点统一 */
-body.reading-page .article-h1 { text-align: center; }
-body.reading-page .article-byline { text-align: center; justify-content: center; }
+/* 标题组(标题 / 发布时间·阅读时长)整体左对齐 —— 所有断点统一。
+   这一处 2026-07-27 反复过两轮:先改左对齐、被要求改回线上的居中、最终又定回左对齐。
+   最后这次是有前提的 —— 为「Blog 卡片 → 文章详情」的共享元素联动做准备:卡片标题是
+   18px 左对齐自然折行,详情标题居中 + <br> 强制换行的话,morph 中间态会出现「一行字
+   正在裂成两行」的错乱;两端都左对齐 + 自然折行后,就只剩字号差异(18 → 36),
+   可以用 scale 平滑过渡。 */
+body.reading-page .article-h1 { text-align: left; }
+body.reading-page .article-byline { text-align: left; justify-content: flex-start; }
+/* 标题的自然折行由 ArticlePage 在渲染后把 <br/> 还原成「,」实现 —— 不能用 CSS
+   屏蔽 br:fragment 里的 <br/> 是「顶替逗号」而非额外换行(源标题「验证循环,把手动
+   检查写进 Skill」被写成「验证循环<br/>把手动检查写进 Skill」),display:none 会
+   连标点一起吃掉(2026-07-27 实测)。 */
 
 /* 标签组移进 byline:与日期/阅读时长同排,标签在前。撤掉 eyebrow 作为独立块的宽度/居中/下间距,
    让它以 inline flex item 身份坐在 byline 这一行里(byline 的 20px gap 分隔标签组与日期)。 */
@@ -779,7 +824,7 @@ body.reading-page .article-byline .article-eyebrow {
     width: auto;
     max-width: none;
     margin: 0;
-    justify-content: center;
+    justify-content: flex-start;
 }
 /* eyebrow 标签与日期/阅读时长同款:剥掉胶囊底,继承 byline 的等宽灰字(#969696、14px)。
    多带一个 .article-byline 提高优先级,盖过共用 chip 块与手机端 padding 覆盖。 */
@@ -798,7 +843,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
 /* 手机端:标题组上下间距同步缩小并保持一致(封面下 = byline 下 = 40px) */
 @media (max-width: 600px) {
     .article-reading .article-cover { margin-bottom: 40px; }
-    body.reading-page .article-byline { margin-bottom: 40px; }
+    body.reading-page .article-byline { margin-bottom: 60px; }   /* 2026-07-28 用户定 60(段落间距仍 40) */
     /* 标签组:手机端字号/内边距/间距同步收小,与缩小后的标题比例协调 */
     body.reading-page .article-eyebrow { gap: 6px; margin-bottom: 14px; }
     body.reading-page .article-eyebrow .a-tag { padding: 3px 8px; }   /* 填充 chip,手机端内边距略收;字号与桌面统一 */
@@ -807,7 +852,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
 .article-cover {
     width: 100%;
     aspect-ratio: 16 / 9;
-    border-radius: 6px;          /* 跟正文图片圆角统一 */
+    border-radius: 0;            /* 通栏 hero 齐边,不留圆角(2026-07-27 用户要求) */
     background: var(--gray-100);
     overflow: hidden;
     margin: 80px 0;   /* 封面上下间距各 80px */
@@ -1666,9 +1711,13 @@ body.home-v2 .header-placeholder { height: 76px; }
     color: #969696;                 /* 与 .w-date 同色 */
     line-height: inherit;
 }
-/* hover 时与日期同步淡化 */
-.card-wrapper:hover .writing-info .w-meta .w-tags .a-tag {
-    color: var(--gray-300);
+/* hover 时与日期同步淡化。
+   触屏要挡掉:点一下之后 hover 态会粘在那张卡上不散,从文章模态收起回来时,
+   刚点过的卡标题/角标一直是淡的,旁边的卡却正常(2026-07-28 用户截图)。 */
+@media (hover: hover) {
+    .card-wrapper:hover .writing-info .w-meta .w-tags .a-tag {
+        color: var(--gray-300);
+    }
 }
 .writing-info .w-title {
     font-size: var(--fs-h3);         /* 卡片标题 20px */
@@ -1712,10 +1761,12 @@ body.home-v2 .header-placeholder { height: 76px; }
 
 /* 卡片字号(标题/简介/时间)已统一走 :root 字号 token,桌面/手机一致,无需断点覆盖 */
 
-/* hover 时封面下面的文字整体变灰 */
-.card-wrapper:hover .writing-info .w-title { color: var(--gray-500); }
-.card-wrapper:hover .writing-info .w-excerpt,
-.card-wrapper:hover .writing-info .w-date { color: var(--gray-300); }
+/* hover 时封面下面的文字整体变灰(同上,触屏挡掉,避免粘滞 hover) */
+@media (hover: hover) {
+    .card-wrapper:hover .writing-info .w-title { color: var(--gray-500); }
+    .card-wrapper:hover .writing-info .w-excerpt,
+    .card-wrapper:hover .writing-info .w-date { color: var(--gray-300); }
+}
 
 /* 填充式占位图(用于封面框内) */
 .img-ph.fill { min-height: 0; height: 100%; margin: 0; border: none; border-radius: 0; }
@@ -1732,7 +1783,9 @@ body.home-v2 .header-placeholder { height: 76px; }
 .home-v2 .foundation-card,
 .home-v2 .icon-cover,
 .home-v2 .icon-preview-frame { border-radius: 12px !important; }
-.article-cover { border-radius: 6px !important; }
+/* 封面直角(2026-07-27 用户要求):它是通栏 hero、齐容器边缘,圆角会在齐边处显脏。
+   保留 !important 是因为上一行那组同样带 !important,同特异性靠顺序决胜。 */
+.article-cover { border-radius: 0 !important; }
 
 /* Blog 列表封面改直角(2026-07-21,原 12px 圆角);archive.html 不含 .writing-card,
    文章详情页 .article-cover 不受影响 */
@@ -2169,7 +2222,10 @@ body.reading-page .header.home-nav::after {
     /* ==== 首页 / Blog / Archive 三页共享规范(2026-07-21 定)====
        1. 背景色必须一致:全走 --site-bg,改这一处三页同步,禁止某页单独改值;
        2. 顶栏下留白必须一致:全走 --nav-content-gap,同样只改这一处。 */
-    --site-bg: var(--gray-50, #f9f9f9);
+    /* 2026-07-27 用户要求加深:脱离 --gray-50(#f9f9f9,近白)改为直接给值 ——
+       #f2f2f2 能读出「灰底面」,白色封面卡自然浮出;--gray-50 仍留给文章页卡片表面。
+       同步点:site/index.html 首帧四处底色 + style.css --hl-paper(纸色)与此同值。 */
+    --site-bg: #f2f2f2;
     --nav-content-gap: 120px;   /* 2026-07-26 用户要求减半(原 240px) */
     /* 首页索引行与手机端全屏菜单三项共用的字号(2026-07-21):两处必须一致。
        当前 = --fs-h2(24px,style.css 字号 scale) */
@@ -2847,7 +2903,7 @@ html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + var(--hero-b
     /* 上下留白各翻倍(实测顶栏→标题 48→96、署名→首卡 56→112)。
        上边少加的 32px 来自 body.no-banner .design-layout 的 padding-top,不是这里漏了。 */
     .home-hero { padding: 64px 0 112px; }
-    .hero-byline { margin-top: 28px; }
+    .hero-byline { margin-top: 36px; }   /* 标题 → 署名 +8px(2026-07-27 用户圈图,原 28) */
     /* 字号:外面那条 clamp(30px, 5.4vw, 76px) 在手机上永远撞到 30px 下限 —— 不随视口走,
        342px 的可用宽里标题只占 287px,显小。这里改成跟视口线性缩放。
        系数由实测得出:第二行(Kaushan 1.2em)自然宽约 9.6×字号,减掉左右各 24px 页面内边距,
@@ -2863,6 +2919,71 @@ html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + var(--hero-b
     body.home-landing .home-index { padding-bottom: 24px; }
     body.home-landing .hero-byline { margin-top: 24px; }
 }
+
+/* ============ 首页 → Blog / Archive 全屏模态(test/page-interaction 实验) ============
+   点击首页 Blog / Archive 行不再跳页:同文档内 body 换成 blog-page / works-page 布局,
+   目标页内容就地挂载,首页 hero / 索引藏在模态下面(visibility 而非 display ——
+   display 切换会把 hero 的 CSS animation 从头重播,关闭模态回来时首页就会重新入场一遍)。
+   2026-07-27 v2「整块位移」:模态内容(#app 里除首页两块外的全部)由 HomePage 施加
+   同一段 transform,整体从行位置移入/移回 —— 标题即行文字本身,feed 跟着一起动,
+   不再有独立飞行的克隆。 */
+body.home-modal .home-hero,
+body.home-modal .home-index {
+    position: absolute;
+    visibility: hidden;
+    pointer-events: none;
+}
+/* 整块位移期间锁滚动(替代旧方案借用的 html.is-loading —— 那个还会把 feed 闸住,
+   v2 要求 feed 点击瞬间就入场)。滚动容器是 html:只锁 body 锁不住页面滚动,
+   用 :has 把锁挂到 html 上(站点已依赖 dvh / WAAPI 等现代特性,:has 同代)。 */
+body.home-modal-riding { overflow: hidden; }
+html:has(body.home-modal-riding) { overflow: hidden; }
+/* 关闭模态:feed / 菜单 / banner 随收起淡出(0.42s;下移 1.12s —— 列表先散,
+   淡完首页显形垫底)。标题行除外:标题就是即将归位的行文字,必须全程可见。
+   按 .home-ride-el(HomePage 递归标出的真实盒子)选择,不按 #app 直接子级 ——
+   Archive 的 .design-content 是 display:contents,没有盒子,opacity 写在它上面
+   完全不生效,卡片根本不会淡出。 */
+body.home-modal.home-modal-closing .home-ride-el:not(.page-title-row) {
+    opacity: 0 !important;
+    /* 退场 ease-in(加速离开),与入场的 ease-out 对仗 —— 出画干脆、入画柔和 */
+    transition: opacity 0.32s ease-in;
+}
+/* 位移期间保留元素各自的 translateY 入场(2026-07-27 定):卡片的 16px 升起 +
+   行/列错峰,正是独立 blog.html / archive.html 加载时的入场语言,用户要求模态
+   展开沿用同一套。曾一度限制成「只许淡入」—— 那是 display:contents 让整块位移
+   失效的时代,块本身不动,卡片自己的位移才显得像各走各的轨迹;块位移修好后,
+   16px 相对四百多像素的整体行程只是入场质感,不会打架。 */
+/* 位移期间提前建合成层(只在 riding 期间挂,不常驻占显存) */
+body.home-modal-riding .home-ride-el { will-change: transform; }
+/* 收起后半程(home-restoring):首页布局已换回,但模态组件要等落位才卸载 ——
+   先把模态内容从布局里拿掉,React 卸载提交后 HomePage 再摘本类。
+   写成「#app 里除首页两块以外全隐」而不是枚举类名:Archive 的 VIBEDESIGN banner
+   卡是 #app 直接子节点,最初按类名枚举漏掉了它,收起时 Contact 行下面拖出一整块
+   黑色 banner(2026-07-27 用户实测);整体否定选择,以后模态页加内容也不会再漏。
+   标题行必须豁免(:not(.page-title-row)):v2 里它就是下移中的行文字本体,
+   这条规则曾把它一并隐掉 —— 用户看到的就是「Blog 先消失、落位又闪现」。 */
+/* 2026-07-27 预载重构:改按 .home-ride-el(HomePage 标出的真实盒子)摘除,
+   不再按 #app 直接子级 —— 预载 wrapper 是 display:contents,按子级选会把
+   正在下移的标题行连同整页一起隐掉。 */
+body.home-restoring .home-ride-el:not(.page-title-row) { display: none; }
+/* 落位窗口(420ms → 落位)里 body 已不带 blog-page / works-page,标题行的排版
+   全部要在 home-restoring 下原样成立,否则下移途中样式塌掉(字号跳大、行散架)。
+   与上方 body.blog-page/.works-page 的同名规则保持同值 —— 改那边记得同步这里。 */
+body.home-restoring .page-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+body.home-restoring .page-title {
+    margin: 0 0 20px;
+    font-size: var(--index-label-size);
+    line-height: 1.15;
+    color: #181818;
+}
+body.design-page:not(.reading-page).home-restoring .page-title {
+    font-weight: var(--fw-normal, 400) !important;
+}
+body.home-restoring.theme-dark .page-title { color: #fff; }
 
 /* ========================================
    Cases(archive.html)—— 深色改版
@@ -2882,17 +3003,403 @@ html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + var(--hero-b
 body.blog-page .page-title,
 body.works-page .page-title {
     margin: 0 0 20px;   /* 标题下间距 2026-07-26 用户要求减半(原 40px) */
-    font-size: var(--fs-h2);   /* 小一档:h1 36px → h2 24px(2026-07-26 用户要求) */
+    /* 字号/行高与首页索引行完全同形(2026-07-27 用户要求):首页行 morph 飞到标题位时
+       起终点盒子一致,落位不缩放不跳。字号绑同一 token(当前 = --fs-h2 24px),
+       行高对齐索引行的 1.15(此前吃 h1 默认 1.5,同字号下 mask 高差 25%,就是「跳」)。 */
+    font-size: var(--index-label-size);
+    line-height: 1.15;
     color: #181818;
 }
-body.works-page .page-title { grid-column: 1 / -1; }
+/* 标题行(2026-07-27):标题 + 右侧「收起」箭头同行两端对齐;works 的 4 列网格里通栏 */
+body.blog-page .page-title-row,
+body.works-page .page-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+body.works-page .page-title-row { grid-column: 1 / -1; }
 /* 标题字重 regular:全局 :is(h1,…) 规则会压成 --fw-bold !important,这里更高特异性拉回 */
 body.design-page:not(.reading-page).blog-page .page-title,
 body.design-page:not(.reading-page).works-page .page-title {
     font-weight: var(--fw-normal, 400) !important;
 }
+/* 文章模态展开/收起期间 body 会带上 reading-page,上面那条 :not(.reading-page) 当场
+   失配,Blog 标题回落到全局 h1 的 bold。展开时它是 display:none 看不见,但收起时
+   article-modal 已经摘掉、标题重新可见 —— 那 240ms 是粗的,动画一结束跳回细,
+   看起来就是「回到 Feed 时 Blog 字重变了」(2026-07-28 用户实测)。这里拉回同值。 */
+body.blog-page.article-modal .page-title,
+body.blog-page.article-closing .page-title,
+body.works-page.article-modal .page-title,
+body.works-page.article-closing .page-title {
+    font-weight: var(--fw-normal, 400) !important;
+}
 body.blog-page.theme-dark .page-title,
 body.works-page.theme-dark .page-title { color: #fff; }
+/* 「收起」箭头:与首页索引行行尾同一支箭头(同 path),旋转 135° 指向下 ——
+   展开/收起时它与行箭头之间用克隆平移 + 旋转互相变形,两端必须同源(2026-07-27)。
+   模态态点击反向 morph 回首页(独立页跳转)。字号跟标题同 token,1em 箭头与标题
+   字面同高;纵向 0.12em 内边距 = heading-rise-mask 的撇捺余量,与标题字面同轴。
+   描边规范见 style.css「UI icon 设计规范」。 */
+.page-collapse {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: 0;
+    margin: 0;
+    padding: 0.12em 0;
+    cursor: pointer;
+    color: #181818;
+    font-size: var(--index-label-size);
+    line-height: 1.15;
+    transition: opacity var(--hover-color-dur) ease;
+}
+.page-collapse:hover { opacity: 0.55; }   /* hover 灰一档,与顶栏非激活 tab 同语言 */
+body.blog-page.theme-dark .page-collapse,
+body.works-page.theme-dark .page-collapse { color: #fff; }
+.page-collapse svg {
+    display: block;
+    width: 1em;
+    height: 1em;
+    stroke: currentColor;
+    stroke-width: var(--icon-stroke, 1.5px);
+    fill: none;
+    stroke-linecap: butt;
+    stroke-linejoin: miter;
+    /* 旋转角是 morph 的终点角度:整块位移时 HomePage 用 WAAPI 把这支 svg 从 0°
+       转到这里的静态 135°(收起反向),两处必须同值 */
+    transform: rotate(135deg);
+}
+.page-collapse svg * { vector-effect: non-scaling-stroke; }
+/* 独立页(直接访问 blog.html / archive.html)时,箭头复用 heading-rise 从基线下方
+   升起,延迟接在标题末字之后(PageCollapse 的 riseDelay,2026-07-27 用户要求)。
+   遮罩要按 1em 见方留出升起的行程 —— .heading-rise-mask 的通用样式是给文字用的,
+   inline-flex 会被 svg 的 display:block 撑成实际高度,这里补一条把它按住。 */
+.page-collapse.heading-rise .heading-rise-mask {
+    display: block;
+    line-height: 0;   /* 消掉 inline 基线余隙,遮罩与 1em 的箭头等高 */
+}
+.page-collapse.heading-rise .heading-rise-char { display: block; }
+/* v2 整块位移后不再有独立飞行的克隆(.home-morph-clone / .home-morph-arrow 已删):
+   标题/箭头是真实 DOM,深浅主题色由 blog-page / works-page 既有规则天然覆盖。 */
+
+/* ============ Blog 页里的文章模态(feat/article-modal) ============
+   点卡片就地展开文章:body 换成阅读页外壳,Blog 的标题/筛选/feed 藏起来,
+   阅读页内容挂在 .blog-article-host(顶替独立页的 div.reading-layout#app)。
+   同层替换而非叠第二层 —— 文章页外壳与 Blog 差异极大(75 条 reading-page 规则、
+   不同挂载根、per-article 主题色),叠层会让 body 类切换与返回栈都失控。 */
+/* 按下反馈:点下去先轻轻一缩。点击到飞行起步之间有约 35ms 是等文章挂载的空窗,
+   这段时间画面完全静止,读起来就是「点了没反应」。参考(App Store 卡片展开)在
+   这里也有这么一下预备动作。只给触屏 —— 桌面端点卡片是普通跳转,不需要。
+   缩到 0.97 后如果 pointer 还没抬起就起飞,飞行的起点几何本身就是缩小态,
+   衔接是连续的;抬起了则回弹,也只是一下轻反馈。 */
+@media (hover: none) {
+    body.blog-page .writing-card:active,
+    body.blog-page .blog-list-item:active { transform: scale(0.97); }
+}
+body.blog-page .writing-card,
+body.blog-page .blog-list-item { transition: transform 0.14s var(--ease); }
+
+/* Blog 的标题 / 筛选 / feed 在模态里全部让位。
+   .page-title 与 .page-title-row 都要写:本分支的 BlogPage 标题没有外层 row
+   (那是另一条线的结构),只写 row 会漏掉标题、它继续占 56px,把文章整体下推
+   (2026-07-27 实测封面因此比顶栏下沿高 16px)。 */
+body.article-modal .page-title,
+body.article-modal .page-title-row,
+body.article-modal .design-menu { display: none; }
+/* feed 不能用 display:none —— 展开时飞过去的是卡片自己那份封面/标题/标签
+   (它们仍是 feed 的子节点,只是就地钉成了 fixed),display:none 会把它们一起
+   抹掉。改成脱流 + visibility 隐藏:不占高度,飞行件单独放行。
+   动的必须是卡片那一份,否则动态封面会出现两份 iframe 各播各的(2026-07-27)。 */
+body.article-modal .design-content {
+    /* 塌高度而不是 position:absolute —— 脱流会让整个 feed 在收起时重新参与流式
+       布局,实测收起起手有一帧 41ms(JS 只占 2.5ms,其余全在重排/重绘)。
+       height:0 + overflow:hidden 同样不占高度,但子元素的相对布局不变,恢复
+       时浏览器能复用。飞行件是 fixed,不受祖先 overflow 裁剪。 */
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+}
+body.article-modal .article-flying-el { visibility: visible; }
+/* 飞行件的祖先一律不许带 transform:只要祖先有 transform(卡片入场动画正在跑的
+   那个),它就成了 fixed 的包含块,而且是「会动的」包含块 —— 飞行件的视口位置
+   被它一路拖着走,轨迹抖、落位还差 22px(2026-07-27 实测停在 94 而目标 72)。
+   校正只能补一次静态偏差,补不了动态的,所以直接把 feed 里除飞行件之外的
+   transform / animation 全冻掉。feed 此时已隐藏,冻了不影响观感。
+   :not(.article-flying-el) 是关键 —— 飞行件自己的 transform 归 WAAPI 管,
+   这里一旦连它也 !important 掉,就彻底不动了。 */
+/* 槽位:飞行期间被点那张卡的 wrapper 锁高隐形(高度由 JS 锁在钉前值),流内留
+   一个等高的洞,列表其余部分纹丝不动;飞行件单独放行。没有这个洞,四件钉成
+   fixed 脱流后 wrapper 塌掉,后面的卡片全体上移,收起快落位时飞行件会压在
+   下一张卡上(2026-07-27 用户截图)。 */
+body.article-modal .card-wrapper.article-slot,
+body.article-closing .card-wrapper.article-slot { visibility: hidden; }
+body.article-modal .card-wrapper.article-slot .article-flying-el,
+body.article-closing .card-wrapper.article-slot .article-flying-el { visibility: visible; }
+/* 槽位内 opacity 全程强制为 1。卡片的显现由入场系统的 .visible 态控制(基态
+   opacity:0,style.css),而 feed 在模态里塌高后,IntersectionObserver 会把视口外
+   的卡判为离场、摘掉 .visible —— 飞行件虽然钉成 fixed,但还是那几个 DOM 节点,
+   opacity 归 0 就整个隐形,而且 opacity 不像 visibility,子元素盖不回来。
+   实测恰好只有第一篇幸免:scrollTo(0) 后它的 rect 还在视口内没被摘
+   (2026-07-27 用户实测「除了第一篇,其他展开后顶部全空白,一上滑才出现」)。
+   通配无妨:非飞行件仍被上面的 visibility:hidden 罩着。 */
+body.article-modal .card-wrapper.article-slot,
+body.article-closing .card-wrapper.article-slot,
+body.article-modal .card-wrapper.article-slot *:not(.w-excerpt),
+body.article-closing .card-wrapper.article-slot *:not(.w-excerpt) { opacity: 1 !important; }
+/* 摘要要从飞行中段就开始淡入(JS 用 WAAPI 推 opacity),!important 会压过 WAAPI,
+   所以把它从上面的通配里排除。它不是飞行件,不受入场态误伤的问题。 */
+body.article-modal .design-content *:not(.article-flying-el),
+/* 收起时同样要冻:这时飞回去的是 feed 里那张卡片自己(它一路钉着没交接),
+   一旦 article-modal 摘掉、wrapper 的入场 transform 复活,它又成了 fixed 的
+   包含块,飞行件坐标当场被劫持(2026-07-27 实测收起第一帧飞到 -1225)。 */
+body.article-closing .design-content *:not(.article-flying-el) {
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+}
+/* 外层 #app 是 main.design-layout,它的 flex / padding / min-height 会干扰阅读排版,
+   中性化掉让 .reading-layout 自己的规则接管 */
+body.article-modal #app {
+    display: block;
+    min-height: 0;
+    padding: 0;
+}
+/* 模态里没有左栏清单,所以不能吃 .reading-layout 在 ≥1000px 的两栏网格
+   (grid-template-columns: 340px minmax(0,1fr))—— 否则文章会落进 340px 的左列,
+   右边一大片空(2026-07-27 实测)。改回单栏,宽度/边距沿用窄屏那套。 */
+body.article-modal .blog-article-host {
+    display: block;
+    /* 宽度吃满 #app —— #app(main.design-layout)已经给了每侧 24px,与首页 / Blog
+       同一条内容边距。host 自己再套一层 calc(100% - 48px) 的话每侧就变 40px,
+       比首页多出 16(2026-07-28 用户实测「左右空白太多」)。 */
+    width: 100%;
+    /* 顶栏是 fixed、不占文档流,而 Blog 的标题在模态里已隐藏 —— host 必须自己
+       从顶栏下沿起算,否则内容(以及顶掉留白后的封面)会钻到顶栏后面。
+       --design-menu-top 由 nav-boot 写入 = 顶栏实际高度。 */
+    margin: var(--design-menu-top, 76px) auto 0;
+    padding: var(--nav-content-gap) 0 80px;
+}
+/* 右栏的左右内边距(72px)也是给两栏布局分隔用的,单栏不需要 */
+body.article-modal .blog-article-host .article-reading { padding: 0; }
+/* 关闭中(article-closing):文章内容退场,封面/标题/标签三件飞回卡片。
+   它们此时已是 fixed(JS 钉住当前位置),不占流;其余内容让位,Blog 的 feed
+   同帧恢复,三件从它上面缩回卡片。
+   注意用 visibility 而不是 display —— 标签挂在 .article-byline 里,父级
+   display:none 会连已脱流的飞行件一起抹掉,收起时标题/标签就整段不飞了
+   (2026-07-27 逐帧采到只有封面在动)。 */
+body.article-closing .blog-article-host .article-reading > *,
+body.article-closing .blog-article-host .article-toc,
+body.article-closing .blog-article-host .reader-list-toggle { visibility: hidden; }
+/* 放行必须写满同样深的选择器,否则特异性输给上面那条(3 类 vs 2 类),
+   飞行件照样被藏(2026-07-27 实测收起时标题/标签仍不飞)。 */
+body.article-closing .blog-article-host .article-reading .article-flying-el,
+body.article-closing .blog-article-host .article-reading > .article-flying-el { visibility: visible; }
+body.article-closing .blog-article-host {
+    margin: 0;
+    padding: 0;
+    height: 0;          /* 不撑开页面,Blog 布局立刻回到原样 */
+    overflow: hidden;   /* 让位的内容不再撑高;飞行件是 fixed,不受裁剪 */
+}
+/* 深色主题:收起时顶栏与页面底层都要回到深色底(--page-bg),不是浅色的 --site-bg ——
+   否则收起过程会先亮成浅色再跳回深色(2026-07-28)。 */
+body.theme-dark.article-closing .header.home-nav { background: var(--page-bg) !important; }
+body.theme-dark.writing-page.design-page.article-closing::before { background: var(--page-bg); }
+
+/* 顶栏在关闭过程里保持 Blog 的底色,避免最后一帧从 tint 硬跳回灰白 */
+body.article-closing .header.home-nav {
+    background: var(--site-bg) !important;
+    /* 收起走快档,跟飞行同步 —— 用展开那档的话颜色会比元素慢一倍 */
+    transition: background-color var(--article-morph-back-dur) var(--ease) !important;
+}
+/* 整页底层同步回 Blog 底色 —— 阅读页的底是 ::before 那一块 fixed 满屏,收起时
+   它若还停在文章的 --page-tint,顶栏(上面这条已切回 --site-bg)和页面底就差一道色。
+   底色是近白的 #f9f9f9 时差 7 个色阶看不出,加深到 #f2f2f2 后就露馅了(2026-07-27)。
+   2s 的 transition 也要关掉,否则色差会挂着慢慢褪、比硬跳更显眼。 */
+body.writing-page.design-page.article-closing::before {
+    background: var(--site-bg);
+    /* 同上:底层与顶栏、飞行三者同一档 */
+    /* 原本关掉 transition 是为了消除与顶栏的色差 —— 现在顶栏也走同一时长同一
+       缓动,两者一起渐变回 Blog 底色,既不留色差也不硬跳。 */
+    transition: background-color var(--article-morph-back-dur) var(--ease);
+}
+
+/* 单栏下标题/正文回到阅读列宽:≥1000px 的两栏规则把它们放开成 max-width:none
+   (那是给「右栏撑满」用的),模态里没有左栏,应当像独立页单列那样收窄居中。 */
+body.article-modal .blog-article-host .article-h1,
+body.article-modal .blog-article-host .article-byline,
+body.article-modal .blog-article-host .article-body,
+body.article-modal .blog-article-host .article-footer {
+    max-width: var(--reading-col);
+    margin-left: auto;
+    margin-right: auto;
+}
+/* 封面出血:host 现在吃满 #app,只剩 #app(main.design-layout)每侧 24px 这一层
+   留白要顶掉,封面即齐到视口边缘。 */
+body.article-modal .article-cover {
+    --cover-bleed-x: 24px;
+    /* 封面到标题的间距与左右边距同值(2026-07-28 用户要求统一) */
+    margin-bottom: 24px;
+    /* 顶部只需顶掉 host 自己的 padding-top;#app 已被中性化、Blog 标题也已隐藏 */
+    --cover-bleed-top: var(--nav-content-gap);
+}
+@media (max-width: 600px) {
+    /* host 吃满 #app,内容边距全部由 #app 那一层的每侧 24px 提供 —— 与首页 / Blog
+       同一条(2026-07-28 用户要求统一;此前 host 自己再套 16px,合计 40px)。
+       封面出血相应只顶掉这一层。 */
+    body.article-modal .blog-article-host { width: 100%; }
+    body.article-modal .article-cover { --cover-bleed-x: 24px; }
+}
+/* 顶栏的尺寸/按钮不需要补丁:模态里 blog-page 类保留着,那一整套规则原样生效
+   (2026-07-27 —— 此前摘掉 blog-page 再逐条补 article-modal,补漏了主题按钮,
+   按钮被压成 4px 挤到左上角)。
+   但底色要跟着走:每篇文章有自己的 --page-tint(阅读页的纸感底色),而 blog-page
+   的顶栏是固定的 --site-bg,两者不一致会在顶栏下沿留一道色差。 */
+/* 展开时页面底色也要渐变。阅读页的底是 ::before 那块 fixed 满屏,它随 reading-page
+   一起新建 —— 新建的元素没有过渡起点,底色是「啪」地从 Blog 灰跳成该篇的 tint,
+   而四件却是渐渐飞的,一快一慢就成了那道闪(2026-07-28 用户录屏第 361→362 帧)。
+   JS 先把 --page-tint 顶成 --site-bg 渲染一帧,再撤掉让它过渡到真实 tint;
+   这里把时长对齐飞行,两者同步到位。特异性要写满,压过上面那条 2s 的切文章淡变。 */
+body.writing-page.design-page.reading-page.article-modal::before {
+    transition: background-color var(--article-morph-dur) var(--ease);
+}
+body.article-modal .header.home-nav {
+    background: var(--page-tint, var(--site-bg)) !important;
+    /* 与共享元素飞行同一时长(同一个 token),颜色和元素一起到位。
+       硬切会让顶栏先变色、元素还在半路,读起来像两件事各干各的。 */
+    transition: background-color var(--article-morph-dur) var(--ease) !important;
+    /* 模态里顶栏常驻:手机端 useHideNavOnScrollMobile 会在下滑时把顶栏收起(走 top),
+       但这里顶栏是唯一的返回入口,滚到文章深处也得能点(2026-07-27 用户要求)。 */
+    top: 0 !important;
+    transform: none !important;
+}
+/* 返回箭头顶掉 logo 的位置:模态里用户要回的是文章列表,不是首页 */
+body.article-modal .header .site-title { display: none; }
+/* 右上角两个按钮(主题切换 / 汉堡)模态里不出现:阅读态只留「返回」一个出口,
+   顶栏越简单越好(2026-07-27 用户定) */
+body.article-modal .header .theme-toggle,
+body.article-modal .header .nav-toggle { display: none !important; }
+/* 关闭键与顶栏右侧那两个圆钮同一套外观:36×36 白色圆底(深色主题 #1A1A1A)。
+   尺寸/底色/深色值都对齐 .theme-toggle 与 .nav-toggle,改那边时这里一并核对。
+   放右侧 —— 顶栏右边本来就是那两个圆钮的位置,模态里它们让位给它(2026-07-27)。 */
+.article-modal-back {
+    position: fixed;
+    top: 18px;      /* 与顶栏两圆钮垂直居中对齐(顶栏 72 高,圆钮 36) */
+    right: 24px;
+    z-index: 101;   /* 高于顶栏(100) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: #fff;
+    border-radius: 50%;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: #181818;
+}
+body.theme-dark .article-modal-back { background: #1A1A1A; }
+.article-modal-back svg {
+    display: block;
+    width: 18px;    /* 与汉堡横线同宽:圆底内的光学尺寸对齐 */
+    height: 18px;
+    stroke: currentColor;
+    stroke-width: var(--icon-stroke, 1.5px);
+    fill: none;
+    stroke-linecap: butt;
+    stroke-linejoin: miter;
+}
+.article-modal-back svg * { vector-effect: non-scaling-stroke; }
+body.theme-dark .article-modal-back { color: #fff; }
+@media (max-width: 600px) {
+    .article-modal-back { right: 16px; }
+}
+/* FLIP 期间封面的 transform 由 WAAPI 独占:阅读页原有的入场过渡(translateY(22px)
+   → 0,1.5s)会和放大动画抢同一个属性,导致封面一边放大一边被往下推。
+   模态里封面直接以最终态在场,位移交给 FLIP。 */
+body.article-modal .article-h1,
+body.article-modal .article-eyebrow .a-tag,
+body.article-closing .article-h1,
+body.article-closing .article-eyebrow .a-tag,
+body.article-modal .article-cover,
+body.article-closing .article-cover {
+    will-change: transform;
+    opacity: 1;
+    /* 阅读页给封面挂了 CSS animation「article-rise」(translateY(22px) → 0,1.5s),
+       它和 FLIP 抢同一个 transform —— 封面会一边放大一边被往下推。
+       模态里封面以最终态在场,位移全部交给 FLIP。transition 一并关掉。 */
+    animation: none !important;
+    transition: none !important;
+}
+
+/* 标签自己被冻住还不够:它挂在 .article-byline / .article-eyebrow 里,父级跑
+   article-rise 会把它整体带走 —— 落位那帧标签往下弹 7px 再慢慢漂回来。
+   父链另起一条:这里绝不能像上面那样写 will-change: transform —— 它会让
+   byline 成为 fixed 后代的包含块,收起时钉成 fixed 的标签坐标被它劫持,
+   直接飞到文档三千像素外(2026-07-27 实测 y=3428)。 */
+body.article-modal .article-byline,
+body.article-closing .article-byline,
+body.article-modal .article-eyebrow,
+body.article-closing .article-eyebrow {
+    opacity: 1;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+}
+
+/* byline 里的日期(裸 span,fragment 不给 class)也要飞,所以它自己这条
+   只关 animation / transition —— 绝不能跟着父链写 transform: none !important,
+   那会连 WAAPI 的飞行 transform 一起盖掉,日期就钉在原地不动了
+   (2026-07-27 实测 anims=1 但 transform 恒为 none)。 */
+body.article-modal .article-byline > span,
+body.article-closing .article-byline > span {
+    opacity: 1;
+    animation: none !important;
+    transition: none !important;
+}
+
+/* 飞行途中:byline 里没参与飞行的部分(阅读时长)先压住。同一行里一半已就位、
+   一半还在飞,读起来是两件事。落位后由 JS 用 WAAPI 淡入(CSS 过渡被上面那条
+   transition:none 挡住,推不动)。 */
+body.article-morphing .article-byline > span:not(.article-flying-el) { opacity: 0; }
+/* 返回键同样等飞行落位再淡入。参考里 X 按钮也不是跟着卡片一起硬出现的 ——
+   几何先到位,附属控件后跟,层次才拉得开。 */
+/* 模态里的文章标题收到 24px(桌面独立文章页仍是 --fs-h1 36px)。
+   两端字号差得越大,联动过程里跳动感越重;更要命的是收起时飞行中的标题一直比
+   目标大,它那两行会盖住卡片下方的摘要(2026-07-27 用户截图实测重叠)。
+   卡片标题是 --fs-h3 18px,24px 时只差 1.33 倍,重叠窗口窄到基本看不见。
+   只在模态里改 —— 桌面点卡片是普通跳转,没有联动,不该陪着把主标题缩小
+   (2026-07-28 用户实测桌面偏小)。
+   收起(article-closing)也要写:飞行件的字号由 WAAPI 从这个值起算,漏了它
+   收起时的目标字号就会跳回 36px。 */
+body.article-modal .blog-article-host .article-h1,
+body.article-closing .blog-article-host .article-h1 { font-size: 24px; }
+
+/* 模态里的文章封面:先铺卡片上那张静态图(--cover-still 由 BlogPage 下发),
+   动态版(iframe)压在上面、初始透明,加载好了才淡入。
+   这样落位那一刻两边是同一张图、像素级一致,彻底没有「换实例」这回事 ——
+   先前不管怎么对齐相位,只要落位要换实例就会闪(2026-07-27 用户定的方案)。 */
+body.article-modal .blog-article-host .article-cover,
+body.article-closing .blog-article-host .article-cover {
+    background-image: var(--cover-still, none);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+/* 模态里连动态版都不要了(2026-07-27 用户定):列表和文章用同一张静态图,
+   落位是同一张图的缩放,不存在任何形式的换实例。iframe 的 src 也不会被挂上,
+   等于这一屏一个 shader 都不跑。桌面独立文章页不受影响,那边照常是动态封面。 */
+body.article-modal .blog-article-host .article-cover iframe,
+body.article-modal .blog-article-host .article-cover video,
+body.article-closing .blog-article-host .article-cover iframe,
+body.article-closing .blog-article-host .article-cover video { display: none; }
+
+body.article-morphing .article-modal-back { opacity: 0; }
+body.article-modal .article-modal-back { transition: opacity 0.26s var(--ease); }
 
 /* banner 与全部作品拼成一个连续的 3 列网格。
    原结构:banner 与 4 个 .category-section 在 .design-layout 里平级,每个 section 各自

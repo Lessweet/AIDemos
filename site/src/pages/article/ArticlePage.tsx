@@ -15,18 +15,41 @@ const fileOf = (slug: string) => `article-${slug}.html`;
 /* 当前 URL 的文章文件名(popstate 恢复用) */
 const currentUrlFile = () => (location.pathname.split('/').pop() || '').split('#')[0];
 
-export default function ArticlePage({ initialSlug }: { initialSlug: string }) {
+/* 嵌入(Blog 模态)时把封面 iframe 的 src 挪到 data-src,由 BlogPage 在共享元素
+   飞完之后再挂上。封面与卡片是同一个 HTML,但这是它的第二个实例 —— 资源走缓存,
+   渲染(跑封面自己的动画、首次绘制)仍要从零来一遍,实测正好在飞行中段砸出一帧
+   40~50ms;摘掉它,展开/收起全程满帧(2026-07-27)。
+   独立文章页不动:那里没有飞行,封面越早出来越好。 */
+function deferCover(html: string): string {
+  return html.replace(
+    /(<div class="article-cover"><iframe[^>]*?)\ssrc=/,
+    '$1 data-src=',
+  );
+}
+
+export default function ArticlePage({
+  initialSlug,
+  embedHost,
+}: {
+  initialSlug: string;
+  /* 嵌入模式(Blog 页里就地展开文章,feat/article-modal):独立入口页的挂载根是
+     div.reading-layout#app,嵌入时宿主换成模态里那层 wrapper —— 布局测量、滚轮锁、
+     站内链接拦截都基于它,不能写死 #app。嵌入时左栏清单也不渲染:那份清单就是
+     Blog 页本身,模态里再放一遍是重复(2026-07-27 用户定)。 */
+  embedHost?: HTMLElement | null;
+}) {
   const [slug, setSlug] = useState(initialSlug);
+  const embedded = embedHost !== undefined;
   const [listOpen, setListOpen] = useState(false);
   const layoutRef = useRef<HTMLDivElement | null>(null);
   const articleRef = useRef<HTMLElement | null>(null);
   const tocNavRef = useRef<HTMLElement | null>(null);
   const tocAsideRef = useRef<HTMLElement | null>(null);
 
-  /* 挂载根是入口 HTML 里的 div.reading-layout#app —— 取它做布局引用 */
+  /* 挂载根:独立页 = 入口 HTML 的 div.reading-layout#app;嵌入 = 传入的宿主 */
   useLayoutEffect(() => {
-    layoutRef.current = document.getElementById('app') as HTMLDivElement;
-  }, []);
+    layoutRef.current = (embedHost ?? document.getElementById('app')) as HTMLDivElement;
+  }, [embedHost]);
 
   /* ── writing.js initReader:布局测量 ──
      --reader-toc-top(列表/目录 sticky 顶)与 --reading-x/w/mid(整屏固定竖分割线) */
@@ -139,15 +162,44 @@ export default function ArticlePage({ initialSlug }: { initialSlug: string }) {
       const file = currentUrlFile();
       if (file.startsWith('article-')) switchTo(file, false);
     };
-    window.addEventListener('popstate', onPop);
+    /* 嵌入模式不监听 popstate:返回键要回到 Blog 列表,由 BlogPage 统一处理,
+       两边同时响应会打架 */
+    if (!embedded) window.addEventListener('popstate', onPop);
     return () => {
       layout.removeEventListener('click', onClick);
-      window.removeEventListener('popstate', onPop);
+      if (!embedded) window.removeEventListener('popstate', onPop);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const slugRef = useRef(slug);
   slugRef.current = slug;
+
+  /* 标题换行归一化:fragment 把源标题里的「,」写成了 <br/>(如「验证循环<br/>把手动
+     检查写进 Skill」),9 篇都是这个模式。左对齐版式要求按容器宽度自然折行,所以把
+     <br/> 还原成「,」。不能用 CSS 的 br{display:none} —— 那样换行没了、逗号也没了。
+     同样不改 fragment:它们由 extract-articles.mjs 生成,手改会被重跑覆盖。 */
+  useLayoutEffect(() => {
+    const h1 = articleRef.current?.querySelector('.article-h1');
+    if (!h1) return;
+    h1.querySelectorAll('br').forEach((br) => {
+      br.replaceWith(document.createTextNode('，'));
+    });
+  }, [slug]);
+
+  /* 标签(eyebrow)位置归一化:13 篇 fragment 有两种结构 —— 4 篇把标签写在 byline 内
+     (与日期/阅读时长同排),9 篇是独立元素排在标题上方。样式规则是按前者写的
+     (body.reading-page .article-byline .article-eyebrow),后者命中不了,标签就还
+     留在标题上方(2026-07-27 用户实测)。
+     这里在渲染后把独立的那种移进 byline 最前 —— 不改 fragment:它们由
+     extract-articles.mjs 生成,手改会被重跑覆盖。按 slug 重跑,与目录重建同批。 */
+  useLayoutEffect(() => {
+    const root = articleRef.current;
+    const byline = root?.querySelector('.article-byline');
+    if (!root || !byline) return;
+    root.querySelectorAll(':scope > .article-eyebrow').forEach((eyebrow) => {
+      byline.insertBefore(eyebrow, byline.firstChild);
+    });
+  }, [slug]);
 
   /* ── writing.js initTOC:从正文 h2/h3 生成目录 + scrollspy(逐行移植,按 slug 重建) ── */
   useLayoutEffect(() => {
@@ -263,8 +315,8 @@ export default function ArticlePage({ initialSlug }: { initialSlug: string }) {
 
   return (
     <>
-      {/* ① 文章列表(master–detail 左栏) */}
-      <ReaderList items={readerList()} currentFile={fileOf(slug)} />
+      {/* ① 文章列表(master–detail 左栏);嵌入模式不渲染 —— 那份清单就是 Blog 页本身 */}
+      {!embedded && <ReaderList items={readerList()} currentFile={fileOf(slug)} />}
       {/* ③ 浮动目录(按 slug 重建) */}
       <aside aria-label="目录" className="article-toc" ref={(el) => (tocAsideRef.current = el)}>
         <div className="article-toc-title">目录</div>
@@ -274,7 +326,7 @@ export default function ArticlePage({ initialSlug }: { initialSlug: string }) {
       <article
         className="article-reading"
         ref={(el) => (articleRef.current = el)}
-        dangerouslySetInnerHTML={{ __html: FRAGMENTS[slug] }}
+        dangerouslySetInnerHTML={{ __html: embedded ? deferCover(FRAGMENTS[slug]) : FRAGMENTS[slug] }}
       />
       {/* ≤1440 单栏:列表收成顶部「文章 ▾」下拉开关(仅该断点 CSS 显示) */}
       <button
