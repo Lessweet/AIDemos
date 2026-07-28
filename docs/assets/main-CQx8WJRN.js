@@ -1,1 +1,0 @@
-import{c as e,j as a}from"./index-BOwIwFzp.js";import{A as l}from"./ArticlePage-CsLFJj03.js";const t=document.getElementById("app"),o=t.dataset.slug||(location.pathname.split("/").pop()||"").replace(/^article-/,"").replace(/\.html?$/,"");e.createRoot(t).render(a.jsx(l,{initialSlug:o}));

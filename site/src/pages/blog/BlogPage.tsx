@@ -852,9 +852,10 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
                       桌面端 = 动态封面,无 blogCover 的少数篇用静态图兜底 */}
                   {isSmall || !a.blogCover ? (
                     <img
-                      src={`writing/${a.listCover}`}
+                      src={`writing/${a.cardCover ?? a.listCover}`}
                       alt=""
                       loading="lazy"
+                      decoding="async"
                       style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
                   ) : a.blogCover.type === 'video' ? (

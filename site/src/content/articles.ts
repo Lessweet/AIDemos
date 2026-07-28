@@ -22,6 +22,10 @@ export interface ArticleMeta {
   collection: string;
   excerpt: string;
   listCover: string; // 阅读器左栏缩略图(articles.json cover 字段,相对 writing/)
+  /* Blog 卡片封面(相对 writing/)。由 scripts/build-card-covers.mjs 从 listCover 压出:
+     1200px 宽 webp。listCover 是设计原图(最大 6MB、3240px 宽),拿它直接当卡片封面
+     会让 Blog 首屏拉 30MB —— 卡片实际只显示 382px(2026-07-28 用户报「封面加载不出来」)。 */
+  cardCover?: string;
   /** blog 卡片(docs/blog.html 为准) */
   inBlogGrid: boolean;
   blogTag?: string;
@@ -46,6 +50,7 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       'Anthropic 博客提了一个概念——验证循环：每次重复做的手动检查，写成 Skill 让 Claude 自己跑。编进去的规矩越多，AI 第一次出手就越接近你要的标准。',
     listCover: 'assets/claude-code-verification-loops/cover4.png',
+    cardCover: 'assets/_cards/claude-code-verification-loops.webp',
     inBlogGrid: true,
     blogTag: 'Agent 协作',
     blogDelay: 500,
@@ -64,6 +69,7 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       '设计师直接交付，在 AI native 团队已经是常态：Figma Make 连上真实仓库改细节、发 PR，Slack 里 Claude Tag 几分钟挂出草稿 PR；不要求设计师变成工程师，判断力花在各自擅长处，从画布一路带进合并的 PR。',
     listCover: 'assets/figma-make-designer-pr/cover4.png',
+    cardCover: 'assets/_cards/figma-make-designer-pr.webp',
     inBlogGrid: true, // 2026-07-22 用户要求上线到 blog 网格(迁移时曾按旧站缺席状态复刻)
     blogTag: '设计协作',
     blogDelay: 450,
@@ -82,6 +88,7 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       'AI 能实现 shader，但生成的默认值不代表想要的效果。设计师的品味得通过参数、mood board、甚至刻意零 AI 的手绘，一层层加进去。',
     listCover: 'assets/remove-ai-taste-in-design/cover4.png',
+    cardCover: 'assets/_cards/remove-ai-taste-in-design.webp',
     inBlogGrid: true,
     blogTag: '刻意零 AI',
     blogDelay: 400,
@@ -115,6 +122,7 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       'Fable 做复杂设计，Opus 做常规实现，Sonnet 干辅助活；新模型发布就拿旧任务再做一遍，感知质量的进步，再决定要不要换进工作流。',
     listCover: 'assets/figma-make-gpt-5-6/cover3.png',
+    cardCover: 'assets/_cards/figma-make-gpt-5-6.webp',
     inBlogGrid: true,
     blogTag: 'AI 设计工作流',
     blogDelay: 350,
@@ -133,6 +141,7 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       'AI 生成的半成品完成度越来越高，设计师的活儿正从「从零创作」变成「审查与打磨」——怎么在 AI 产物上继续投入，直到做出无法被反驳的东西。',
     listCover: 'assets/review-ai-output/cover.png',
+    cardCover: 'assets/_cards/review-ai-output.webp',
     inBlogGrid: true,
     blogTag: 'AI 辅助工作流',
     blogDelay: 300,
@@ -151,6 +160,7 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       '第一次接触 Skills 是在 vibe coding 里攒图标系列；这回在 Figma 里拿一个小需求上手，再看官方 blog 的团队协作案例。设计系统管零件，Skills 管规矩。',
     listCover: 'assets/figma-skills/cover2.1.png',
+    cardCover: 'assets/_cards/figma-skills.webp',
     inBlogGrid: true,
     blogTag: 'Agent 协作',
     blogDelay: 250,
@@ -169,6 +179,7 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       '不开 AE 和 C4D，我在 Figma 里用官方预设做了几张 shader 视觉图和动图；Motion 比 AE 轻，更有用的是能把一段动效做成组件、复用到整套图标上。Figma Shader 和 Motion，正在被当成组件和变量那样对待，从「加在最后」变成「一开始就在画布上」。',
     listCover: 'assets/figma-shader-motion/cover.webp',
+    cardCover: 'assets/_cards/figma-shader-motion.webp',
     inBlogGrid: true,
     blogTag: '参数化材质',
     blogDelay: 200,
@@ -191,6 +202,7 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       'AI 拉低了设计的下限，却没抬高上限。Config 2026 的生成式插件、Agent、代码图层、Motion，都在放大设计表达。以不受限制的方式设计，是一种持续的创作力。',
     listCover: 'assets/figma-config-2026/cover.png',
+    cardCover: 'assets/_cards/figma-config-2026.webp',
     inBlogGrid: true,
     blogTag: 'AI 设计工作流',
     blogDelay: 150,
@@ -209,6 +221,7 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       'WWDC26 上 Apple 把 App 接入 Siri 的逻辑整个反转——不再让开发者写话术，而是让 App 把自己暴露成 AI 读得懂的结构。设计师要交付的，多了一份给机器看的设计稿。',
     listCover: 'assets/app-shape-for-ai/cover_v9.png',
+    cardCover: 'assets/_cards/app-shape-for-ai.webp',
     inBlogGrid: true, // 今天的 blog.html 里有这张卡(articles.json 里是 status:draft,但卡片在)
     blogTag: '即将发布',
     blogDelay: 100,
@@ -229,6 +242,7 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       '那颗四角星 ✦ 不是被发明的，是被借来的——AI 入口设计的真相，是调用用户脑子里早就成熟的心智模型；而越成熟的 AI，越不需要被标出来。',
     listCover: 'assets/sparkle/cover.png',
+    cardCover: 'assets/_cards/sparkle.webp',
     inBlogGrid: true,
     blogTag: '认知设计',
     blogDelay: 50,
