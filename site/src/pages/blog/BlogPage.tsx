@@ -854,7 +854,11 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
                     <img
                       src={`writing/${a.cardCover ?? a.listCover}`}
                       alt=""
-                      loading="lazy"
+                      /* 不能用 loading="lazy":首页把 BlogPage 常驻挂载在 display:none 的
+                         容器里做预载(见 HomePage 那段注释),而 lazy 图在不可见容器里
+                         永远不触发下载 —— 视频没有 lazy 所以照常预载,封面却被挡在门外,
+                         点进 Blog 才现拉(2026-07-28 用户报「封面加载不出来」)。
+                         压到 webp 后十张合计 540KB,eager 全量拉也很轻。 */
                       decoding="async"
                       style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
