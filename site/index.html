@@ -201,7 +201,7 @@
             } catch (e) {}
             docEl.classList.add('is-loading');
             var t0 = Date.now();
-            var pct = 0, sim = 0, loaded = 0, total = 0, finished = false;
+            var pct = 0, sim = 0, finished = false;
             var fill, num, digits, trickle;
             /* ── 数字轮播(odometer)────────────────────────────────────────
                不按「整数一跳换一个字」来做,而是每个数位一条 0-9 的竖条、按连续值滚动:
@@ -415,36 +415,21 @@
                     digits[d].appendChild(makeSlot());
                 }
                 showNumber();
-                var els = [].slice.call(document.querySelectorAll('iframe, img, video'));
-                total = els.length;
-                function mark() {
-                    loaded++;
-                    render(loaded / total * 100);
-                    if (loaded >= total) finish();
-                }
-                els.forEach(function (el) {
-                    var tag = el.tagName;
-                    if (tag === 'IMG') {
-                        if (el.complete) { mark(); return; }
-                        el.addEventListener('load', mark, { once: true });
-                        el.addEventListener('error', mark, { once: true });
-                    } else if (tag === 'VIDEO') {
-                        if (el.readyState >= 2) { mark(); return; }
-                        el.addEventListener('loadeddata', mark, { once: true });
-                        el.addEventListener('error', mark, { once: true });
-                    } else {
-                        el.addEventListener('load', mark, { once: true });
-                        el.addEventListener('error', mark, { once: true });
-                    }
-                });
-                if (!total) finish();
+                /* logo animation 立刻走完自己那一档,不再被内容拖着(2026-07-28 用户定:
+                   「先立刻加载 logo animation,再预加载内容」)。
+                   先前是三条闸取最先满足者:全部 iframe/img/video 都 load、window.load、
+                   8s 硬上限,再叠 MIN_MS 的地板。首页为了预载把 Blog/Archive 常驻挂载,
+                   于是开局就有 19 个媒体元素(10 视频 + 9 iframe,每个 iframe 还是独立
+                   文档)全被算进这道闸 —— 网络稍慢就一路走到 8s,用户实测「延迟很久」。
+                   现在 finish 立即调用:它内部仍按 MIN_MS 把进度扫到 100 再揭幕,
+                   动画时长一点没少;内容照旧在后台继续预载,只是不再挡着揭幕。
+                   trickle 保留:MIN_MS 这一段里数字还是要有跳动感。 */
+                finish();
                 trickle = setInterval(function () {
                     sim += (90 - sim) * 0.045;
-                    render(Math.max(sim, total ? loaded / total * 100 : sim));
+                    render(sim);
                 }, 180);
             });
-            window.addEventListener('load', finish);
-            setTimeout(finish, 8000);
         })();
     </script>
 <header class="header home-nav" data-active="writing" id="site-nav"></header>
