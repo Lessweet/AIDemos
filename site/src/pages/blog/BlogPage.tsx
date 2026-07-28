@@ -213,12 +213,15 @@ function clampToViewport(r: DOMRect): DOMRect {
    Blog 列表行的入场动画正是这种,实测飞行件跑到视口外 2400px 处(2026-07-27)。
    所以钉完再量一次,把偏差反补回去。校正分两趟做(先全钉、再全补),避免
    读写交替反复触发重排。 */
-function pin(el: HTMLElement, r: DOMRect, z: string) {
+function pin(el: HTMLElement, r: DOMRect, z: string, lockHeight = true) {
   el.style.position = 'fixed';
   el.style.left = `${r.left}px`;
   el.style.top = `${r.top}px`;
   el.style.width = `${r.width}px`;
-  el.style.height = `${r.height}px`;
+  /* 文字件不锁高度:字号一路从 18 长到 24,若压在卡片那两行的旧高度里,交接给
+     文章标题时高度一放开就会重新流一次版 —— 用户实测「模态里稍微上滑一下,
+     标题排版又动了」(2026-07-28)。封面要锁,它靠 height 撑出 16:9。 */
+  if (lockHeight) el.style.height = `${r.height}px`;
   el.style.margin = '0';
   el.style.zIndex = z;
   el.style.transformOrigin = 'top left';
@@ -401,7 +404,7 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       wrapper.style.height = `${wrapper.offsetHeight}px`;
       wrapper.classList.add('article-slot');
     }
-    items.forEach(({ el, from }) => pin(el, from, '95')); // 95:低于顶栏(100)
+    items.forEach(({ el, from, kind }) => pin(el, from, '95', kind === 'cover')); // 95:低于顶栏(100)
     flyingRef.current = { items };
 
     const body = document.body;
@@ -462,6 +465,12 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
 
     const body = document.body;
     const slug = article?.slug;
+    /* 滚动过就不再演飞行。pendingCover 为空 = 交接已发生 = 用户滚动过,那四件
+       早已不在视野里(实测滚 700px 后封面 top=-628)。从视口边缘硬飞回来,配上
+       正文瞬间消失,读起来就是画面突变 —— 用户录屏帧 512 正是这一下。
+       这种时候「共享元素」已经无从谈起,整篇淡出让位给列表才是干净的收法,
+       iOS 也是这么处理的(2026-07-28 用户认可此方案)。 */
+    const scrolledAway = !pendingCover;
 
     const finish = () => {
       closingAnims.forEach((a) => a.cancel());
@@ -499,6 +508,28 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
     };
 
     const host = articleHostRef.current;
+    if (scrolledAway && host) {
+      /* 淡出收法:文章整体淡出,Blog 布局与滚动位置同帧恢复(列表原样露出,
+         不做任何入场)。槽位与飞行件都没启用过,finish 里照常兜底清理。 */
+      host.querySelector('.article-cover')?.classList.remove('cover-live');
+      const out = host.animate([{ opacity: 1 }, { opacity: 0 }], {
+        duration: morphMs(true),
+        easing: COVER_EASE,
+        fill: 'both',
+      });
+      body.classList.add('article-closing');
+      body.classList.remove('article-modal');
+      window.scrollTo({ top: blogScrollRef.current, behavior: 'instant' as ScrollBehavior });
+      document.querySelectorAll<HTMLElement>('.design-content .card-wrapper').forEach((el) => {
+        el.classList.add('visible');
+        el.dataset.entered = '1';
+      });
+      out.onfinish = () => {
+        out.cancel();
+        finish();
+      };
+      return;
+    }
     /* 动态版退场,露出底下那张静态图 —— 飞回卡片时两边又是同一张图。
        淡出时长与飞行同档(CSS 里定),落位时正好已经透明。 */
     host?.querySelector('.article-cover')?.classList.remove('cover-live');
@@ -530,7 +561,7 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
         kind,
       }))
       .map(({ el, from, kind }) => {
-        pin(el, from, '90'); // 90:低于顶栏(100),缩回时从顶栏下穿过
+        pin(el, from, '90', kind === 'cover'); // 90:低于顶栏(100),缩回时从顶栏下穿过
         return { el, from, kind };
       });
 
@@ -549,15 +580,11 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
     document.querySelectorAll<HTMLElement>('.design-content .card-wrapper').forEach((el) => {
       el.classList.add('visible');
       el.dataset.entered = '1';
-      /* 整个列表柔和回归,不只是被点那张卡的摘要。
-         此前只让摘要淡入,但周围所有卡片是「唰」一下同时出现的,那一下比 260ms 的
-         摘要淡入抢眼得多,淡入就被淹没了 —— 用户连着三次反馈「看不出淡入」
-         (2026-07-28)。让视口内的卡片一起淡,单张卡的层次才浮得出来。
-         视口外的跳过:看不见,白费一次合成。 */
-      if (el.classList.contains('article-slot')) return;
-      const r = el.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > window.innerHeight) return;
-      el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: 'ease-out' });
+      /* 不给列表加淡入:这些卡片本来就一直在那儿(只是被模态盖着),让它们再
+         「入场」一次反而是干扰 —— 收起时上半屏在淡、下半屏已定,读起来很乱
+         (2026-07-28 用户录屏帧 1066)。只有被点那张卡的摘要才该淡入,它确实被
+         槽位藏过。此前以为「周围瞬现抢眼所以摘要看不见」,真因是摘要晚起步
+         100ms,那个已单独修好。 */
     });
 
     /* ③ 量目标卡片 —— 必须在 Blog 布局恢复之后 */
