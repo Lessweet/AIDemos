@@ -4014,6 +4014,13 @@ body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-le
    选择器带上 :not(.menu-dark) + .nav-open,只在这个组合、且菜单展开时生效;
    类的数量已压过 body.no-banner.theme-dark 那几条,不需要 !important。 */
 @media (max-width: 600px) {
+    /* 墨纸对调也要跟着回来:theme-dark 把 --hl-ink 定成了 #ffffff(给深色页面用),
+       而这里菜单是浅底 —— 不改的话整行 hover 块是白块贴浅底,看不出来
+       (2026-07-28 用户实测「hover 色块应该是黑色」)。取 :root 的原值。 */
+    body.theme-dark:not(.menu-dark) .header.home-nav .nav-collapse {
+        --hl-ink: #1a1a1a;
+        --hl-paper: #f2f2f2;
+    }
     body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat,
     body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat.active,
     body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .header-right .header-connect {
