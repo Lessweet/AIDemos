@@ -42,9 +42,7 @@ function initSiteNav() {
     var ARROW_SVG = '<svg viewBox="0 0 24 24"><path d="M5.3 18.7 L18 6 M8.1 6 H18 V15.9"/></svg>';
     var riseText = function (text, base) {
         var out = '<span class="heading-rise-mask" aria-hidden="true">';
-        /* --i = 字符序号,供 hover 的逐字上浮取 stagger 用(--d 里含 base 偏移,取不出序号)。
-           入场动画仍走 --d,两者互不干扰。 */
-        for (var k = 0; k < text.length; k++) out += '<span class="heading-rise-char" style="--d:' + (base + k * 35) + 'ms;--i:' + k + '">' + text[k] + '</span>';
+        for (var k = 0; k < text.length; k++) out += '<span class="heading-rise-char" style="--d:' + (base + k * 35) + 'ms">' + text[k] + '</span>';
         return out + '</span>';
     };
     var riseArrow = function (base, n) {
