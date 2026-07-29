@@ -124,11 +124,11 @@ function setSiteTheme(dark) {
     document.body.classList.add('theme-switching');
     setTimeout(function () { document.body.classList.remove('theme-switching'); }, 240);
     document.body.classList.toggle('theme-dark', dark);
-    /* menu-dark 跟着主题走:浅色主题 = 浅底菜单,深色主题 = 黑底反色菜单
-       (2026-07-28 用户定「点击深色主题切换要适配颜色,不是固定黑背景」)。
-       一度改成静态类挂在三页 body 上让菜单恒黑,那是理解错了 —— 恒黑就不会随主题
-       适配了。圆形展开与反色规则本身不受影响,它们只是在 menu-dark 在场时生效。 */
-    document.body.classList.toggle('menu-dark', dark);
+    /* 菜单与页面主题「反着来」(2026-07-28 用户定:浅色模式 = 黑背景菜单,
+       深色模式 = 浅背景菜单)。所以这里取反,不是跟随。
+       走过两次弯路:先做成静态类让菜单恒黑(那样不随主题变),再改成跟随主题
+       (方向反了)。 */
+    document.body.classList.toggle('menu-dark', !dark);
     /* html 背景必须跟 body 同色:内容不满一屏 / 橡皮筋滚动时露出的是 html 底,
        只翻 body 会在页面底部留一条异色(浅色 #f2f2f2 = --site-bg,深色 #0a0a0a = --page-bg)。
        2026-07-27 底色加深时这里一度漏改(仍写旧 #f9f9f9):主题切换重绘的一两帧里
@@ -141,7 +141,9 @@ function applySiteTheme() {
        顺带清掉旧版遗留的 localStorage 跨会话记忆(老访客不再被锁在深色)。 */
     try {
         localStorage.removeItem('site-theme');
-        if (sessionStorage.getItem('site-theme') === 'dark') setSiteTheme(true);
+        /* 无论深浅都要调一次:菜单类是取反挂的,默认浅色时若不调,
+           menu-dark 就挂不上,首屏打开菜单会是浅底(应为黑底)。 */
+        setSiteTheme(sessionStorage.getItem('site-theme') === 'dark');
     } catch (e) { /* 隐私模式等取不到 storage 时静默,维持浅色 */ }
 }
 function toggleSiteTheme() {
