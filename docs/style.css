@@ -212,6 +212,9 @@
        像幕布一样落下来)。比原先整块 0.448s 的淡入短 —— 展开是有方向的行程,
        快才有「刷一下铺开」的干脆,拖长了就变成慢慢拉幕。 */
     --menu-wipe-dur: 0.34s;
+    /* 主题切换期间统一压到这一档。底色由 nav-boot 内联写、瞬切,而文字色各走各的
+       hover 过渡(最长实测 0.42s),不压的话就是「底色已黑、字还在褪」的脱节感。 */
+    --theme-switch-dur: 0.18s;
     /* 移出:反色消失的时长(页面里的整行 0.8s,2026-07-26)。移出比移入慢 ——
        与全站 hover 放大(--hover-zoom-in / --hover-zoom-out)同一手法:进场干脆、退场留一口气。
        底块与文字必须用同一组时长,否则会出现「块还黑着、字已变黑」的看不清的中间态。 */
@@ -1938,4 +1941,17 @@ a {
     .masonry-grid {
         grid-template-columns: repeat(6, minmax(0, 1fr));
     }
+}
+
+
+/* 主题切换的 240ms 窗口内,把颜色类过渡统一压到 --theme-switch-dur(2026-07-28)。
+   用 * + !important 是刻意的:主题切换会同时改动全站几乎每个元素的 color /
+   background-color / border-color,逐条去追不现实;类由 nav-boot 加上、240ms 后摘掉,
+   作用范围被时间窗口限死,不影响常规 hover 手感。 */
+body.theme-switching,
+body.theme-switching *,
+body.theme-switching *::before,
+body.theme-switching *::after {
+    transition-duration: var(--theme-switch-dur) !important;
+    transition-delay: 0s !important;
 }

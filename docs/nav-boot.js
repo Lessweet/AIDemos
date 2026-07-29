@@ -117,8 +117,16 @@ function initSiteNav() {
    applySiteTheme() 需在各页 body 起始的内联脚本里、initSiteNav() 之后同步调用,
    保证首次绘制前就带上主题类、不闪色。 */
 function setSiteTheme(dark) {
+    /* 切换期间把所有过渡压到一档:底色是下面几行内联写的、瞬切,而文字色走各自的
+       hover 过渡(实测 .w-title 的 color 0.42s,要 450ms 才褪完)——两者脱节,看着
+       就是「底色已经黑了、字还在慢慢变」(2026-07-28 用户反馈「切换太慢」)。
+       240ms 后摘掉,不影响常规 hover 手感。 */
+    document.body.classList.add('theme-switching');
+    setTimeout(function () { document.body.classList.remove('theme-switching'); }, 240);
     document.body.classList.toggle('theme-dark', dark);
-    document.body.classList.toggle('menu-dark', dark);
+    /* menu-dark 不再跟着主题走:全屏菜单恒为黑底反色(2026-07-28 用户定),
+       类静态写在三页的 body 上。若在这里 toggle,用户切回浅色时会把它摘掉,
+       黑菜单当场失效。 */
     /* html 背景必须跟 body 同色:内容不满一屏 / 橡皮筋滚动时露出的是 html 底,
        只翻 body 会在页面底部留一条异色(浅色 #f2f2f2 = --site-bg,深色 #0a0a0a = --page-bg)。
        2026-07-27 底色加深时这里一度漏改(仍写旧 #f9f9f9):主题切换重绘的一两帧里
