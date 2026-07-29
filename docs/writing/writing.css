@@ -2371,7 +2371,7 @@ body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active { color: rgba(255,
         body.home-v2.design-page .header.home-nav .nav-cats .nav-cat:hover::before,
         body.home-v2.design-page .header.home-nav .header-connect:hover::before {
             clip-path: inset(0 0 0 0);
-            transition: clip-path var(--hl-dur) ease;
+            transition: clip-path var(--hl-wipe-dur) ease;
         }
         /* 字色跟着擦除边逐字翻,不能整词一起翻:块 0.18s 才擦到右端,而字若立刻全变
            纸色,右边几个字就是「纸色叠在还没铺到的浅底上」= 当场看不见。
@@ -2381,7 +2381,9 @@ body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active { color: rgba(255,
         body.home-v2.design-page .header.home-nav .header-connect:hover .heading-rise-char {
             color: var(--hl-paper);
             transition: color 60ms linear;
-            transition-delay: calc(var(--i, 0) * 22ms);
+            /* 44ms/字:擦除拉长到 --hl-wipe-dur 后,翻色边要同步放慢才继续贴着擦除边
+               (7 个字母 6×44=264ms,落在 360ms 的行程内)。 */
+            transition-delay: calc(var(--i, 0) * 44ms);
         }
     }
     /* (顶栏不做当前页高亮 —— 2026-07-26 用户要求取消选中态,黑块只在 hover 时出现。
