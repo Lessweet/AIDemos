@@ -258,6 +258,13 @@ body.theme-dark {
     --hl-ink: #ffffff;
     --hl-paper: #0a0a0a;
 }
+/* 全屏菜单转黑时同样要对调。原先只挂在 .theme-dark 上 —— 而 .menu-dark 的设计前提
+   就是「白底页也可能要黑菜单」(见 writing.css 那段注释),那种组合下 --hl-ink 仍是
+   #1a1a1a,整行 hover 块贴在 #0a0a0a 的黑底上只差 16 级,基本看不见(2026-07-28)。 */
+body.menu-dark {
+    --hl-ink: #ffffff;
+    --hl-paper: #0a0a0a;
+}
 
 
 /* ── Feed 卡片四组依次淡入(参数只认上方 :root 的 --tf-* token)──────────────

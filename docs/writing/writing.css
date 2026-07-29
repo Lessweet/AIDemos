@@ -1460,9 +1460,10 @@ body .home-nav .nav-cats .nav-cat.active {
            看过实机后再 +32)。加在这里而不是调 --nav-content-gap —— 那个 token 是
            首页/Blog/Archive 三页共用的内容起点,动它会把三页一起推下去。 */
         padding: calc(var(--design-menu-top, 76px) + var(--nav-content-gap) + 64px) 24px 40px;
-        /* 底色搬到 ::before(见下):面板自己不再铺色,否则它会跟着整块淡入,
-           盖掉「从上到下展开」的效果。 */
-        background: transparent;
+        /* 面板自己铺色,并由自己的 clip-path 揭示 —— 背景与内容一起被圆裁开。
+           先前把底色拆到 ::before、只裁背景层,结果三项菜单没被裁到:圆外的浅色区域
+           也画着 Blog/Archive/Contact,文字先浮在还没揭开的页面上(2026-07-28 实测)。 */
+        background: var(--site-bg, #f9f9f9);
         z-index: 0;                     /* 低于 logo(1)与汉堡 X(2),其余区域铺满全屏 */
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
@@ -1471,29 +1472,20 @@ body .home-nav .nav-cats .nav-cat.active {
            三项有自己的错峰入场(--row-d + 逐字 translateY(110%),挂在 .nav-open 上)。 */
         visibility: hidden;
         pointer-events: none;
-        transition: visibility 0s linear var(--menu-wipe-dur);
-    }
-    /* 背景层:从上到下展开(2026-07-28 用户要求,取代原先整块 0.448s 的淡入)。
-       用 clip-path 而不是 height/scaleY:零布局影响,也不会把内容一起拉伸;
-       面板是 position:fixed 铺满视口,这里 inset:0 跟着铺满即可。
-       z-index:-1 沉到三项之下 —— 面板自身 z-index:0 建了层叠上下文,负值只会落到
-       面板的背景层,不会掉到页面后面去。 */
-    .home-v2 .header.home-nav .nav-collapse::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        background: var(--site-bg, #f9f9f9);
-        clip-path: inset(0 0 100% 0);   /* 收起:只剩顶边一条 */
-        transition: clip-path var(--menu-wipe-dur) var(--ease-soft);
+        /* 从右上角关闭键的圆铺开到全屏(2026-07-28 用户要求)。
+           圆心 = 关闭键中心:实测按钮 36x36、距右 24 / 距顶 18,故圆心距右 42、距顶 36。
+           收起态半径 18px = 按钮自身半径,视觉上就是「从那个圆长出来」。
+           展开用 150%:circle() 的百分比按 sqrt((w²+h²)/2) 解析,430x932 下 ≈726px,
+           150% ≈ 1089px,而覆盖到最远的左下角只需 976px,留足余量。 */
+        clip-path: circle(18px at calc(100% - 42px) 36px);
+        transition: clip-path var(--menu-wipe-dur) var(--ease-soft),
+                    visibility 0s linear var(--menu-wipe-dur);
     }
     .home-v2 .header.home-nav.nav-open .nav-collapse {
         visibility: visible;
         pointer-events: auto;
-        transition: visibility 0s;
-    }
-    .home-v2 .header.home-nav.nav-open .nav-collapse::before {
-        clip-path: inset(0 0 0 0);      /* 展开:幕布落到底 */
+        clip-path: circle(150% at calc(100% - 42px) 36px);   /* 展开:圆扩到铺满 */
+        transition: clip-path var(--menu-wipe-dur) var(--ease-soft), visibility 0s;
     }
     /* logo 与汉堡(X)浮在模态之上,保持可见、可点击关闭。
        header-left 必须在此显式给 z-index —— 顶栏内容的 z-index 原本只由
@@ -2449,9 +2441,7 @@ body.theme-dark .design-content .category-section .section-divider {
      .theme-dark  —— 页面本身是黑底才需要的(顶栏底色、未展开时的汉堡反白)。 */
 @media (max-width: 600px) {
     /* —— 全屏菜单模态(.menu-dark:首页 + Cases) —— */
-    /* 底色已搬到 ::before(见全屏菜单展开那段),这里跟着改,否则黑菜单会退回浅底 */
-    body.menu-dark .header.home-nav .nav-collapse { background: transparent; }
-    body.menu-dark .header.home-nav .nav-collapse::before { background: var(--page-bg); }
+    body.menu-dark .header.home-nav .nav-collapse { background: var(--page-bg); }
     /* 模态里的 Blog / Cases / Contact 三项反白。必须连 .nav-collapse 一起写满 ——
        上面 .home-v2 .header.home-nav .nav-collapse .nav-cat/.header-connect(0,5,0)
        给三项写死了 #1a1a1a(那是白底菜单的深灰),不写满就压不过,Contact 会黑进背景里。
