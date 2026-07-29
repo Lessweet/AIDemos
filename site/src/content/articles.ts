@@ -40,7 +40,7 @@ export const ARTICLES: ArticleMeta[] = [
   {
     slug: 'model-routing-by-task',
     file: 'article-model-routing-by-task.html',
-    title: 'AI 模型决策的交互，最好的形态可能是没有交互',
+    title: 'AI 产品的模型决策交互，最好的形态可能是没有交互',
     date: '2026-07-26',
     readTime: '7 分钟',
     tags: ['AI 设计工作流', '模型选型'],

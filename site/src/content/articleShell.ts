@@ -9,7 +9,7 @@ export const ARTICLE_SHELL: Record<string, { title: string; accent: string; tint
   "figma-shader-motion": { title: "在设计系统里，Figma Shader 和 Motion ，正从效果变成可复用元素 · VibeUX", accent: "#7C4DFF", tint: "violet" },
   "figma-skills": { title: "设计师的新资产，是 Skills · VibeUX", accent: "#D4A017", tint: "sand" },
   "genie": { title: "Genie 给 AI 装了一具身体：光、物理和触感 · VibeUX", accent: "#06B6D4", tint: "mint" },
-  "model-routing-by-task": { title: "AI 模型决策的交互，最好的形态可能是没有交互 · VibeUX", accent: "#03071a", tint: "blue" },
+  "model-routing-by-task": { title: "AI 产品的模型决策交互，最好的形态可能是没有交互 · VibeUX", accent: "#03071a", tint: "blue" },
   "remove-ai-taste-in-design": { title: "看不出 AI 味的 AI 设计方式 · VibeUX", accent: "#5A6CD8", tint: "blue" },
   "review-ai-output": { title: "设计师的新工作，审查 AI 产物 · VibeUX", accent: "#0E9E6E", tint: "mint" },
   "sparkle": { title: "AI 符号被秒懂，是调用了成熟的用户心智模型 · VibeUX", accent: "#6F8FC4", tint: "blue" },
