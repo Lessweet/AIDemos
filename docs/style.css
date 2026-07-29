@@ -261,12 +261,21 @@ body.theme-dark {
     --hl-ink: #ffffff;
     --hl-paper: #0a0a0a;
 }
-/* 全屏菜单转黑时同样要对调。原先只挂在 .theme-dark 上 —— 而 .menu-dark 的设计前提
-   就是「白底页也可能要黑菜单」(见 writing.css 那段注释),那种组合下 --hl-ink 仍是
-   #1a1a1a,整行 hover 块贴在 #0a0a0a 的黑底上只差 16 级,基本看不见(2026-07-28)。 */
-body.menu-dark {
-    --hl-ink: #ffffff;
-    --hl-paper: #0a0a0a;
+/* 全屏菜单转黑时同样要对调 —— 但只在菜单容器内,不能挂到 body 上。
+   .menu-dark 的设计前提是「白底页也可能要黑菜单」,那种组合下菜单里的 --hl-ink 仍是
+   #1a1a1a,整行 hover 块贴在 #0a0a0a 的黑底上只差 16 级、基本看不见。
+   一度写成 body.menu-dark { --hl-ink: #fff } —— 那是整页作用域,自定义属性往下继承,
+   把页面里所有吃 --hl-ink 的地方(首页索引行、顶栏三个 tab 的黑块…)全反白了,
+   用户实测「首页 hover 色块不能是白色」(2026-07-28)。挂在 .nav-collapse 上,
+   继承范围就被限死在菜单内部。 */
+/* 还得再收一层断点:桌面端顶栏三项本身就住在 .nav-collapse 里(那时它是
+   display:contents),只按选择器限定的话,顶栏 tab 的黑块也会被继承成白色
+   (2026-07-28 实测 顶栏tab=#ffffff)。全屏菜单只在 ≤560px 存在,包进去就干净了。 */
+@media (max-width: 560px) {
+    body.menu-dark .header.home-nav .nav-collapse {
+        --hl-ink: #ffffff;
+        --hl-paper: #0a0a0a;
+    }
 }
 
 
