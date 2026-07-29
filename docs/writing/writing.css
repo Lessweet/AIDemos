@@ -2354,8 +2354,13 @@ body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active { color: rgba(255,
         /* 左右用 tab 专用留白(= 相邻间距的一半),相邻两块正好贴合成一条连续的黑带 */
         inset: calc(-1 * var(--hl-pad-y)) calc(-1 * var(--hl-pad-x-nav));
         border-radius: 0;   /* 直角 —— 与全站方头直角语言一致 */
-        background-color: transparent;
-        transition: background-color var(--hl-dur-out-nav) ease;   /* 移出 0.6s */
+        /* 从左到右铺满(2026-07-28 用户要求)。用 clip-path 擦除而不是动宽度/scaleX:
+           几何自始至终不变、零布局影响,也没有 scaleX 那种边缘拉伸。
+           这一条取代了 2026-07-26 定的「块一开始就是最终尺寸、只换透明度」——
+           那时要避免的是「由小长大的缩放感」,擦除不是缩放,边一直是直角实边。 */
+        background-color: var(--hl-ink);
+        clip-path: inset(0 100% 0 0);
+        transition: clip-path var(--hl-dur-out-nav) ease;   /* 移出 0.6s,擦回左侧 */
     }
     @media (hover: hover) {
         body.home-v2.design-page .header.home-nav .nav-cats .nav-cat:hover,
@@ -2365,8 +2370,18 @@ body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active { color: rgba(255,
         }
         body.home-v2.design-page .header.home-nav .nav-cats .nav-cat:hover::before,
         body.home-v2.design-page .header.home-nav .header-connect:hover::before {
-            background-color: var(--hl-ink);
-            transition: background-color var(--hl-dur) ease;
+            clip-path: inset(0 0 0 0);
+            transition: clip-path var(--hl-dur) ease;
+        }
+        /* 字色跟着擦除边逐字翻,不能整词一起翻:块 0.18s 才擦到右端,而字若立刻全变
+           纸色,右边几个字就是「纸色叠在还没铺到的浅底上」= 当场看不见。
+           用现成的 --i 做 stagger,每字在擦除边扫过它时才翻色;60ms 的短过渡让翻色
+           贴着边走,不拖尾。移出时统一按 --hl-dur-out-nav 柔和退回,不再逐字。 */
+        body.home-v2.design-page .header.home-nav .nav-cats .nav-cat:hover .heading-rise-char,
+        body.home-v2.design-page .header.home-nav .header-connect:hover .heading-rise-char {
+            color: var(--hl-paper);
+            transition: color 60ms linear;
+            transition-delay: calc(var(--i, 0) * 22ms);
         }
     }
     /* (顶栏不做当前页高亮 —— 2026-07-26 用户要求取消选中态,黑块只在 hover 时出现。
