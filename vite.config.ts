@@ -20,6 +20,7 @@ const ARTICLE_SLUGS = [
   'figma-shader-motion',
   'figma-skills',
   'genie',
+  'model-routing-by-task',
   'remove-ai-taste-in-design',
   'review-ai-output',
   'sparkle',

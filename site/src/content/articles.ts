@@ -38,6 +38,25 @@ export interface ArticleMeta {
 
 export const ARTICLES: ArticleMeta[] = [
   {
+    slug: 'model-routing-by-task',
+    file: 'article-model-routing-by-task.html',
+    title: 'AI 模型决策的交互，最好的形态可能是没有交互',
+    date: '2026-07-26',
+    readTime: '7 分钟',
+    tags: ['AI 设计工作流', '模型选型'],
+    cat: 'product',
+    accent: '#0B40F5',
+    collection: '',
+    excerpt:
+      'vibe coding 时我几乎不挑模型，对话框里默认挂着当下最强的那个。Anthropic 教你按任务把模型分成几档手动选，Cursor Router 干脆拿一个分类器替你选：省钱这步是对的，可判断权要不要一起交出去，得自己算。',
+    listCover: 'assets/model-routing-by-task/cover.png',
+    cardCover: 'assets/cards/model-routing-by-task.webp',
+    inBlogGrid: true,
+    blogTag: 'AI 设计工作流',
+    blogDelay: 550,
+    blogCover: { type: 'iframe', src: 'writing/assets/model-routing-by-task/cover.html' },
+  },
+  {
     slug: 'claude-code-verification-loops',
     file: 'article-claude-code-verification-loops.html',
     title: '验证循环，把手动检查写进 Skill',

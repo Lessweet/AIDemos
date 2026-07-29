@@ -21,7 +21,7 @@ const ENTRY_DIR = path.join(ROOT, 'site/writing');
 const SLUGS = [
   'app-shape-for-ai', 'claude-code-verification-loops', 'figma-agent', 'figma-config-2026',
   'figma-make-designer-pr', 'figma-make-gpt-5-6', 'figma-shader-motion', 'figma-skills',
-  'genie', 'remove-ai-taste-in-design', 'review-ai-output', 'sparkle', 'voices',
+  'genie', 'model-routing-by-task', 'remove-ai-taste-in-design', 'review-ai-output', 'sparkle', 'voices',
 ];
 
 /* 旧版 writing.js initPageTint 的稳定哈希(输入 = 'article-<slug>',与 pathname 推导一致) */

@@ -1,0 +1,467 @@
+
+<h1 class="article-h1">AI 模型决策的交互<br/>最好的形态可能是没有交互</h1>
+<div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-tag">AI 设计工作流</span></div><span>2026-07-26</span><span>阅读约 7 分钟</span></div>
+<div class="article-cover"><iframe loading="lazy" src="assets/model-routing-by-task/cover.html"></iframe></div>
+<div class="article-body"><style>
+/* article-template 样式 inline 到网站，仅作用于 .article-body 内 */
+.article-eyebrow { text-align: center; justify-content: center; }
+.article-eyebrow .a-tag { font-weight: 400; }
+.article-h1 { text-align: center; }
+.article-byline { text-align: center; justify-content: center; }
+.article-body { color: #1a1a1a; line-height: 1.4; }
+.article-body p { font-size: var(--fs-body); font-weight: 300; margin: 40px 0; color: #1a1a1a; }
+.article-body strong { font-weight: 400; color: #0B40F5; }
+.article-body .list-dot { font-weight: 600; margin-right: 4px; color: #1a1a1a; }
+.article-body .section-head { text-align: center; margin: 56px 0; }
+/* 图标居中：svg display:block + margin auto，别改回 vertical-align/line-height/padding（微信按基线对齐会贴底、border-box 下 padding 挤小图标）。跟 template.html 保持一致。详见记忆 wechat-icon-vertical-center。 */
+.article-body .icon-badge { display: inline-block; width: 40px; height: 40px; border-radius: 10px; background: rgba(102, 102, 102, 0.08); margin-bottom: 14px; }
+.article-body .section-head svg { display: block; width: 32px; height: 32px; margin: 4px auto; overflow: visible; }
+.article-body h2 { font-size: var(--fs-h2); font-weight: 400; color: #1a1a1a; line-height: 1.2; margin: 0; letter-spacing: 0; text-align: center; }
+.article-body img { width: 100%; margin: 16px 0 0 0; display: block; }
+.article-body .img-caption { font-size: var(--fs-caption); color: #aaa; text-align: center; margin: 4px 0 18px 0; line-height: 1.4; }
+.article-body .img-ph { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 160px; margin: 24px 0; padding: 28px 20px; border: 1px dashed #d6d6de; border-radius: 12px; background: repeating-linear-gradient(45deg, #fafafb, #fafafb 10px, #f3f3f6 10px, #f3f3f6 20px); }
+.article-body .img-ph .img-ph-cap { font-size: var(--fs-caption); color: #9a9aa6; line-height: 1.5; max-width: 80%; }
+.article-body .highlight { font-size: var(--fs-body); font-weight: 300; line-height: 1.4; color: #1a1a1a; margin: 40px 0; }
+.article-body .highlight strong { font-weight: 400; color: #0B40F5; }
+
+/* outlined 图标动画 CSS（自动从 design-gallery 抽取，不要手改） */
+/* 时长/延迟变量（在 design-gallery 基础上整体提速 ~40%，文章里看着更精神） */
+.section-head {
+  --dur-1-5: 0.9s; --dur-1-8: 1.1s; --dur-2-1: 1.2s; --dur-2-2: 1.3s;
+  --dur-2-3: 1.4s; --dur-2-4: 1.4s; --dur-2-5: 1.5s; --dur-2-6: 1.6s;
+  --dur-2-8: 1.7s; --dur-4-0: 2.4s; --dur-5-0: 3s;
+  --delay-150: 100ms; --delay-300: 180ms; --delay-600: 360ms;
+}
+/* 通用 transform-box */
+.section-head svg [class*="anim-"],
+.section-head svg .favorite-star,
+.section-head svg .favorite-rays {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.section-head svg .anim-viewBox {
+  transform-box: view-box;
+  transform-origin: center;
+}
+
+/* ---- 各图标动画规则 ---- */
+.section-head svg .anim-doc-line {
+    animation: doc-line-write var(--dur-2-8) ease-in-out infinite;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+.section-head svg .anim-doc-line-2 { animation-delay: var(--delay-300); }
+.section-head svg .anim-doc-line-3 { animation-delay: var(--delay-600); }
+.section-head svg .anim-user-head { animation: user-head var(--dur-2-3) ease-out infinite; }
+.section-head svg .anim-user-shoulders { animation: user-shoulders var(--dur-2-3) ease-out infinite; }
+.section-head svg .anim-gear { animation: gear-turn var(--dur-2-8) cubic-bezier(0.25, 0.8, 0.2, 1) infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .anim-search { animation: search-scan var(--dur-4-0) cubic-bezier(0.16, 0.9, 0.2, 1) infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-cart-burst {
+    animation: cart-burst var(--dur-2-5) ease-out infinite;
+    opacity: 0;
+  }
+.section-head svg .anim-cart-burst-1 { --tx: -5px; --ty: -9px; }
+.section-head svg .anim-cart-burst-2 { --tx: -1px; --ty: -11px; animation-delay: var(--delay-150); }
+.section-head svg .anim-cart-burst-3 { --tx: 3px; --ty: -10px; animation-delay: var(--delay-300); }
+.section-head svg .anim-cart-burst-4 { --tx: 6px; --ty: -8px; animation-delay: var(--delay-300); }
+.section-head svg .anim-clap-hand { animation: clap-hand var(--dur-1-8) ease-in-out infinite; transform-box: view-box; transform-origin: 9px 14px; }
+.section-head svg .anim-clap-lines { animation: clap-lines var(--dur-1-8) ease-out infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-music-note {
+    animation: music-float var(--dur-2-8) ease-in-out infinite;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: center;
+  }
+.section-head svg .anim-music-base {
+    animation: music-tilt var(--dur-2-8) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 14px;
+  }
+.section-head svg .anim-music-note-2 { animation-delay: calc(var(--dur-2-8) / 2); }
+.section-head svg .anim-lightning {
+    animation: lightning-flash var(--dur-2-4) ease-in-out infinite;
+  }
+.section-head svg .anim-pencil { animation: pencil-write var(--dur-5-0) ease-in-out infinite; transform-box: view-box; transform-origin: 13px 12px; }
+.section-head svg .anim-pencil-trace {
+    animation: pencil-trace var(--dur-5-0) ease-in-out infinite;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+.section-head svg .anim-eye-shape { animation: eye-blink var(--dur-2-8) ease-in-out infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .anim-eye-pupil { animation: eye-pupil-blink var(--dur-2-8) ease-in-out infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-bell { animation: bell-rattle var(--dur-5-0) cubic-bezier(0.3, 0.7, 0.2, 1) infinite; transform-box: view-box; transform-origin: 12px 4px; }
+.section-head svg .anim-bell-clapper { animation: bell-clapper var(--dur-5-0) linear infinite; transform-box: view-box; transform-origin: 12px 17px; }
+.section-head svg .anim-ide-cursor { animation: ide-blink var(--dur-1-5) step-end infinite; }
+.section-head svg .anim-pin-ripple {
+    animation: pin-ripple var(--dur-2-5) ease-out infinite;
+    opacity: 0;
+  }
+.section-head svg .anim-pin-ripple-2 { animation-delay: calc(var(--dur-2-5) / 3); }
+.section-head svg .anim-pin-ripple-3 { animation-delay: calc(var(--dur-2-5) * 2 / 3); }
+.section-head svg .anim-brain {
+    animation: brain-pulse var(--dur-2-2) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+  }
+.section-head svg .anim-ai-spark {
+    animation: ai-twinkle var(--dur-2-2) ease-in-out infinite;
+  }
+.section-head svg .anim-ai-spark-small {
+    animation-delay: calc(var(--dur-2-2) / 2);
+  }
+.section-head svg .anim-cursor {
+    animation: cursor-nudge var(--dur-2-2) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 10px 12px;
+  }
+.section-head svg .anim-cursor-click {
+    animation: cursor-click var(--dur-2-2) ease-out infinite;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: 6px 5px;
+  }
+.section-head svg .anim-cursor-spark {
+    animation: ai-twinkle var(--dur-2-2) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 18px 6px;
+  }
+.section-head svg .anim-hourglass-top {
+    animation: hourglass-top var(--dur-2-8) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 8px;
+  }
+.section-head svg .anim-hourglass-stream {
+    animation: hourglass-stream var(--dur-2-8) ease-in-out infinite;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+.section-head svg .anim-hourglass-bottom {
+    animation: hourglass-bottom var(--dur-2-8) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 18px;
+  }
+.section-head svg .anim-shape-cycle {
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+  }
+.section-head svg .anim-home { animation: home-settle var(--dur-2-4) ease-out infinite; }
+.section-head svg .anim-lock-shackle { animation: lock-shackle var(--dur-2-6) ease-in-out infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .anim-lock-dot { animation: lock-dot var(--dur-2-6) ease-out infinite; }
+.section-head svg .anim-message-dot-1 { animation: typing-dot var(--dur-1-5) ease-in-out infinite 0ms; }
+.section-head svg .anim-message-dot-2 { animation: typing-dot var(--dur-1-5) ease-in-out infinite var(--delay-150); }
+.section-head svg .anim-message-dot-3 { animation: typing-dot var(--dur-1-5) ease-in-out infinite var(--delay-300); }
+.section-head svg .anim-heart { animation: heart-flutter var(--dur-2-8) cubic-bezier(0.2, 0.85, 0.25, 1) infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .favorite-star { animation: favorite-pop var(--dur-2-2) cubic-bezier(0.2, 0.85, 0.25, 1) infinite; }
+.section-head svg .favorite-rays { animation: favorite-rays var(--dur-2-2) ease-out infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-gift-lid { animation: gift-lid var(--dur-2-8) ease-in-out infinite; transform-box: view-box; transform-origin: 12px 8px; }
+.section-head svg .anim-gift-particle {
+    animation: gift-particle var(--dur-2-8) ease-out infinite;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: center;
+  }
+.section-head svg .anim-gift-particle-1 { --tx: -5px; --ty: -9px; }
+.section-head svg .anim-gift-particle-2 { --tx: 4px; --ty: -10px; animation-delay: var(--delay-150); }
+.section-head svg .anim-gift-particle-3 { --tx: -8px; --ty: -6px; animation-delay: var(--delay-300); }
+.section-head svg .anim-gift-particle-4 { --tx: 7px; --ty: -7px; animation-delay: var(--delay-300); }
+.section-head svg .anim-gift-particle-5 { --tx: -2px; --ty: -11px; animation-delay: var(--delay-600); }
+.section-head svg .anim-gift-particle-6 { --tx: 6px; --ty: -5px; animation-delay: var(--delay-600); }
+/* 以下两条此前未接入(class 存在但没有匹配规则,design-gallery 里同样是孤儿 keyframe)。
+   现补上选择器,和 icons-outlined/*.svg 里新加的 SMIL 保持一致。 */
+.section-head svg .anim-bookmark { animation: bookmark-tuck var(--dur-2-4) ease-in-out infinite; }
+.section-head svg .anim-clock-minute { animation: clock-hand 3s linear infinite; transform-box: view-box; transform-origin: 12px 12px; }
+
+/* ---- keyframes ---- */
+@keyframes ai-twinkle {
+    0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    50% { opacity: 0.35; transform: scale(0.6) rotate(25deg); }
+  }
+@keyframes bell-clapper {
+    0%, 8%, 84%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(13deg); }
+    36% { transform: rotate(-9deg); }
+    52% { transform: rotate(6deg); }
+    68% { transform: rotate(-3deg); }
+  }
+@keyframes bell-rattle {
+    0%, 8%, 84%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(-11deg); }
+    36% { transform: rotate(8deg); }
+    52% { transform: rotate(-5deg); }
+    68% { transform: rotate(3deg); }
+  }
+@keyframes bookmark-tuck {
+    0%, 100% { transform: translateY(0); }
+    42% { transform: translateY(2px); }
+    72% { transform: translateY(-1px); }
+  }
+@keyframes brain-pulse {
+    0%, 100% { transform: scale(1); }
+    22% { transform: scale(1.06); }
+    44% { transform: scale(0.98); }
+    62% { transform: scale(1.06); }
+    82% { transform: scale(0.98); }
+  }
+@keyframes calendar-page {
+    0%, 100% { transform: translateY(0); }
+    45% { transform: translateY(1.2px); }
+  }
+@keyframes calendar-tabs {
+    0%, 100% { transform: translateY(0); }
+    35% { transform: translateY(-1.8px); }
+  }
+@keyframes cart-burst {
+    0%, 14% { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); }
+    28% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+    72% { opacity: 0.85; transform: translate(var(--tx), var(--ty)) scale(1) rotate(18deg); }
+    100% { opacity: 0; transform: translate(calc(var(--tx) * 1.25), calc(var(--ty) * 1.2)) scale(0.7) rotate(30deg); }
+  }
+@keyframes cart-roll {
+    0%, 100% { transform: translateX(0); }
+    42% { transform: translateX(3px); }
+    75% { transform: translateX(-1px); }
+  }
+@keyframes clap-hand {
+    0%, 100% { transform: translateX(-1.5px) rotate(-7deg); }
+    24%, 50% { transform: translateX(1px) rotate(3deg); }
+    70% { transform: translateX(-0.6px) rotate(-3deg); }
+  }
+@keyframes clap-lines {
+    0%, 14%, 72%, 100% { opacity: 0; transform: scale(0.88); }
+    26%, 48% { opacity: 1; transform: scale(1); }
+    58% { opacity: 0.45; transform: scale(1.08); }
+  }
+@keyframes clock-hand {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+@keyframes cursor-click {
+    0%, 34% { opacity: 0; transform: scale(0.45); }
+    46% { opacity: 0.85; transform: scale(0.78); }
+    74%, 100% { opacity: 0; transform: scale(1.55); }
+  }
+@keyframes cursor-nudge {
+    0%, 100% { transform: translate(0, 0); }
+    42% { transform: translate(1px, -1px); }
+    66% { transform: translate(0.35px, -0.35px); }
+  }
+@keyframes doc-line-write {
+    0%, 12% {
+      opacity: 0;
+      stroke-dashoffset: 1;
+    }
+    42%, 76% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 0;
+    }
+  }
+@keyframes eye-blink {
+    0%, 44%, 58%, 70%, 100% { transform: scaleY(1); }
+    50%, 64% { transform: scaleY(0.08); }
+  }
+@keyframes eye-pupil-blink {
+    0%, 44%, 58%, 70%, 100% { opacity: 1; transform: scaleY(1); }
+    50%, 64% { opacity: 0; transform: scaleY(0.08); }
+  }
+@keyframes favorite-pop {
+    0%   { transform: scale(1); }
+    20%  { transform: scale(0.72); }
+    46%  { transform: scale(1.2); }
+    72%  { transform: scale(0.94); }
+    100% { transform: scale(1); }
+  }
+@keyframes favorite-rays {
+    0%   { opacity: 0; transform: scale(0.58) rotate(0deg); }
+    18%  { opacity: 0; transform: scale(0.62) rotate(0deg); }
+    34%  { opacity: 1; }
+    76%  { opacity: 0.75; }
+    100% { opacity: 0; transform: scale(1.28) rotate(10deg); }
+  }
+@keyframes gear-turn {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(90deg); }
+  }
+@keyframes gift-box {
+    0%, 100% { transform: scaleY(1); }
+    42% { transform: scaleY(0.96); }
+  }
+@keyframes gift-lid {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    42% { transform: translateY(-3px) rotate(-4deg); }
+    70% { transform: translateY(-1px) rotate(2deg); }
+  }
+@keyframes gift-particle {
+    0%, 18% { opacity: 0; transform: translate(0, 3px) scale(0.62) rotate(0deg); }
+    32% { opacity: 1; transform: translate(0, 0) scale(1) rotate(8deg); }
+    72% { opacity: 0.9; transform: translate(var(--tx), var(--ty)) scale(1.05) rotate(18deg); }
+    100% { opacity: 0; transform: translate(calc(var(--tx) * 1.2), calc(var(--ty) * 1.25)) scale(0.78) rotate(28deg); }
+  }
+@keyframes heart-flutter {
+    0%, 10%, 68%, 100% { transform: scale(1) rotate(0deg); }
+    16% { transform: scale(0.94) rotate(-1.5deg); }
+    23% { transform: scale(1.18) rotate(1.5deg); }
+    31% { transform: scale(0.98) rotate(0deg); }
+    42% { transform: scale(1.1) rotate(-0.8deg); }
+    54% { transform: scale(1.01) rotate(0.4deg); }
+  }
+@keyframes home-settle {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-2px); }
+    70% { transform: translateY(1px); }
+  }
+@keyframes hourglass-bottom {
+    0%, 100% { opacity: 0.68; transform: scaleX(0.72); }
+    60% { opacity: 1; transform: scaleX(1.08); }
+  }
+@keyframes hourglass-stream {
+    0%, 14% { opacity: 0; stroke-dashoffset: 1; }
+    30% { opacity: 1; }
+    68% { opacity: 1; stroke-dashoffset: 0; }
+    100% { opacity: 0; stroke-dashoffset: -1; }
+  }
+@keyframes hourglass-top {
+    0%, 100% { opacity: 0.95; transform: scaleY(1); }
+    54% { opacity: 0.5; transform: scaleY(0.64); }
+    78% { opacity: 0.9; transform: scaleY(0.86); }
+  }
+@keyframes ide-blink {
+    0%, 49% { opacity: 1; }
+    50%, 99% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+@keyframes lightning-flash {
+    0%, 100% { opacity: 0.92; transform: scale(1); }
+    42% { opacity: 1; transform: scale(1.08); }
+    72% { opacity: 0.78; transform: scale(0.98); }
+  }
+@keyframes lightning-pulse {
+    0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+    36% { transform: translateY(-1px) rotate(-3deg) scale(1.04); }
+    64% { transform: translateY(0.6px) rotate(2deg) scale(0.98); }
+  }
+@keyframes lock-dot {
+    0%, 100% { transform: scale(1); }
+    45% { transform: scale(1.35); }
+  }
+@keyframes lock-shackle {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    36% { transform: translateY(-2px) rotate(-9deg); }
+    72% { transform: translateY(0) rotate(0deg); }
+  }
+@keyframes music-float {
+    0% { opacity: 0; transform: translate(0, 3px) scale(0.82) rotate(-5deg); }
+    18% { opacity: 1; }
+    68% { opacity: 1; transform: translate(0.8px, -4px) scale(1) rotate(6deg); }
+    100% { opacity: 0; transform: translate(-0.5px, -7px) scale(0.86) rotate(-8deg); }
+  }
+@keyframes music-tilt {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    34% { transform: rotate(-5deg) translateY(-0.8px); }
+    68% { transform: rotate(4deg) translateY(0.5px); }
+  }
+@keyframes pencil-trace {
+    0%, 14% {
+      opacity: 0;
+      stroke-dashoffset: 1;
+    }
+    46% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    72% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 0;
+    }
+  }
+@keyframes pencil-write {
+    0%, 100% { transform: translate(-0.8px, -0.8px) rotate(-4deg); }
+    18% { transform: translate(1.4px, -2.4px) rotate(-1deg); }
+    36% { transform: translate(3.8px, -0.5px) rotate(3deg); }
+    56% { transform: translate(6.4px, -2.2px) rotate(1deg); }
+    76% { transform: translate(9px, -0.7px) rotate(4deg); }
+    88% { transform: translate(4.2px, -1.5px) rotate(-1deg); }
+  }
+@keyframes pin-drop {
+    0% { transform: translateY(-6px); opacity: 0; }
+    55% { transform: translateY(1px); opacity: 1; }
+    75% { transform: translateY(-1px); }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+@keyframes pin-ripple {
+    0% { opacity: 0; transform: scale(0.45); }
+    20% { opacity: 0.9; }
+    100% { opacity: 0; transform: scale(1.8); }
+  }
+@keyframes search-scan {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-4.2px, 0.4px) rotate(-10deg); }
+    18% { transform: translate(-1.1px, -0.2px) rotate(-2deg); }
+    30% { transform: translate(0.6px, -3.8px) rotate(7deg); }
+    39% { transform: translate(1.6px, -1px) rotate(2deg); }
+    52% { transform: translate(3px, 3.4px) rotate(9deg); }
+    62% { transform: translate(0.8px, 1px) rotate(2deg); }
+    78% { transform: translate(-0.7px, 0.2px) rotate(-1deg); }
+  }
+@keyframes search-sway {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(-1.4px) rotate(-7deg); }
+    55% { transform: translateX(1.4px) rotate(7deg); }
+    78% { transform: translateX(-0.5px) rotate(-3deg); }
+  }
+@keyframes typing-dot {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+    38% { transform: translateY(-2px) scale(1.18); opacity: 0.75; }
+  }
+@keyframes user-head {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-2px); }
+  }
+@keyframes user-shoulders {
+    0%, 100% { transform: scaleX(1); }
+    45% { transform: scaleX(1.08); }
+  }
+@keyframes wheel-pulse {
+    0%, 100% { transform: scale(1); }
+    42% { transform: scale(1.2); }
+  }
+</style>
+<p>作为 AI 用户，用大部分 AI 工具时，我都一直有个绕不开的问题：模型到底怎么选？不只是 AI coding 工具，生图、生视频工具也都有个选模型的动作。平时用 Claude vibe coding，出于省 token、又想要生成效率的双重考虑，经常会在切换 models 和 effort 上停几秒，多数时候其实也是凭感觉切。模型层面，我默认用 Claude Opus 5，遇到更复杂的设计任务才手动切到 Fable 5，管理类的活儿比如 GitHub 工作流就用 Sonnet 5；effort 层面，我基本很少动。</p>
+<img alt="模型和档位是两个能分开拧的旋钮：同一个 Opus 5，effort 从 High 拉到 Ultracode 就是多花力气；实在不够才升到 Fable 5" src="assets/model-routing-by-task/claude-effort-档位对比.png"/>
+<p>正好上周 Anthropic 和 Cursor 各发了一篇讲模型怎么选的文章，对用户来说，两种方式截然不同。Anthropic 是教你怎么选，而 Cursor 在 AI 工具层早就替你选好了。这是我觉得 Cursor 很有产品 sense 的点：真实解决了用户的难点，自动路由又是个很妙的产品设计策略。</p>
+<p>自动路由不是 Cursor 首创，ChatGPT 一年前就内置了 GPT-5 router，只不过走的是完全内部路由，表现层的用户完全不知情。但这套全自动没扛住：router 一度不稳，又撤掉了手动选模型的入口，招来用户一片不满，又很快把 model picker 加了回来。绕了一圈，又退回到「默认自动、但随时能接管」。现在，又出现了同样的产品策略，Cursor 做的是在两种体验中结合了，而 Claude 是更加保守的做法。</p>
+<div class="section-head"><span class="icon-badge" style="background: transparent;"><svg height="40" viewBox="0 0 48 48" width="40" xmlns="http://www.w3.org/2000/svg"><rect fill="#0B40F5" fill-opacity="0.08" height="48" rx="13" width="48"></rect><g fill="none" stroke="#0B40F5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" transform="translate(9.6 9.6) scale(1.2)"><path d="M9 3.5 V7.5"></path><path d="M15 3.5 V7.5"></path><path d="M7.5 7.5 H16.5 C17.05 7.5 17.5 7.95 17.5 8.5 V10.5 C17.5 13.54 15.04 16 12 16 C8.96 16 6.5 13.54 6.5 10.5 V8.5 C6.5 7.95 6.95 7.5 7.5 7.5 Z"></path><path d="M12 16 V20.5"></path></g></svg></span><h2 style="color: #0B40F5;">手动选模型<br/>选择权在用户</h2></div>
+<p>以 Anthropic 为例，思路是<strong>先把模型分档</strong>：最前沿的 Fable 留给硬骨头，那些从没解过的难题、长链条的 agent、复杂 coding；Opus 适合重推理的企业任务，比 Fable 快也便宜；Sonnet 可以是日常主力，也最适合拿来跑大批量的子 agent；Haiku 最便宜最快，给那种高频、对延迟敏感又不难的活儿。</p>
+<img alt="Anthropic 的选择指南：先判断该换模型还是换努力档位，再看模型和档位怎么配合" src="assets/model-routing-by-task/anthropic-换模型还是换努力档位-长图-中文.png"/>
+<p>官方给的默认建议是，先从当前能用到的最聪明的模型起步，<strong>再用 effort level 去调性能和成本</strong>。因为高能力模型虽然单 token 贵，但常常几轮就做对了，单次任务算下来反而更省。判断到底选哪档，它拆成几个问题：任务有多难、对延迟敏不敏感、跑到量产之后单次成本合不合算。</p>
+<p>有个日常使用方式：让快的模型干主力，偶尔叫更强的模型来当顾问过一眼。比如，Sonnet 5 配一个 Fable 5 当顾问，分数能到 Fable 5 的九成以上，价钱只要 63%。它还特意提醒别只看 benchmark，顶尖模型早把榜刷到饱和了，要在几个最强的模型中分高下，还是得看自己生产环境里的任务建一套评测。</p>
+<p>Anthropic 这套逻辑可以理解，不过它还是站在「用户自己怎么判断」的角度。这让我联想到互联网产品设计里的「引导、说明」机制：其实没多少用户会仔细看，实操时也不太会照着做。</p>
+<div class="section-head"><span class="icon-badge" style="background: transparent;"><svg height="40" viewBox="0 0 48 48" width="40" xmlns="http://www.w3.org/2000/svg"><rect fill="#0B40F5" fill-opacity="0.08" height="48" rx="13" width="48"></rect><g fill="none" stroke="#0B40F5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" transform="translate(9.6 9.6) scale(1.2)"><path d="M4.9 11 L16.2 4.4 C16.7 4.1 17.3 4.3 17.6 4.8 L19.1 7.4 C19.4 7.9 19.2 8.5 18.7 8.8 L7.4 15.4 C6.9 15.7 6.3 15.5 6 15 L4.5 12.4 C4.2 11.9 4.4 11.3 4.9 11 Z"></path><path d="M6.7 9.9 L8.6 13.2"></path><path d="M11 15.2 L8.5 20.5"></path><path d="M13.6 13.7 L16.5 20.5"></path></g></svg></span><h2 style="color: #0B40F5;">自动分配模型<br/>帮用户做困难决策</h2></div>
+<p>像 Anthropic 这种把决策权交给用户，用户会更有深度参与感；而像 Cursor 这种自动 router，<strong>把每个请求分配到最适合当前任务的模型</strong>，决策权交给产品，也是一种让用户以更低成本使用 AI 的方案。不过同时，Cursor 把这个能力定位成面向团队和组织开放，Auto Intelligence 的权限给了管理员，某种程度上也算把选择权交回给了用户。</p>
+<img alt="Cursor 的模型选择器默认停在 Auto：具体派 Grok 4.5 还是 Opus 4.8 由 router 定，留在用户手上的开关只剩 Intelligence / Balance / Cost" src="assets/model-routing-by-task/cursor-三挡意图选择器.png"/>
+<p>Cursor Router 背后的设计动因，是他们发现大约 60% 开发者日常就靠一个前沿模型干所有活，routine 任务也按旗舰单价在跑，而 AI 支出的增长速度远快于输出质量的提升。</p>
+<img alt="Cursor 给出的用户画像：绝大多数人压根不换模型，router 要解决的就是这群人的账单" src="assets/model-routing-by-task/cursor-60-开发者一个模型用到底.png"/>
+<p>Cursor 的优势在于对用户偏好以及哪些内容最终能留在代码库中有着独特洞察，同时了解每个模型最擅长的场景，因此可以将请求路由到最合适的选项，这件事情非常适合 Cursor 来做。</p>
+<p>Cursor 拿数百万条真实请求做在线 A/B 测试（不是离线跑分），Router 省下约 60% 成本，同时还给到前沿质量。输出质量有两个方面：<strong>用户满意度和代码保留率</strong>。几个早期高用量账户实测，比全程用 Opus 4.8 省了约 30%–50%。跟 Fable 比，Auto Intelligence 满意度接近 Fable、成本却低约 60%；跟 Opus 4.8 比，是在成本几乎持平的前提下，满意度高出约 15%。</p>
+<img alt="省钱通常要拿质量换，Cursor 给的这两组数是反过来的：账单砍掉六成，用户反而更买账" src="assets/model-routing-by-task/cursor-成本与满意度.png"/>
+<p>它本质是个分类器，为了分得准，用六十万条真实请求训出来，每个请求进来先看内容、上下文、任务复杂度和领域，再决定派给哪个模型。拿设计工作流来说，简单活给便宜模型，纯 UI 更新给擅长审美的那档，复杂长链条的才上前沿推理模型。Cursor 把它设成三挡：Intelligence 对齐最强模型的质量，Balance 对标日常够用的水准，Cost 主打省 token。</p>
+<div class="section-head"><span class="icon-badge" style="background: transparent;"><svg height="40" viewBox="0 0 48 48" width="40" xmlns="http://www.w3.org/2000/svg"><rect fill="#0B40F5" fill-opacity="0.08" height="48" rx="13" width="48"></rect><g fill="none" stroke="#0B40F5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" transform="translate(9.6 9.6) scale(1.2)"><path d="M12 2.5 C13 8.5 15.5 11 21.5 12 C15.5 13 13 15.5 12 21.5 C11 15.5 8.5 13 2.5 12 C8.5 11 11 8.5 12 2.5 Z"></path></g></svg></span><h2 style="color: #0B40F5;">AI 产品设计<br/>别把复杂交给用户</h2></div>
+<p>传统互联网设计里有一条：<strong>Don't make me think</strong>，尽量减少用户的疑惑和流程摩擦，让用户少动脑子。而在 AI 产品设计里，真正 make me think 的，是「该用哪个模型、会花多少成本」这种本来得靠专业经验的判断。Anthropic 和 Cursor 给的两种不同的产品答案，也都各有角度：</p>
+<p><span class="list-dot" style="font-weight:600;margin-right:4px;color:#0B40F5;">•</span><strong style="font-weight:600">产品设计层面</strong>，Anthropic 倾向于给判断框架、教用户怎么用，前提是用户愿意投入进来。Cursor 更自动化，它不觉得用户必须懂模型分类，而是把这个决策做成了产品的默认能力。Cursor 的产品 sense 就在这：与其教用户怎么选，不如替用户把这件麻烦事消化掉。</p>
+<p><span class="list-dot" style="font-weight:600;margin-right:4px;color:#0B40F5;">•</span><strong style="font-weight:600">模型产品设计层面</strong>，选模型正在被塞进不同的层。GPT-5 一年前就把 router 做进了模型系统内部，用户在 ChatGPT 里连模型都看不到，走快模型还是推理模型由它实时判断；Cursor 把 router 做在应用层，用户挑的是 Intelligence / Balance / Cost 三挡意图，而不是具体型号；Anthropic 把选择留在最外面，什么都不替用户决定。放在哪一层，是每个产品取舍：越靠近模型内部，用户越省心，透明度也越低。</p>
+<img alt='模型选择的决策放在哪一层：Anthropic 留在文档层、用户全自己选，Cursor 放到应用层、只挑三挡意图，GPT-5 塞进模型内部、全自动，一条从"透明费脑"到"黑盒省心"的轴线' src="assets/model-routing-by-task/决策放在哪一层-三层轴线.png"/>
+<p><span class="list-dot" style="font-weight:600;margin-right:4px;color:#0B40F5;">•</span><strong style="font-weight:600">体验设计层面</strong>，自动路由省掉的是操作步骤，代价是可预测性和掌控感。GPT-5 的 router 上线后，不少人不满意看不到自己到底用了哪个模型，OpenAI 到现在还给付费档留着手动 picker。自动化也不能只省钱省事，还得让用户想决策时能决策、想看时看得到里面发生了什么。Cursor 留了三挡、又让管理员能锁模型，就是在替你决定和让你掌控之间找平衡。</p>
+<p>最后回到我自己的设计工作流：琐碎活交给一个默认挡去跑，需要设计判断的地方再手动切最强模型。但更理想的状态，是连「该用哪个模型、花多少 token」这些念头都不用起，也不用手动切来切去。<strong>最精简的 AI 产品设计，是把模型和成本这层复杂度整个吞进产品里，让用户只管表达意图、不必为效率分心。</strong> 到那一步，token 效率不再需要用户自己去算，AI 产品默认就给出了最划算的那条路线。</p>
+<p style="display:flex; align-items:center; margin:40px 0;"><span style="flex:1 1 auto;height:1px;background:#0B40F5;opacity:0.35;font-size:0;line-height:0;overflow:hidden;"></span><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" fill="#0B40F5" r="4.3"></circle></svg><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><polygon fill="#0B40F5" points="8,3.50 4.10,10.25 11.90,10.25"></polygon></svg><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><polygon fill="#0B40F5" points="8,3.20 9.18,6.38 12.57,6.52 9.90,8.62 10.82,11.88 8,10.00 5.18,11.88 6.10,8.62 3.44,6.52 6.82,6.38"></polygon></svg><span style="flex:1 1 auto;height:1px;background:#0B40F5;opacity:0.35;font-size:0;line-height:0;overflow:hidden;"></span></p>
+<p>本文数据与模型选型框架参考 Anthropic 官方博客 Claude Models Explained 与 Cursor 官方博客 Cursor Router；GPT-5 router 相关参考 OpenAI 官方博客 Introducing GPT-5。</p></div>
+<!-- 底部 -->
+<footer class="article-footer">
+<div class="same-collection"></div>
+</footer>
