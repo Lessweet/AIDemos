@@ -3920,3 +3920,26 @@ body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-le
     from { transform: translateY(100%); }
     to   { transform: translateY(0); }
 }
+
+/* 移出:字「滚过去」—— 向下沉出遮罩,再从上方回到原位(2026-07-28 用户定)。
+   为什么不是严格逆向:严格逆向的终点是「沉在遮罩下方、看不见」,而导航文字在非
+   hover 时必须可见,动画一结束就得跳回来,那一下硬跳比现在的瞬间复位更难看。
+   滚一圈的终点天然就是可见的原位,全程无跳变。
+   中途从 +100% 跳到 -100% 不会被看见:两端都在遮罩外,实测遮罩内/上/下三点取样
+   全为空(elementFromPoint,非几何判断)。
+   两段各用各的曲线:沉出走 spec 的 exit 曲线(ease-in,干脆离场),回落走 enter 曲线
+   (与 hover 升起同一条),读起来是同一个动作语言。
+   移出的这一段由 nav-boot.js 加 .nav-rolling 驱动 —— :hover 一撤,CSS 规则就没了。 */
+@media (hover: hover) and (min-width: 561px) {
+    body.home-v2.design-page .header.home-nav .nav-cats .nav-cat.nav-rolling .heading-rise-char,
+    body.home-v2.design-page .header.home-nav .header-connect.nav-rolling .heading-rise-char {
+        animation: nav-char-roll 360ms both;
+        animation-delay: calc(var(--i, 0) * 22ms);
+    }
+}
+@keyframes nav-char-roll {
+    0%     { transform: translateY(0);      animation-timing-function: cubic-bezier(0.7, 0, 0.84, 0); }
+    49.9%  { transform: translateY(100%); }
+    50%    { transform: translateY(-100%);  animation-timing-function: cubic-bezier(0.18, 1, 0.32, 1); }
+    100%   { transform: translateY(0); }
+}
