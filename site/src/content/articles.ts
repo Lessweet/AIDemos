@@ -49,12 +49,12 @@ export const ARTICLES: ArticleMeta[] = [
     collection: '',
     excerpt:
       'vibe coding 时我几乎不挑模型，对话框里默认挂着当下最强的那个。Anthropic 教你按任务把模型分成几档手动选，Cursor Router 干脆拿一个分类器替你选：省钱这步是对的，可判断权要不要一起交出去，得自己算。',
-    listCover: 'assets/model-routing-by-task/cover.png',
+    listCover: 'assets/model-routing-by-task/cover2.png',
     cardCover: 'assets/cards/model-routing-by-task.webp',
     inBlogGrid: true,
     blogTag: 'AI 设计工作流',
     blogDelay: 550,
-    blogCover: { type: 'iframe', src: 'writing/assets/model-routing-by-task/cover.html' },
+    blogCover: { type: 'iframe', src: 'writing/assets/model-routing-by-task/cover2.html' },
   },
   {
     slug: 'claude-code-verification-loops',

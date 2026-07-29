@@ -423,7 +423,7 @@ function initTOC() {
    ======================================== */
 /* READER_ARTICLES:AUTO —— 发布时 render.py 从 articles.json 自动重生成此数组,勿手改。 */
 let READER_ARTICLES = [
-    { file: "article-model-routing-by-task.html", cat: "product", title: "AI 模型决策的交互，最好的形态可能是没有交互", date: "2026-07-26", cover: "assets/model-routing-by-task/cover.png", accent: "#03071a" },
+    { file: "article-model-routing-by-task.html", cat: "product", title: "AI 模型决策的交互，最好的形态可能是没有交互", date: "2026-07-26", cover: "assets/model-routing-by-task/cover2.png", accent: "#0B40F5" },
     { file: "article-claude-code-verification-loops.html", cat: "product", title: "验证循环，把手动检查写进 Skill", date: "2026-07-23", cover: "assets/claude-code-verification-loops/cover4.png", accent: "#6A823F" },
     { file: "article-figma-make-designer-pr.html", cat: "product", title: "AI native 设计师的交付物，不只设计稿，还有 GitHub PR", date: "2026-07-19", cover: "assets/figma-make-designer-pr/cover4.png", accent: "#2F3336" },
     { file: "article-remove-ai-taste-in-design.html", cat: "ui", title: "看不出 AI 味的 AI 设计方式", date: "2026-07-16", cover: "assets/remove-ai-taste-in-design/cover4.png", accent: "#5A6CD8" },
