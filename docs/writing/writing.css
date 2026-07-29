@@ -1456,10 +1456,10 @@ body .home-nav .nav-cats .nav-cat.active {
         gap: 0;
         /* 顶部留白 = 顶栏高度 + 三页统一的 --nav-content-gap,与页面内容起点同规范;
            底色复用 --site-bg —— 首页/三页背景改 token 时,全屏菜单自动跟着变 */
-        /* +32px:全屏菜单顶栏下方要比页面内容起点再松一档(2026-07-28 用户定)。
-           加在这里而不是调 --nav-content-gap —— 那个 token 是首页/Blog/Archive 三页
-           共用的内容起点,动它会把三页一起推下去。 */
-        padding: calc(var(--design-menu-top, 76px) + var(--nav-content-gap) + 32px) 24px 40px;
+        /* +64px:全屏菜单顶栏下方要比页面内容起点松两档(2026-07-28 用户定,先 +32
+           看过实机后再 +32)。加在这里而不是调 --nav-content-gap —— 那个 token 是
+           首页/Blog/Archive 三页共用的内容起点,动它会把三页一起推下去。 */
+        padding: calc(var(--design-menu-top, 76px) + var(--nav-content-gap) + 64px) 24px 40px;
         background: var(--site-bg, #f9f9f9);
         z-index: 0;                     /* 低于 logo(1)与汉堡 X(2),其余区域铺满全屏 */
         overflow-y: auto;
