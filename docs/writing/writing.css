@@ -1460,23 +1460,38 @@ body .home-nav .nav-cats .nav-cat.active {
            看过实机后再 +32)。加在这里而不是调 --nav-content-gap —— 那个 token 是
            首页/Blog/Archive 三页共用的内容起点,动它会把三页一起推下去。 */
         padding: calc(var(--design-menu-top, 76px) + var(--nav-content-gap) + 64px) 24px 40px;
+        /* 面板自己铺色,并由自己的 clip-path 揭示 —— 背景与内容一起被圆裁开。
+           先前把底色拆到 ::before、只裁背景层,结果三项菜单没被裁到:圆外的浅色区域
+           也画着 Blog/Archive/Contact,文字先浮在还没揭开的页面上(2026-07-28 实测)。 */
         background: var(--site-bg, #f9f9f9);
         z-index: 0;                     /* 低于 logo(1)与汉堡 X(2),其余区域铺满全屏 */
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        /* 收起态:淡出 + 轻微上移、不可点击;visibility 延到淡出结束再隐藏 */
-        opacity: 0;
+        /* 收起态:不可点击;visibility 延到展开动画结束再隐藏,否则内容会在幕布收完
+           之前就消失。面板本身不再做 opacity/transform —— 背景由 ::before 展开,
+           三项有自己的错峰入场(--row-d + 逐字 translateY(110%),挂在 .nav-open 上)。 */
         visibility: hidden;
-        transform: translateY(-10px);
         pointer-events: none;
-        transition: opacity 0.448s var(--ease), transform 0.448s var(--ease), visibility 0s linear 0.448s;
+        /* 从右上角关闭键的圆铺开到全屏(2026-07-28 用户要求)。
+           圆心 = 关闭键中心:实测按钮 36x36、距右 24 / 距顶 18,故圆心距右 42、距顶 36。
+           收起态半径 18px = 按钮自身半径,视觉上就是「从那个圆长出来」。
+           展开用 150%:circle() 的百分比按 sqrt((w²+h²)/2) 解析,430x932 下 ≈726px,
+           150% ≈ 1089px,而覆盖到最远的左下角只需 976px,留足余量。 */
+        clip-path: circle(18px at calc(100% - 42px) 36px);
+        transition: clip-path var(--menu-wipe-dur) var(--ease-soft),
+                    visibility 0s linear var(--menu-wipe-dur);
     }
     .home-v2 .header.home-nav.nav-open .nav-collapse {
-        opacity: 1;
         visibility: visible;
-        transform: none;
         pointer-events: auto;
-        transition: opacity 0.448s var(--ease), transform 0.448s var(--ease), visibility 0s;
+        clip-path: circle(150% at calc(100% - 42px) 36px);   /* 展开:圆扩到铺满 */
+        /* 展开单独用 --ease-in-out,不跟收起共用 --ease-soft。
+           --ease-soft 是强 ease-out、起步极快:半径 18px→1089px 的行程,前 10% 时间
+           就冲掉大半,小圆阶段几十毫秒就过去,根本看不出是从圆开始的
+           (2026-07-28 用户实测「展开没看出来是从圆形开始,收起倒能看出来」——
+           收起是同一条曲线反向用,先快后慢,末尾缩成小圆那段被拉长,所以反而看得清)。
+           两端都缓的曲线让小圆多留一会儿,圆形才读得出来。 */
+        transition: clip-path var(--menu-open-dur) var(--ease-in-out), visibility 0s;
     }
     /* logo 与汉堡(X)浮在模态之上,保持可见、可点击关闭。
        header-left 必须在此显式给 z-index —— 顶栏内容的 z-index 原本只由
@@ -2588,6 +2603,16 @@ body.works-page.theme-dark .home-nav .theme-toggle { background: #1A1A1A; }
     .home-v2 .header.home-nav .nav-toggle { background: #fff; border-radius: 50%; }
     body.no-banner.theme-dark .header.home-nav .nav-toggle,
     body.menu-dark .header.home-nav.nav-open .nav-toggle { background: #1A1A1A; }
+    /* 主题切换键跟着一起反色。它原先只在 body.theme-dark 下反色,而 .menu-dark 的
+       前提是「白底页也可能要黑菜单」—— 那种组合下它仍是白圆 + 深图标,黑菜单里
+       就剩它一个白点,与旁边已经变深的关闭键对不上(2026-07-28 用户实测)。
+       取值与 nav-toggle / theme-dark 下的主题键完全一致:圆底 #1A1A1A、
+       图标 rgb(152,152,152)(= 55% 白在 #1A1A1A 上的等效色)、hover 转纯白。 */
+    body.menu-dark .header.home-nav.nav-open .theme-toggle {
+        background: #1A1A1A;
+        color: rgb(152, 152, 152);
+    }
+    body.menu-dark .header.home-nav.nav-open .theme-toggle:hover { color: #fff; }
 }
 /* 主题切换按钮双 icon:浅色显示太阳,深色显示月亮(2026-07-22) */
 /* 月牙两个尖角用圆头圆角(2026-07-22 用户要求,覆盖 icon 规范的 butt/miter —— 
@@ -3795,7 +3820,7 @@ body.works-page.theme-dark .card-meta .card-tag { color: rgba(255, 255, 255, 0.4
     background-color: transparent;
     transition: background-color var(--hl-dur-out) ease;
 }
-.home-v2 .header.home-nav .nav-collapse .nav-cat .heading-rise-mask,
+.home-v2 .header.home-nav .nav-collapse .nav-cat > .heading-rise-mask,
 .home-v2 .header.home-nav .nav-collapse .header-connect .connect-label,
 .home-v2 .header.home-nav .nav-collapse .nav-arrow {
     transition: transform var(--hl-shift-out) ease;   /* 归位比黑块淡出快 */
@@ -3814,7 +3839,13 @@ body.works-page.theme-dark .card-meta .card-tag { color: rgba(255, 255, 255, 0.4
         background-color: var(--hl-ink);
         transition: background-color var(--hl-dur) ease;
     }
-    .home-v2 .header.home-nav .nav-collapse .nav-cat:hover .heading-rise-mask,
+    /* 必须用子选择器 > ,不能用后代:箭头内部也有一个 .heading-rise-mask
+       (riseArrow 把 SVG 包成 .nav-arrow > .heading-rise-mask > .heading-rise-char)。
+       写成后代的话,这条「文字右移 +12px」会同时命中箭头里那个 mask,与下面
+       「箭头左移 -12px」正好抵消 —— 表现为文字缩进了、箭头纹丝不动
+       (2026-07-28 用户实测「这俩箭头 hover 时没有缩进」)。
+       文字的 mask 是 .nav-cat 的直接子元素,箭头的深一层,用 > 正好隔开。 */
+    .home-v2 .header.home-nav .nav-collapse .nav-cat:hover > .heading-rise-mask,
     .home-v2 .header.home-nav .nav-collapse .header-connect:hover .connect-label {
         transform: translateX(var(--hl-shift));
         transition: transform var(--hl-shift-in) ease;
@@ -3841,7 +3872,7 @@ body.works-page.theme-dark .card-meta .card-tag { color: rgba(255, 255, 255, 0.4
         background-color: var(--hl-ink);
         transition: none;
     }
-    .home-v2 .header.home-nav .nav-collapse .nav-cat:active .heading-rise-mask,
+    .home-v2 .header.home-nav .nav-collapse .nav-cat:active > .heading-rise-mask,
     .home-v2 .header.home-nav .nav-collapse .header-connect:active .connect-label {
         transform: translateX(var(--hl-shift));
         transition: none;
@@ -3866,7 +3897,7 @@ body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-le
     background-color: var(--hl-ink);
     transition: none;
 }
-.home-v2 .header.home-nav .nav-collapse .nav-cat.nav-leaving .heading-rise-mask,
+.home-v2 .header.home-nav .nav-collapse .nav-cat.nav-leaving > .heading-rise-mask,
 .home-v2 .header.home-nav .nav-collapse .header-connect.nav-leaving .connect-label {
     transform: translateX(var(--hl-shift));
     transition: none;
@@ -3972,4 +4003,45 @@ body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-le
     49.9%  { transform: translateY(100%); }
     50%    { transform: translateY(-100%);  animation-timing-function: cubic-bezier(0.18, 1, 0.32, 1); }
     100%   { transform: translateY(0); }
+}
+
+/* ── 深色主题 + 浅底菜单:把菜单里的内容拉回深色(2026-07-28)────────────────
+   菜单与页面主题是反着来的(浅页黑菜单 / 深页浅菜单),而 theme-dark 的那批反白规则
+   (logo #fff、字标 invert(1)、三项与 active 的 rgba(255,255,255,·))是给深色页面
+   写的 —— 深色主题下菜单是浅底,不挡住就是白字/白 logo 贴浅底,整块读不出来
+   (2026-07-28 用户实测:logo、Archive 那一项与它的箭头都看不见)。
+   这是 .menu-dark 的镜像缺口:当年只写了「浅页要黑菜单」,没写「深页要浅菜单」。
+   选择器带上 :not(.menu-dark) + .nav-open,只在这个组合、且菜单展开时生效;
+   类的数量已压过 body.no-banner.theme-dark 那几条,不需要 !important。 */
+@media (max-width: 600px) {
+    /* 墨纸对调也要跟着回来:theme-dark 把 --hl-ink 定成了 #ffffff(给深色页面用),
+       而这里菜单是浅底 —— 不改的话整行 hover 块是白块贴浅底,看不出来
+       (2026-07-28 用户实测「hover 色块应该是黑色」)。取 :root 的原值。 */
+    body.theme-dark:not(.menu-dark) .header.home-nav .nav-collapse {
+        --hl-ink: #1a1a1a;
+        --hl-paper: #f2f2f2;
+    }
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat.active,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .header-right .header-connect {
+        color: var(--gray-900);
+    }
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cat,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .header-connect {
+        border-top-color: rgba(0, 0, 0, 0.2);
+    }
+    /* 上面那条「拉回深色」写满了 8 个类,压过了 hover 的纸色规则(7 类)——
+       于是 hover 时黑块上的字仍是深色,贴在块上看不见(2026-07-28 用户实测
+       「文字没反色」)。这里补同等级的 hover / active / 离场变体,让它回到纸色。
+       :not(.menu-dark) 保证只作用于「深色主题 + 浅底菜单」这一种组合。 */
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat:hover,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat:active,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat.nav-leaving,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .header-right .header-connect:hover,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .header-right .header-connect:active {
+        color: var(--hl-paper);
+    }
+    /* logo 与字标浮在菜单之上(z-index 1/2),同样要回到深色 */
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open svg.site-logo { color: #101114; }
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .site-wordmark { filter: none; }
 }

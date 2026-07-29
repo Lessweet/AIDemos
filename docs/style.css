@@ -208,6 +208,17 @@
        动它会把无关的地方一起拖慢。擦除是一段有方向的行程,比原地换色需要更多时间
        才看得出「铺过去」。 */
     --hl-wipe-dur: 0.36s;
+    /* 全屏菜单背景「从上到下展开」的时长(2026-07-28 用户要求:背景不再淡入,改成
+       像幕布一样落下来)。比原先整块 0.448s 的淡入短 —— 展开是有方向的行程,
+       快才有「刷一下铺开」的干脆,拖长了就变成慢慢拉幕。 */
+    --menu-wipe-dur: 0.34s;
+    /* 展开单独一档,比收起慢(2026-07-28 用户要求「展开慢一点」)。
+       不共用 --menu-wipe-dur:收起的手感用户已确认是好的,调共用值会把它一起拖慢。
+       展开要交代「从关闭键那个小圆长出来」的过程,慢一点才看得清;收起是让路,快些利落。 */
+    --menu-open-dur: 0.52s;
+    /* 主题切换期间统一压到这一档。底色由 nav-boot 内联写、瞬切,而文字色各走各的
+       hover 过渡(最长实测 0.42s),不压的话就是「底色已黑、字还在褪」的脱节感。 */
+    --theme-switch-dur: 0.18s;
     /* 移出:反色消失的时长(页面里的整行 0.8s,2026-07-26)。移出比移入慢 ——
        与全站 hover 放大(--hover-zoom-in / --hover-zoom-out)同一手法:进场干脆、退场留一口气。
        底块与文字必须用同一组时长,否则会出现「块还黑着、字已变黑」的看不清的中间态。 */
@@ -253,6 +264,22 @@
 body.theme-dark {
     --hl-ink: #ffffff;
     --hl-paper: #0a0a0a;
+}
+/* 全屏菜单转黑时同样要对调 —— 但只在菜单容器内,不能挂到 body 上。
+   .menu-dark 的设计前提是「白底页也可能要黑菜单」,那种组合下菜单里的 --hl-ink 仍是
+   #1a1a1a,整行 hover 块贴在 #0a0a0a 的黑底上只差 16 级、基本看不见。
+   一度写成 body.menu-dark { --hl-ink: #fff } —— 那是整页作用域,自定义属性往下继承,
+   把页面里所有吃 --hl-ink 的地方(首页索引行、顶栏三个 tab 的黑块…)全反白了,
+   用户实测「首页 hover 色块不能是白色」(2026-07-28)。挂在 .nav-collapse 上,
+   继承范围就被限死在菜单内部。 */
+/* 还得再收一层断点:桌面端顶栏三项本身就住在 .nav-collapse 里(那时它是
+   display:contents),只按选择器限定的话,顶栏 tab 的黑块也会被继承成白色
+   (2026-07-28 实测 顶栏tab=#ffffff)。全屏菜单只在 ≤560px 存在,包进去就干净了。 */
+@media (max-width: 560px) {
+    body.menu-dark .header.home-nav .nav-collapse {
+        --hl-ink: #ffffff;
+        --hl-paper: #0a0a0a;
+    }
 }
 
 
@@ -1927,4 +1954,17 @@ a {
     .masonry-grid {
         grid-template-columns: repeat(6, minmax(0, 1fr));
     }
+}
+
+
+/* 主题切换的 240ms 窗口内,把颜色类过渡统一压到 --theme-switch-dur(2026-07-28)。
+   用 * + !important 是刻意的:主题切换会同时改动全站几乎每个元素的 color /
+   background-color / border-color,逐条去追不现实;类由 nav-boot 加上、240ms 后摘掉,
+   作用范围被时间窗口限死,不影响常规 hover 手感。 */
+body.theme-switching,
+body.theme-switching *,
+body.theme-switching *::before,
+body.theme-switching *::after {
+    transition-duration: var(--theme-switch-dur) !important;
+    transition-delay: 0s !important;
 }

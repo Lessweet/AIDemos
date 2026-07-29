@@ -117,8 +117,18 @@ function initSiteNav() {
    applySiteTheme() 需在各页 body 起始的内联脚本里、initSiteNav() 之后同步调用,
    保证首次绘制前就带上主题类、不闪色。 */
 function setSiteTheme(dark) {
+    /* 切换期间把所有过渡压到一档:底色是下面几行内联写的、瞬切,而文字色走各自的
+       hover 过渡(实测 .w-title 的 color 0.42s,要 450ms 才褪完)——两者脱节,看着
+       就是「底色已经黑了、字还在慢慢变」(2026-07-28 用户反馈「切换太慢」)。
+       240ms 后摘掉,不影响常规 hover 手感。 */
+    document.body.classList.add('theme-switching');
+    setTimeout(function () { document.body.classList.remove('theme-switching'); }, 240);
     document.body.classList.toggle('theme-dark', dark);
-    document.body.classList.toggle('menu-dark', dark);
+    /* 菜单与页面主题「反着来」(2026-07-28 用户定:浅色模式 = 黑背景菜单,
+       深色模式 = 浅背景菜单)。所以这里取反,不是跟随。
+       走过两次弯路:先做成静态类让菜单恒黑(那样不随主题变),再改成跟随主题
+       (方向反了)。 */
+    document.body.classList.toggle('menu-dark', !dark);
     /* html 背景必须跟 body 同色:内容不满一屏 / 橡皮筋滚动时露出的是 html 底,
        只翻 body 会在页面底部留一条异色(浅色 #f2f2f2 = --site-bg,深色 #0a0a0a = --page-bg)。
        2026-07-27 底色加深时这里一度漏改(仍写旧 #f9f9f9):主题切换重绘的一两帧里
@@ -131,7 +141,9 @@ function applySiteTheme() {
        顺带清掉旧版遗留的 localStorage 跨会话记忆(老访客不再被锁在深色)。 */
     try {
         localStorage.removeItem('site-theme');
-        if (sessionStorage.getItem('site-theme') === 'dark') setSiteTheme(true);
+        /* 无论深浅都要调一次:菜单类是取反挂的,默认浅色时若不调,
+           menu-dark 就挂不上,首屏打开菜单会是浅底(应为黑底)。 */
+        setSiteTheme(sessionStorage.getItem('site-theme') === 'dark');
     } catch (e) { /* 隐私模式等取不到 storage 时静默,维持浅色 */ }
 }
 function toggleSiteTheme() {
