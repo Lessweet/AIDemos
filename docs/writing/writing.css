@@ -2354,8 +2354,13 @@ body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active { color: rgba(255,
         /* 左右用 tab 专用留白(= 相邻间距的一半),相邻两块正好贴合成一条连续的黑带 */
         inset: calc(-1 * var(--hl-pad-y)) calc(-1 * var(--hl-pad-x-nav));
         border-radius: 0;   /* 直角 —— 与全站方头直角语言一致 */
-        background-color: transparent;
-        transition: background-color var(--hl-dur-out-nav) ease;   /* 移出 0.6s */
+        /* 从左到右铺满(2026-07-28 用户要求)。用 clip-path 擦除而不是动宽度/scaleX:
+           几何自始至终不变、零布局影响,也没有 scaleX 那种边缘拉伸。
+           这一条取代了 2026-07-26 定的「块一开始就是最终尺寸、只换透明度」——
+           那时要避免的是「由小长大的缩放感」,擦除不是缩放,边一直是直角实边。 */
+        background-color: var(--hl-ink);
+        clip-path: inset(0 100% 0 0);
+        transition: clip-path var(--hl-dur-out-nav) ease;   /* 移出 0.6s,擦回左侧 */
     }
     @media (hover: hover) {
         body.home-v2.design-page .header.home-nav .nav-cats .nav-cat:hover,
@@ -2365,8 +2370,20 @@ body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active { color: rgba(255,
         }
         body.home-v2.design-page .header.home-nav .nav-cats .nav-cat:hover::before,
         body.home-v2.design-page .header.home-nav .header-connect:hover::before {
-            background-color: var(--hl-ink);
-            transition: background-color var(--hl-dur) ease;
+            clip-path: inset(0 0 0 0);
+            transition: clip-path var(--hl-wipe-dur) var(--ease-in-out);
+        }
+        /* 字色跟着擦除边逐字翻,不能整词一起翻:块 0.18s 才擦到右端,而字若立刻全变
+           纸色,右边几个字就是「纸色叠在还没铺到的浅底上」= 当场看不见。
+           用现成的 --i 做 stagger,每字在擦除边扫过它时才翻色;60ms 的短过渡让翻色
+           贴着边走,不拖尾。移出时统一按 --hl-dur-out-nav 柔和退回,不再逐字。 */
+        body.home-v2.design-page .header.home-nav .nav-cats .nav-cat:hover .heading-rise-char,
+        body.home-v2.design-page .header.home-nav .header-connect:hover .heading-rise-char {
+            color: var(--hl-paper);
+            transition: color 60ms linear;
+            /* 44ms/字:擦除拉长到 --hl-wipe-dur 后,翻色边要同步放慢才继续贴着擦除边
+               (7 个字母 6×44=264ms,落在 360ms 的行程内)。 */
+            transition-delay: calc(var(--i, 0) * 44ms);
         }
     }
     /* (顶栏不做当前页高亮 —— 2026-07-26 用户要求取消选中态,黑块只在 hover 时出现。
@@ -3865,3 +3882,94 @@ body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-le
    保留布局尺寸(不塌、不触发重排)。由 usePauseOffscreenMedia 挂/摘。
    不用 display:none —— 那会让 iframe 尺寸归零,滚回来要重新布局甚至重载。 */
 .media-idle { visibility: hidden; }
+
+/* ── 顶栏三项 hover:逐字上浮(2026-07-28 用户要求)────────────────────────────
+   叠加在上面那套「反色高亮块」之上,块的规则一条没动:块负责「点亮成块」,
+   这层负责字本身的反馈。
+
+   取自 animate-text 的 bottom-up-letters:per-character、自下而上、
+   easing cubic-bezier(0.18, 1, 0.32, 1)。spec 原值(位移 46px / 逐字 88ms)是给
+   40px+ 大字设计的(usage_notes 写明),顶栏是 16px —— 位移改成 translateY(100%)
+   (= 字自身高度 24px,正好整字沉出遮罩),时长/间隔按比例收到 240ms / 22ms。
+
+   ── 上一版(34a40b7 / 67dc7aa)失败并回退,踩到的三个坑,这里逐条避开 ──
+
+   1. transform 对非替换 inline 元素无效。
+      .heading-rise-char 的 display:inline-block 写在 style.css 的
+      `.heading-rise .heading-rise-char` 里,要 .heading-rise 祖先类 —— 顶栏的 <a>
+      没有,实测顶栏里 char 是 display:inline。所以上一版的 transform 根本没生效,
+      「看不出动效」的真正原因在这里,不是时长问题。这里显式补上 inline-block。
+
+   2. overflow 对非替换 inline 元素同样无效。
+      Blog/Archive 的遮罩是 display:block(裁得住),而 Contact 的遮罩是
+      display:inline —— 实测把字推到 translateY(100%) 后,在遮罩正下方
+      elementFromPoint 取到的就是字符本身,根本没裁。所以遮罩统一规范成
+      inline-block。注意:光看几何(字顶 >= 遮罩底)会误判成「裁住了」,必须验画面。
+
+   3. 不能改动 <a> 或其子元素的盒高 —— 高亮块 ::before 的尺寸(inset: -5.44px -28px)
+      挂在 <a> 的盒子上,盒高一变三个块就高矮不一(上一版给遮罩加 line-height:1
+      正是这么崩的:Blog/Archive 24px 而 Contact 因内含 mail icon 变成 28px)。
+      本版逐项核对过基线:三项 <a> 仍是 h=24,::before 仍是 34.875px,只有 Archive
+      宽度 +0.28px(inline-block 让字形步进按整像素取整,7 个字母累积,亚像素级)。
+
+   限定 (hover: hover) + ≥561px:≤560px 这三项进全屏菜单、是整行版式;
+   触屏没有 hover 态,加了会在点击后残留。作用域与高亮块严格一致。 */
+@media (hover: hover) and (min-width: 561px) {
+    body.home-v2.design-page .header.home-nav .nav-cats .nav-cat .heading-rise-mask,
+    body.home-v2.design-page .header.home-nav .header-connect .heading-rise-mask {
+        display: inline-block;   /* 见坑 2:inline 裁不住 */
+        overflow: hidden;
+        vertical-align: top;
+    }
+    body.home-v2.design-page .header.home-nav .nav-cats .nav-cat .heading-rise-char,
+    body.home-v2.design-page .header.home-nav .header-connect .heading-rise-char {
+        display: inline-block;   /* 见坑 1:inline 上 transform 无效 */
+    }
+    body.home-v2.design-page .header.home-nav .nav-cats .nav-cat:hover .heading-rise-char,
+    body.home-v2.design-page .header.home-nav .header-connect:hover .heading-rise-char {
+        animation: nav-char-rise 300ms both;   /* 滚一圈,行程翻倍;曲线在 keyframes 里分段给 */
+        animation-delay: calc(var(--i, 0) * 22ms);
+    }
+}
+/* 移入也滚一圈:先向上滚出遮罩,再从下方回到原位(2026-07-28 用户实测修正)。
+   原先是 from translateY(100%) 的纯揭示 —— 那是给「字从无到有出现」设计的,起手
+   必须先把字塞到遮罩下方。可顶栏的字本来就在那儿看着,一 hover 先掉下去再升上来,
+   用户看到的就是「文字往下抖了一下」。
+   改成先向上出场,hover 的第一下是向上,没有掉落感;落位仍是从下方升起,
+   bottom-up 的读感不变。与移出的 nav-char-roll 正好成一对(那个是先向下)。
+   中途从 -100% 跳到 +100% 不会被看见:两端都在遮罩外(实测 elementFromPoint
+   遮罩内/上/下三点取样全为空)。
+   两段各用各的曲线:出场走 spec 的 exit 曲线,回落走 enter 曲线。
+   全程不带 opacity 淡入 —— spec 要求「Letters never blur during enter or exit」。 */
+@keyframes nav-char-rise {
+    /* 出场段不用 spec 的 exit 曲线(0.7,0,0.84,0):它起步极慢,实测头 70ms 几乎不动、
+       首字到 136ms 才看得出位移,hover 会显得迟钝。换成温和的 ease-in,一按就走。
+       (移出的 nav-char-roll 仍用 spec 曲线 —— 退场不需要跟手。) */
+    0%     { transform: translateY(0);      animation-timing-function: cubic-bezier(0.4, 0, 0.7, 0.6); }
+    49.9%  { transform: translateY(-100%); }
+    50%    { transform: translateY(100%);   animation-timing-function: cubic-bezier(0.18, 1, 0.32, 1); }
+    100%   { transform: translateY(0); }
+}
+
+/* 移出:字「滚过去」—— 向下沉出遮罩,再从上方回到原位(2026-07-28 用户定)。
+   为什么不是严格逆向:严格逆向的终点是「沉在遮罩下方、看不见」,而导航文字在非
+   hover 时必须可见,动画一结束就得跳回来,那一下硬跳比现在的瞬间复位更难看。
+   滚一圈的终点天然就是可见的原位,全程无跳变。
+   中途从 +100% 跳到 -100% 不会被看见:两端都在遮罩外,实测遮罩内/上/下三点取样
+   全为空(elementFromPoint,非几何判断)。
+   两段各用各的曲线:沉出走 spec 的 exit 曲线(ease-in,干脆离场),回落走 enter 曲线
+   (与 hover 升起同一条),读起来是同一个动作语言。
+   移出的这一段由 nav-boot.js 加 .nav-rolling 驱动 —— :hover 一撤,CSS 规则就没了。 */
+@media (hover: hover) and (min-width: 561px) {
+    body.home-v2.design-page .header.home-nav .nav-cats .nav-cat.nav-rolling .heading-rise-char,
+    body.home-v2.design-page .header.home-nav .header-connect.nav-rolling .heading-rise-char {
+        animation: nav-char-roll 360ms both;
+        animation-delay: calc(var(--i, 0) * 22ms);
+    }
+}
+@keyframes nav-char-roll {
+    0%     { transform: translateY(0);      animation-timing-function: cubic-bezier(0.7, 0, 0.84, 0); }
+    49.9%  { transform: translateY(100%); }
+    50%    { transform: translateY(-100%);  animation-timing-function: cubic-bezier(0.18, 1, 0.32, 1); }
+    100%   { transform: translateY(0); }
+}

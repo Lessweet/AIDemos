@@ -42,7 +42,9 @@ function initSiteNav() {
     var ARROW_SVG = '<svg viewBox="0 0 24 24"><path d="M5.3 18.7 L18 6 M8.1 6 H18 V15.9"/></svg>';
     var riseText = function (text, base) {
         var out = '<span class="heading-rise-mask" aria-hidden="true">';
-        for (var k = 0; k < text.length; k++) out += '<span class="heading-rise-char" style="--d:' + (base + k * 35) + 'ms">' + text[k] + '</span>';
+        /* --i = 字符序号,供顶栏 hover 的逐字上浮取 stagger(--d 含 base 偏移,取不出序号)。
+           入场动画仍走 --d,两者互不干扰。 */
+        for (var k = 0; k < text.length; k++) out += '<span class="heading-rise-char" style="--d:' + (base + k * 35) + 'ms;--i:' + k + '">' + text[k] + '</span>';
         return out + '</span>';
     };
     var riseArrow = function (base, n) {
@@ -73,6 +75,21 @@ function initSiteNav() {
             '</div>' +
         '</div>';
     initNavToggle(nav);
+    /* 顶栏三项:移出时让字「滚过去」—— 向下沉出遮罩,再从上方回到原位。
+       移入那一段是纯 CSS(:hover),但移出瞬间 :hover 规则就没了、动画跟着消失,
+       所以这一段只能靠 class 驱动。用 nav-rolling,动画播完自己摘掉。
+       连续快速划过时要能重新触发:先摘类 + 强制重排,再加回去。 */
+    Array.prototype.forEach.call(nav.querySelectorAll('.nav-cats .nav-cat, .header-connect'), function (el) {
+        el.addEventListener('mouseenter', function () { el.classList.remove('nav-rolling'); });
+        el.addEventListener('mouseleave', function () {
+            el.classList.remove('nav-rolling');
+            void el.offsetWidth;
+            el.classList.add('nav-rolling');
+        });
+        el.addEventListener('animationend', function (e) {
+            if (e.animationName === 'nav-char-roll') el.classList.remove('nav-rolling');
+        });
+    });
     /* 右上角深/浅色切换按钮:首页 / Blog / Archive 三页都有(文章详情页不放) */
     if (bd.contains('home-landing') || bd.contains('blog-page') || bd.contains('works-page')) {
         var tt = document.createElement('button');
