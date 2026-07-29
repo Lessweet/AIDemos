@@ -1326,7 +1326,7 @@ body .home-nav .header-connect {
        系数取 3.4vw 让最长的 Contact 在 1/6 槽位里留余量,不贴边溢出。 */
     font-size: clamp(13px, 3.4vw, 28px);
     font-weight: 400;            /* 任何情况下都不加粗 */
-    color: rgba(0, 0, 0, 0.3);
+    color: var(--gray-900);
     padding: 0;                  /* 文字本身不加左右内边距 */
     letter-spacing: 0;           /* 不加字间距 */
 }
@@ -1354,7 +1354,7 @@ body .home-nav .nav-cats .nav-cat.active {
     border: 0;
     border-radius: 0;
     background: transparent;
-    color: rgba(0, 0, 0, 0.3);
+    color: var(--gray-900);
     font-weight: 400;
     transition: color var(--hover-color-dur) ease;   /* hover 柔和过渡(2026-07-22) */
 }
@@ -1456,7 +1456,10 @@ body .home-nav .nav-cats .nav-cat.active {
         gap: 0;
         /* 顶部留白 = 顶栏高度 + 三页统一的 --nav-content-gap,与页面内容起点同规范;
            底色复用 --site-bg —— 首页/三页背景改 token 时,全屏菜单自动跟着变 */
-        padding: calc(var(--design-menu-top, 76px) + var(--nav-content-gap)) 24px 40px;
+        /* +64px:全屏菜单顶栏下方要比页面内容起点松两档(2026-07-28 用户定,先 +32
+           看过实机后再 +32)。加在这里而不是调 --nav-content-gap —— 那个 token 是
+           首页/Blog/Archive 三页共用的内容起点,动它会把三页一起推下去。 */
+        padding: calc(var(--design-menu-top, 76px) + var(--nav-content-gap) + 64px) 24px 40px;
         background: var(--site-bg, #f9f9f9);
         z-index: 0;                     /* 低于 logo(1)与汉堡 X(2),其余区域铺满全屏 */
         overflow-y: auto;
@@ -2307,7 +2310,7 @@ body.no-banner.theme-dark .home-nav .nav-cats .nav-cat,
 body.no-banner.theme-dark .home-nav .header-connect { color: rgba(255, 255, 255, 0.3); }
 /* 顶栏不做当前页高亮(2026-07-22 用户要求):active 与其余项同色,仅 hover 提亮。
    浅色压过前面 (0,5,1) 的 active=#000,深色直接给统一值 */
-body.design-page .home-nav .nav-cats .nav-cat.active { color: rgba(0, 0, 0, 0.3); }
+body.design-page .home-nav .nav-cats .nav-cat.active { color: var(--gray-900); }
 body.no-banner.theme-dark .home-nav .nav-cats .nav-cat,
 body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active { color: rgba(255, 255, 255, 0.3); }
 
