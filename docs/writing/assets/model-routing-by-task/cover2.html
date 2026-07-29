@@ -596,6 +596,7 @@ if(CFG.bg==='heatmap'){
   }
   window.__stepShader=function(t){draw(t,sweepAt(t));};   // 导出 GIF/MP4 逐帧驱动（光带随之循环扫）
   window.__shaderRate=SPEED;                              // t 每真实秒推进量
+  window.__shaderPeriod=HOLD+CYCLE;                       // 光带扫完一整轮的 u_time 跨度 —— GIF 导出据此录「正放无缝循环」，不用 boomerang 倒放
 })();
 }else{
 var m=makeMesh(cv,3);
