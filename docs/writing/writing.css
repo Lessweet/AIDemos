@@ -1491,7 +1491,7 @@ body .home-nav .nav-cats .nav-cat.active {
            (2026-07-28 用户实测「展开没看出来是从圆形开始,收起倒能看出来」——
            收起是同一条曲线反向用,先快后慢,末尾缩成小圆那段被拉长,所以反而看得清)。
            两端都缓的曲线让小圆多留一会儿,圆形才读得出来。 */
-        transition: clip-path var(--menu-wipe-dur) var(--ease-in-out), visibility 0s;
+        transition: clip-path var(--menu-open-dur) var(--ease-in-out), visibility 0s;
     }
     /* logo 与汉堡(X)浮在模态之上,保持可见、可点击关闭。
        header-left 必须在此显式给 z-index —— 顶栏内容的 z-index 原本只由
