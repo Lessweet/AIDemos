@@ -4004,3 +4004,26 @@ body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-le
     50%    { transform: translateY(-100%);  animation-timing-function: cubic-bezier(0.18, 1, 0.32, 1); }
     100%   { transform: translateY(0); }
 }
+
+/* ── 深色主题 + 浅底菜单:把菜单里的内容拉回深色(2026-07-28)────────────────
+   菜单与页面主题是反着来的(浅页黑菜单 / 深页浅菜单),而 theme-dark 的那批反白规则
+   (logo #fff、字标 invert(1)、三项与 active 的 rgba(255,255,255,·))是给深色页面
+   写的 —— 深色主题下菜单是浅底,不挡住就是白字/白 logo 贴浅底,整块读不出来
+   (2026-07-28 用户实测:logo、Archive 那一项与它的箭头都看不见)。
+   这是 .menu-dark 的镜像缺口:当年只写了「浅页要黑菜单」,没写「深页要浅菜单」。
+   选择器带上 :not(.menu-dark) + .nav-open,只在这个组合、且菜单展开时生效;
+   类的数量已压过 body.no-banner.theme-dark 那几条,不需要 !important。 */
+@media (max-width: 600px) {
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat.active,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .header-right .header-connect {
+        color: var(--gray-900);
+    }
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cat,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .header-connect {
+        border-top-color: rgba(0, 0, 0, 0.2);
+    }
+    /* logo 与字标浮在菜单之上(z-index 1/2),同样要回到深色 */
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open svg.site-logo { color: #101114; }
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .site-wordmark { filter: none; }
+}
