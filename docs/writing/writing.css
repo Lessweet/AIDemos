@@ -3820,7 +3820,7 @@ body.works-page.theme-dark .card-meta .card-tag { color: rgba(255, 255, 255, 0.4
     background-color: transparent;
     transition: background-color var(--hl-dur-out) ease;
 }
-.home-v2 .header.home-nav .nav-collapse .nav-cat .heading-rise-mask,
+.home-v2 .header.home-nav .nav-collapse .nav-cat > .heading-rise-mask,
 .home-v2 .header.home-nav .nav-collapse .header-connect .connect-label,
 .home-v2 .header.home-nav .nav-collapse .nav-arrow {
     transition: transform var(--hl-shift-out) ease;   /* 归位比黑块淡出快 */
@@ -3839,7 +3839,13 @@ body.works-page.theme-dark .card-meta .card-tag { color: rgba(255, 255, 255, 0.4
         background-color: var(--hl-ink);
         transition: background-color var(--hl-dur) ease;
     }
-    .home-v2 .header.home-nav .nav-collapse .nav-cat:hover .heading-rise-mask,
+    /* 必须用子选择器 > ,不能用后代:箭头内部也有一个 .heading-rise-mask
+       (riseArrow 把 SVG 包成 .nav-arrow > .heading-rise-mask > .heading-rise-char)。
+       写成后代的话,这条「文字右移 +12px」会同时命中箭头里那个 mask,与下面
+       「箭头左移 -12px」正好抵消 —— 表现为文字缩进了、箭头纹丝不动
+       (2026-07-28 用户实测「这俩箭头 hover 时没有缩进」)。
+       文字的 mask 是 .nav-cat 的直接子元素,箭头的深一层,用 > 正好隔开。 */
+    .home-v2 .header.home-nav .nav-collapse .nav-cat:hover > .heading-rise-mask,
     .home-v2 .header.home-nav .nav-collapse .header-connect:hover .connect-label {
         transform: translateX(var(--hl-shift));
         transition: transform var(--hl-shift-in) ease;
@@ -3866,7 +3872,7 @@ body.works-page.theme-dark .card-meta .card-tag { color: rgba(255, 255, 255, 0.4
         background-color: var(--hl-ink);
         transition: none;
     }
-    .home-v2 .header.home-nav .nav-collapse .nav-cat:active .heading-rise-mask,
+    .home-v2 .header.home-nav .nav-collapse .nav-cat:active > .heading-rise-mask,
     .home-v2 .header.home-nav .nav-collapse .header-connect:active .connect-label {
         transform: translateX(var(--hl-shift));
         transition: none;
@@ -3891,7 +3897,7 @@ body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-le
     background-color: var(--hl-ink);
     transition: none;
 }
-.home-v2 .header.home-nav .nav-collapse .nav-cat.nav-leaving .heading-rise-mask,
+.home-v2 .header.home-nav .nav-collapse .nav-cat.nav-leaving > .heading-rise-mask,
 .home-v2 .header.home-nav .nav-collapse .header-connect.nav-leaving .connect-label {
     transform: translateX(var(--hl-shift));
     transition: none;

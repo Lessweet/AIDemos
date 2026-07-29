@@ -124,9 +124,11 @@ function setSiteTheme(dark) {
     document.body.classList.add('theme-switching');
     setTimeout(function () { document.body.classList.remove('theme-switching'); }, 240);
     document.body.classList.toggle('theme-dark', dark);
-    /* menu-dark 不再跟着主题走:全屏菜单恒为黑底反色(2026-07-28 用户定),
-       类静态写在三页的 body 上。若在这里 toggle,用户切回浅色时会把它摘掉,
-       黑菜单当场失效。 */
+    /* menu-dark 跟着主题走:浅色主题 = 浅底菜单,深色主题 = 黑底反色菜单
+       (2026-07-28 用户定「点击深色主题切换要适配颜色,不是固定黑背景」)。
+       一度改成静态类挂在三页 body 上让菜单恒黑,那是理解错了 —— 恒黑就不会随主题
+       适配了。圆形展开与反色规则本身不受影响,它们只是在 menu-dark 在场时生效。 */
+    document.body.classList.toggle('menu-dark', dark);
     /* html 背景必须跟 body 同色:内容不满一屏 / 橡皮筋滚动时露出的是 html 底,
        只翻 body 会在页面底部留一条异色(浅色 #f2f2f2 = --site-bg,深色 #0a0a0a = --page-bg)。
        2026-07-27 底色加深时这里一度漏改(仍写旧 #f9f9f9):主题切换重绘的一两帧里
