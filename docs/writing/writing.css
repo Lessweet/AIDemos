@@ -3865,3 +3865,58 @@ body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-le
    保留布局尺寸(不塌、不触发重排)。由 usePauseOffscreenMedia 挂/摘。
    不用 display:none —— 那会让 iframe 尺寸归零,滚回来要重新布局甚至重载。 */
 .media-idle { visibility: hidden; }
+
+/* ── 顶栏三项 hover:逐字上浮(2026-07-28 用户要求)────────────────────────────
+   叠加在上面那套「反色高亮块」之上,块的规则一条没动:块负责「点亮成块」,
+   这层负责字本身的反馈。
+
+   取自 animate-text 的 bottom-up-letters:per-character、自下而上、
+   easing cubic-bezier(0.18, 1, 0.32, 1)。spec 原值(位移 46px / 逐字 88ms)是给
+   40px+ 大字设计的(usage_notes 写明),顶栏是 16px —— 位移改成 translateY(100%)
+   (= 字自身高度 24px,正好整字沉出遮罩),时长/间隔按比例收到 240ms / 22ms。
+
+   ── 上一版(34a40b7 / 67dc7aa)失败并回退,踩到的三个坑,这里逐条避开 ──
+
+   1. transform 对非替换 inline 元素无效。
+      .heading-rise-char 的 display:inline-block 写在 style.css 的
+      `.heading-rise .heading-rise-char` 里,要 .heading-rise 祖先类 —— 顶栏的 <a>
+      没有,实测顶栏里 char 是 display:inline。所以上一版的 transform 根本没生效,
+      「看不出动效」的真正原因在这里,不是时长问题。这里显式补上 inline-block。
+
+   2. overflow 对非替换 inline 元素同样无效。
+      Blog/Archive 的遮罩是 display:block(裁得住),而 Contact 的遮罩是
+      display:inline —— 实测把字推到 translateY(100%) 后,在遮罩正下方
+      elementFromPoint 取到的就是字符本身,根本没裁。所以遮罩统一规范成
+      inline-block。注意:光看几何(字顶 >= 遮罩底)会误判成「裁住了」,必须验画面。
+
+   3. 不能改动 <a> 或其子元素的盒高 —— 高亮块 ::before 的尺寸(inset: -5.44px -28px)
+      挂在 <a> 的盒子上,盒高一变三个块就高矮不一(上一版给遮罩加 line-height:1
+      正是这么崩的:Blog/Archive 24px 而 Contact 因内含 mail icon 变成 28px)。
+      本版逐项核对过基线:三项 <a> 仍是 h=24,::before 仍是 34.875px,只有 Archive
+      宽度 +0.28px(inline-block 让字形步进按整像素取整,7 个字母累积,亚像素级)。
+
+   限定 (hover: hover) + ≥561px:≤560px 这三项进全屏菜单、是整行版式;
+   触屏没有 hover 态,加了会在点击后残留。作用域与高亮块严格一致。 */
+@media (hover: hover) and (min-width: 561px) {
+    body.home-v2.design-page .header.home-nav .nav-cats .nav-cat .heading-rise-mask,
+    body.home-v2.design-page .header.home-nav .header-connect .heading-rise-mask {
+        display: inline-block;   /* 见坑 2:inline 裁不住 */
+        overflow: hidden;
+        vertical-align: top;
+    }
+    body.home-v2.design-page .header.home-nav .nav-cats .nav-cat .heading-rise-char,
+    body.home-v2.design-page .header.home-nav .header-connect .heading-rise-char {
+        display: inline-block;   /* 见坑 1:inline 上 transform 无效 */
+    }
+    body.home-v2.design-page .header.home-nav .nav-cats .nav-cat:hover .heading-rise-char,
+    body.home-v2.design-page .header.home-nav .header-connect:hover .heading-rise-char {
+        animation: nav-char-rise 240ms cubic-bezier(0.18, 1, 0.32, 1) both;
+        animation-delay: calc(var(--i, 0) * 22ms);
+    }
+}
+/* 纯遮罩揭示,不带 opacity 淡入 —— 淡入会把「升起」冲淡成「渐显」,
+   spec 也要求「Letters never blur during enter or exit」。 */
+@keyframes nav-char-rise {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+}
