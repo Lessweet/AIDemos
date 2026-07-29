@@ -2597,6 +2597,16 @@ body.works-page.theme-dark .home-nav .theme-toggle { background: #1A1A1A; }
     .home-v2 .header.home-nav .nav-toggle { background: #fff; border-radius: 50%; }
     body.no-banner.theme-dark .header.home-nav .nav-toggle,
     body.menu-dark .header.home-nav.nav-open .nav-toggle { background: #1A1A1A; }
+    /* 主题切换键跟着一起反色。它原先只在 body.theme-dark 下反色,而 .menu-dark 的
+       前提是「白底页也可能要黑菜单」—— 那种组合下它仍是白圆 + 深图标,黑菜单里
+       就剩它一个白点,与旁边已经变深的关闭键对不上(2026-07-28 用户实测)。
+       取值与 nav-toggle / theme-dark 下的主题键完全一致:圆底 #1A1A1A、
+       图标 rgb(152,152,152)(= 55% 白在 #1A1A1A 上的等效色)、hover 转纯白。 */
+    body.menu-dark .header.home-nav.nav-open .theme-toggle {
+        background: #1A1A1A;
+        color: rgb(152, 152, 152);
+    }
+    body.menu-dark .header.home-nav.nav-open .theme-toggle:hover { color: #fff; }
 }
 /* 主题切换按钮双 icon:浅色显示太阳,深色显示月亮(2026-07-22) */
 /* 月牙两个尖角用圆头圆角(2026-07-22 用户要求,覆盖 icon 规范的 butt/miter —— 
