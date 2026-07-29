@@ -4030,6 +4030,17 @@ body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-le
     body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .header-connect {
         border-top-color: rgba(0, 0, 0, 0.2);
     }
+    /* 上面那条「拉回深色」写满了 8 个类,压过了 hover 的纸色规则(7 类)——
+       于是 hover 时黑块上的字仍是深色,贴在块上看不见(2026-07-28 用户实测
+       「文字没反色」)。这里补同等级的 hover / active / 离场变体,让它回到纸色。
+       :not(.menu-dark) 保证只作用于「深色主题 + 浅底菜单」这一种组合。 */
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat:hover,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat:active,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat.nav-leaving,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .header-right .header-connect:hover,
+    body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .header-right .header-connect:active {
+        color: var(--hl-paper);
+    }
     /* logo 与字标浮在菜单之上(z-index 1/2),同样要回到深色 */
     body.theme-dark:not(.menu-dark) .header.home-nav.nav-open svg.site-logo { color: #101114; }
     body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .site-wordmark { filter: none; }
