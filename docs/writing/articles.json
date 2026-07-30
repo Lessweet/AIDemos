@@ -1,6 +1,21 @@
 {
   "articles": [
     {
+      "slug": "config-2026-visual-identity",
+      "title": "品牌设计师的材质，是自己写的工具",
+      "date": "2026-07-30",
+      "read_time": "8 分钟",
+      "tags": [
+        "参数化材质",
+        "品牌视觉系统"
+      ],
+      "cat": "ui",
+      "accent": "#1AA85A",
+      "collection": "Figma 观察",
+      "excerpt": "我调 Figma 预设 shader 卡在参数改不动，Mesh gradient 固定 16 个颜色点、3D-to-2D perspective 不能 K 帧。Figma 品牌团队做 Config 2026 视觉时干脆在 Figma Make 里现搭了三个材质工具，还写了个 dithering 工具处理上百张讲者头像。把重复的那一层做成工具，一次调试换掉几百次抽卡。",
+      "cover": "assets/config-2026-visual-identity/cover.png"
+    },
+    {
       "slug": "model-routing-by-task",
       "title": "AI 产品的模型决策交互，最好的形态可能是没有交互",
       "date": "2026-07-26",
