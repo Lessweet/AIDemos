@@ -1,6 +1,20 @@
 {
   "articles": [
     {
+      "slug": "figma-make-properties-panel",
+      "title": "Prompt 不够用的时候属性面板来补",
+      "date": "2026-07-31",
+      "read_time": "7 分钟",
+      "tags": [
+        "AI 设计工具"
+      ],
+      "cat": "product",
+      "accent": "#2E86B8",
+      "collection": "Figma 观察",
+      "excerpt": "Figma Make 的属性面板把精确编辑从 prompt 里拎出来了；暂存再扣分的机制把试错和消费拆开了，比面板本身更值得注意。但只对新建文件生效，存量项目全被挡在外面。",
+      "cover": "assets/figma-make-properties-panel/cover.png"
+    },
+    {
       "slug": "config-2026-visual-identity",
       "title": "品牌设计师的材质，是自己写的工具",
       "date": "2026-07-30",
@@ -10,7 +24,7 @@
         "品牌视觉系统"
       ],
       "cat": "ui",
-      "accent": "#1AA85A",
+      "accent": "#1693B6",
       "collection": "Figma 观察",
       "excerpt": "我调 Figma 预设 shader 卡在参数改不动，Mesh gradient 固定 16 个颜色点、3D-to-2D perspective 不能 K 帧。Figma 品牌团队做 Config 2026 视觉时干脆在 Figma Make 里现搭了三个材质工具，还写了个 dithering 工具处理上百张讲者头像。把重复的那一层做成工具，一次调试换掉几百次抽卡。",
       "cover": "assets/config-2026-visual-identity/cover.png"
