@@ -14,7 +14,7 @@
 <script src="writing.js?v=85"></script>
 </head>
 <!-- 复用首页 index.html 的胶囊顶栏:home-v2 控制顶栏内边距,design-page 提供胶囊样式 -->
-<body class="writing-page home-v2 design-page reading-page" data-accent="#1AA85A" data-tint="mint">
+<body class="writing-page home-v2 design-page reading-page" data-accent="#1693B6" data-tint="blue">
 <!-- 顶部导航:与首页同一个组件(initSiteNav);data-base="../" 把站内链接/资源指回 docs 根目录。
          返回入口 = 左侧 VIBEUX 与高亮的 Writing 胶囊,均回到 index.html#writing -->
 <header class="header home-nav" data-active="writing" data-base="../" id="site-nav"></header>
@@ -58,7 +58,7 @@
 .article-byline { text-align: center; justify-content: center; }
 .article-body { color: #1a1a1a; line-height: 1.4; }
 .article-body p { font-size: var(--fs-body); font-weight: 300; margin: 40px 0; color: #1a1a1a; }
-.article-body strong { font-weight: 400; color: #1AA85A; }
+.article-body strong { font-weight: 400; color: #1693B6; }
 .article-body .list-dot { font-weight: 600; margin-right: 4px; color: #1a1a1a; }
 .article-body .section-head { text-align: center; margin: 56px 0; }
 /* 图标居中：svg display:block + margin auto，别改回 vertical-align/line-height/padding（微信按基线对齐会贴底、border-box 下 padding 挤小图标）。跟 template.html 保持一致。详见记忆 wechat-icon-vertical-center。 */
@@ -70,7 +70,7 @@
 .article-body .img-ph { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 160px; margin: 24px 0; padding: 28px 20px; border: 1px dashed #d6d6de; border-radius: 12px; background: repeating-linear-gradient(45deg, #fafafb, #fafafb 10px, #f3f3f6 10px, #f3f3f6 20px); }
 .article-body .img-ph .img-ph-cap { font-size: var(--fs-caption); color: #9a9aa6; line-height: 1.5; max-width: 80%; }
 .article-body .highlight { font-size: var(--fs-body); font-weight: 300; line-height: 1.4; color: #1a1a1a; margin: 40px 0; }
-.article-body .highlight strong { font-weight: 400; color: #1AA85A; }
+.article-body .highlight strong { font-weight: 400; color: #1693B6; }
 
 /* outlined 图标动画 CSS（自动从 design-gallery 抽取，不要手改） */
 /* 时长/延迟变量（在 design-gallery 基础上整体提速 ~40%，文章里看着更精神） */
@@ -492,7 +492,7 @@
 <rect fill="#7E6BEE" height="21" rx="8" width="21" x="29" y="29">
 <animateTransform attributeName="transform" dur="1.9s" keyTimes="0;0.15;0.4;0.6;0.85;1" repeatCount="indefinite" type="translate" values="0 0;0 0;5 5;5 5;0 0;0 0"></animateTransform>
 </rect>
-</g></g></svg></span><h2 style="color: #1AA85A;">我调预设材质最后卡在参数改不动</h2></div>
+</g></g></svg></span><h2 style="color: #1693B6;">我调预设材质最后卡在参数改不动</h2></div>
 <p>Motion 那边的体验要好得多，把一段调好的 Scale 动效配合 Variants，一次就套到首页、心、文档、头像这一整组图标上，动效在我这儿终于像组件一样能复用了。可材质这条线上，我能动的只有别人替我留好的那几个滑杆。<strong>预设给的是一套已经收敛过的参数范围</strong>，超出这个范围的想法，滑杆上根本没有对应的位置。我那时候的打算就是等 Agent 到位，再自己创建趁手的工具。</p>
 <p>Figma 自己的品牌团队做 Config 2026 这套视觉，走的就是这条路，他们根本没碰预设。6 月 23 到 25 日的 Config 在旧金山 Moscone Center 办，从玻璃幕墙到讲者头像到线下装置，整套视觉背后是他们自己搭的几个小工具。</p>
 <img alt="Config 讲者预告动画：glyph 方块不断增殖，再被颗粒线条重写一遍" src="assets/config-2026-visual-identity/speaker-launch.gif"/><div class="img-caption">Config 讲者预告动画：glyph 方块不断增殖，再被颗粒线条重写一遍</div>
@@ -513,7 +513,7 @@
 <animateTransform attributeName="transform" dur="1.9s" keyTimes="0;0.1;0.32;0.44;0.56;0.66;1" repeatCount="indefinite" type="translate" values="0 0;0 0;0 -10;0 -10;0 2;0 -0.8;0 0"></animateTransform>
 </path>
 </g>
-</g></g></svg></span><h2 style="color: #1AA85A;">三套材质是他们在 Figma Make 里现搭工具做出来的</h2></div>
+</g></g></svg></span><h2 style="color: #1693B6;">三套材质是他们在 Figma Make 里现搭工具做出来的</h2></div>
 <p>Brand Studio 的创意主导是品牌设计师 Chelsea White，她给这套视觉定的三条线是演化、流动、和谐，说白了就是想法可以被反复混剪重做，起点可以随便挑、在设计和代码之间来回绕，以及用生成工具做探索的时候别把人的判断丢掉。</p>
 <p>为了做出那种和 AI 合作时才会出现的意外感，团队反过来用 AI 搭工具。他们在 Figma Make 里做了几个工具，先把想要的那种粗糙效果固定下来，最后收敛出三套核心材质，潦草线条、模糊渐变、椭圆颗粒。工具做好之后往里喂图，出来的构成就带着手绘的意外。"在这样一个工具能让我们自动化更多、做出更完美视觉的时代，我们反而想珍惜一点不完美的痕迹，"品牌设计师 Maria Chimishkyan 说。</p>
 <p>这句话要是只停在理念上，我不会太当真。他们顺手做的第二件事更能说明问题，一个 dithering 工具，把上百张讲者头像一次性处理成统一的抖动网点效果，省掉几个小时的重复劳动。品牌设计师 Deanna Sperrazza 的说法是，这个效果有一种细密的点彩感，带着手工的温度，同时又明显是被代码算出来的。</p>
@@ -531,7 +531,7 @@
 <animateTransform attributeName="transform" dur="1.3s" keyTimes="0;1" repeatCount="indefinite" type="translate" values="0 0;-12 0"></animateTransform>
 <path d="M-16 32 Q-13 18 -10 32 T-4 32 T2 32 T8 32 T14 32 T20 32 T26 32 T32 32 T38 32 T44 32 T50 32 T56 32 T62 32 T68 32 T74 32 T80 32 T86 32 T92 32" fill="none" stroke="#FA6E52" stroke-linecap="round" stroke-width="3"></path>
 </g>
-</g></g></svg></span><h2 style="color: #1AA85A;">动效和静态两条线并行推进</h2></div>
+</g></g></svg></span><h2 style="color: #1693B6;">动效和静态两条线并行推进</h2></div>
 <p>这套视觉里我最认可的做法在动效环节。团队没有先把静态视觉定稿再丢给动效，两条线是并行做的。"这是一种很舒服的来回，"品牌动效设计师 Ben Hill 说，"动效影响设计，设计也影响动效。"有个细节能说明问题，他们第一次看到一个早期 glyph 动起来时是个恍然大悟的时刻，那个构成其实很简单，但那种粗糙和意料之外让他们确定方向是对的。</p>
 <p>Ben 的原话是，他们本来完全可以退回到干净利落的 glyph 动画，但最后让所有元素都更松、更拼贴、更有表达欲，这种带立场的感觉是 Figma 独有的。开幕 keynote 那支片子是和动效工作室 Relay 一起做的，glyph 和材质在里面穿线、堆叠、循环，最后一路冲出画框。</p>
 <img alt="Relay 做的开幕 keynote 动画，glyph 和材质穿线堆叠，一路冲出画框" src="assets/config-2026-visual-identity/keynote.gif"/><div class="img-caption">Relay 做的开幕 keynote 动画，glyph 和材质穿线堆叠，一路冲出画框</div>
@@ -546,7 +546,7 @@
 <circle cx="-9" cy="-9" r="11"></circle><circle cx="9" cy="-9" r="11"></circle>
 <circle cx="-9" cy="9" r="11"></circle><circle cx="9" cy="9" r="11"></circle>
 </g>
-</g></g></svg></span><h2 style="color: #1AA85A;">线下装置让人亲手操作品牌自己的工具</h2></div>
+</g></g></svg></span><h2 style="color: #1693B6;">线下装置让人亲手操作品牌自己的工具</h2></div>
 <p>落到三维，团队用的主材是挤出泡沫，够轻、也容易做出想要的质感和形状。Maria 提到一个取舍，你会以为一条不完美线稿的三维版本是空间里的一根铁丝，但如果它其实是被厚厚地挤出来的呢。一组超大号的挤出 glyph 就挂在 Moscone 大堂，她形容那是一个把整套视觉理念全装进去的、形式上放纵又好玩的时刻。</p>
 <img alt='挂在中庭的挤出泡沫 glyph，斜切口是"人与机器"那条线的手法' src="assets/config-2026-visual-identity/atrium-foam.jpg"/><div class="img-caption">挂在中庭的挤出泡沫 glyph，斜切口是"人与机器"那条线的手法</div>
 <p>现场几个装置的思路很一致，都是把 Figma 里的工具搬到手上。Play Canvas 是一块巨型数字画布，配放大版的 Figma Draw 工具让人随手涂；Shared Frequency 是一个 Figma Make 原型装进实体 kiosk，两个人把手按在上面，Make 就用 Config 视觉里的圆点生成一张独一无二的图案打印出来；Collage Remixer 用旋钮和滑杆控制屏幕上的 glyph 和材质，Deanna 说那是一种很有触感的操作方式，逻辑跟在 Figma 里调 components 和 dynamic strokes 一样。还有一面 Particle Pins 针阵装置，纯手动、纯感官，一点数字成分都没有。</p>
@@ -555,14 +555,14 @@
 <p>音频交给了伦敦的 Sounds Like These，三首曲子各表达一种创作状态，软胶唱片上那版叫 Music for Making，Spotify 上那张叫 Open, Connect, Feel；讲者上台的走场音乐更利落有劲，软胶唱片这版更古怪、更氛围。官方还在 Figma Community 放了一套数字海报包，图形是有限的，排法随你。</p>
 <img alt="Config 官网也是同一套逻辑，logo 由颗粒现场拼出来" src="assets/config-2026-visual-identity/website.gif"/><div class="img-caption">Config 官网也是同一套逻辑，logo 由颗粒现场拼出来</div>
 <p>这套做法对我的实际影响是，我不再指望预设能给到最后那点质感。Config 视觉里真正难复制的部分，是那三个只为这一场活动存在的材质工具，做完就可以扔掉。Agent 现在到位了，我打算先把自己那套图标的材质规则写成一个工具试试。</p>
-<p style="display:flex; align-items:center; margin:40px 0;"><span style="flex:1 1 auto;height:1px;background:#1AA85A;opacity:0.35;font-size:0;line-height:0;overflow:hidden;"></span><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" fill="#1AA85A" r="4.3"></circle></svg><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><polygon fill="#1AA85A" points="8,3.50 4.10,10.25 11.90,10.25"></polygon></svg><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><polygon fill="#1AA85A" points="8,3.20 9.18,6.38 12.57,6.52 9.90,8.62 10.82,11.88 8,10.00 5.18,11.88 6.10,8.62 3.44,6.52 6.82,6.38"></polygon></svg><span style="flex:1 1 auto;height:1px;background:#1AA85A;opacity:0.35;font-size:0;line-height:0;overflow:hidden;"></span></p>
+<p style="display:flex; align-items:center; margin:40px 0;"><span style="flex:1 1 auto;height:1px;background:#1693B6;opacity:0.35;font-size:0;line-height:0;overflow:hidden;"></span><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" fill="#1693B6" r="4.3"></circle></svg><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><polygon fill="#1693B6" points="8,3.50 4.10,10.25 11.90,10.25"></polygon></svg><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><polygon fill="#1693B6" points="8,3.20 9.18,6.38 12.57,6.52 9.90,8.62 10.82,11.88 8,10.00 5.18,11.88 6.10,8.62 3.44,6.52 6.82,6.38"></polygon></svg><span style="flex:1 1 auto;height:1px;background:#1693B6;opacity:0.35;font-size:0;line-height:0;overflow:hidden;"></span></p>
 <p>Figma 品牌设计师 Chelsea White 在 blog 结尾的一段话，我觉得是这套视觉真正的落点：</p>
 <p>现在是一个让人兴奋的时刻，不同的想法、媒介、学科和人，能在一个非线性的过程里汇到一起。这套视觉识别很坦然地在为那些让它成立的数字工具庆祝，但它用的手法是不完美的，带着一种让人耳目一新的人味。</p>
-<p style="display:flex; align-items:center; margin:40px 0;"><span style="flex:1 1 auto;height:1px;background:#1AA85A;opacity:0.35;font-size:0;line-height:0;overflow:hidden;"></span><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" fill="#1AA85A" r="4.3"></circle></svg><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><polygon fill="#1AA85A" points="8,3.50 4.10,10.25 11.90,10.25"></polygon></svg><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><polygon fill="#1AA85A" points="8,3.20 9.18,6.38 12.57,6.52 9.90,8.62 10.82,11.88 8,10.00 5.18,11.88 6.10,8.62 3.44,6.52 6.82,6.38"></polygon></svg><span style="flex:1 1 auto;height:1px;background:#1AA85A;opacity:0.35;font-size:0;line-height:0;overflow:hidden;"></span></p>
+<p style="display:flex; align-items:center; margin:40px 0;"><span style="flex:1 1 auto;height:1px;background:#1693B6;opacity:0.35;font-size:0;line-height:0;overflow:hidden;"></span><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" fill="#1693B6" r="4.3"></circle></svg><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><polygon fill="#1693B6" points="8,3.50 4.10,10.25 11.90,10.25"></polygon></svg><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><polygon fill="#1693B6" points="8,3.20 9.18,6.38 12.57,6.52 9.90,8.62 10.82,11.88 8,10.00 5.18,11.88 6.10,8.62 3.44,6.52 6.82,6.38"></polygon></svg><span style="flex:1 1 auto;height:1px;background:#1693B6;opacity:0.35;font-size:0;line-height:0;overflow:hidden;"></span></p>
 <p>本文 Config 2026 视觉识别的案例、图片、动图与引语来自 Figma 官方博客 Digital tools, human expression: The visual identity behind Config 2026；Figma 预设 shader 与 Motion 的实操过程为本人尝试。</p></div>
 <!-- 底部 -->
 <footer class="article-footer">
-<div class="same-collection"><div class="sc-title">合集 · Figma 观察</div><a href="article-figma-config-2026.html"><span class="sc-num">01</span><span>设计师被 AI 替代之前，Figma 用一整套新功能抬高设计师上限</span></a><a href="article-figma-shader-motion.html"><span class="sc-num">02</span><span>在设计系统里，Figma Shader 和 Motion ，正从效果变成可复用元素</span></a><a href="article-figma-make-gpt-5-6.html"><span class="sc-num">03</span><span>设计师的新习惯，给 AI 模型分工</span></a><a href="article-figma-make-designer-pr.html"><span class="sc-num">04</span><span>AI native 设计师的交付物，不只设计稿，还有 GitHub PR</span></a><a href="article-config-2026-visual-identity.html"><span class="sc-num">05</span><span>品牌设计师的材质，是自己写的工具</span></a></div>
+<div class="same-collection"><div class="sc-title">合集 · Figma 观察</div><a href="article-figma-config-2026.html"><span class="sc-num">01</span><span>设计师被 AI 替代之前，Figma 用一整套新功能抬高设计师上限</span></a><a href="article-figma-shader-motion.html"><span class="sc-num">02</span><span>在设计系统里，Figma Shader 和 Motion ，正从效果变成可复用元素</span></a><a href="article-figma-make-gpt-5-6.html"><span class="sc-num">03</span><span>设计师的新习惯，给 AI 模型分工</span></a><a href="article-figma-make-designer-pr.html"><span class="sc-num">04</span><span>AI native 设计师的交付物，不只设计稿，还有 GitHub PR</span></a><a href="article-config-2026-visual-identity.html"><span class="sc-num">05</span><span>品牌设计师的材质，是自己写的工具</span></a><a href="article-figma-make-properties-panel.html"><span class="sc-num">06</span><span>Figma Make 终于推出了属性面板和画布标注</span></a></div>
 </footer>
 </article>
 </div>
