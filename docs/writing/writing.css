@@ -769,14 +769,13 @@ body.reading-page .article-eyebrow-top .a-tag {
 }
 
 .article-h1 {
-    /* 字号随视口流动(窄屏自动缩小,减少折行);text-wrap: balance 让多行更均衡,避免末行只剩一个字 */
+    /* 自然折行:第一行吃满整宽再换行(用户定 2026-08-03,废除 text-wrap: balance 的两行均分) */
     font-size: var(--fs-h1);   /* 大标题 48px(桌面/手机统一) */
     font-weight: var(--fw-bold);
     line-height: 1.4;
     color: var(--gray-900);
     margin: 0 0 22px;   /* 标题下方间距 ×1.6 */
     letter-spacing: -0.01em;
-    text-wrap: balance;
 }
 
 .article-byline {
@@ -811,8 +810,11 @@ body.reading-page .article-eyebrow-top .a-tag {
    18px 左对齐自然折行,详情标题居中 + <br> 强制换行的话,morph 中间态会出现「一行字
    正在裂成两行」的错乱;两端都左对齐 + 自然折行后,就只剩字号差异(18 → 36),
    可以用 scale 平滑过渡。 */
-body.reading-page .article-h1 { text-align: left; }
-body.reading-page .article-byline { text-align: left; justify-content: flex-start; }
+/* 标题组整体居中(用户定 2026-08-03,覆盖上面 07-27 的左对齐决定):
+   H1 排版宽 70% 且盒子居中,eyebrow / byline 两组同样居中。 */
+body.reading-page .article-h1 { text-align: center; max-width: calc(var(--reading-col) * 0.7); margin-left: auto; margin-right: auto; }
+body.reading-page .article-byline { text-align: center; justify-content: center; }
+body.reading-page .article-eyebrow { text-align: center; justify-content: center; }
 /* 标题的自然折行由 ArticlePage 在渲染后把 <br/> 还原成「,」实现 —— 不能用 CSS
    屏蔽 br:fragment 里的 <br/> 是「顶替逗号」而非额外换行(源标题「验证循环,把手动
    检查写进 Skill」被写成「验证循环<br/>把手动检查写进 Skill」),display:none 会
