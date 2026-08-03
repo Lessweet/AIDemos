@@ -10,10 +10,10 @@
         "设计系统"
       ],
       "cat": "ui",
-      "accent": "#B8730E",
+      "accent": "#1E8FBF",
       "collection": "",
       "excerpt": "视觉决策前置到 token，使用规则显式化成契约，agent 手里只剩组装；7 天 330 个提交跑下来，真实环境的失控让我确定单人走不了 A2UI 那条路。",
-      "cover": "assets/genui-no-style-to-write/cover4.png"
+      "cover": "assets/genui-no-style-to-write/cover5.png"
     },
     {
       "slug": "claude-code-verification-loops",
