@@ -1,10 +1,10 @@
 <!-- posters 封面（20260801 GenUI建站实录）：封底 = 实验八贴缝颗粒绸带（Grok 风，黑蓝 PAL），
      mesh shader 5 色点 + 贴缝颗粒叠层，与 glass-hero bg:'black' 同构；排版 = 三图对角，c2 加大 530。
-     参数：SEED=62.1 FREEZE=18.4 DIST=0.5 SWIRL=0.4 GSEED=0.71 -->
+     参数：SEED=33.3 FREEZE=51.0 DIST=0.45 SWIRL=0.33 GSEED=0.52 -->
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
 *{margin:0;padding:0;box-sizing:border-box;}
-.wrap{position:fixed;inset:0;overflow:hidden;background:#06010f;}
+.wrap{position:fixed;inset:0;overflow:hidden;background:#030303;}
 #sh{position:absolute;inset:0;width:100%;height:100%;display:block;}
 .stage{position:absolute;left:50%;top:50%;width:1080px;height:460px;transform:translate(-50%,-50%);transform-origin:center center;}
 
@@ -30,7 +30,7 @@ fit();addEventListener('resize',fit);})();
 <script>
 // ===== mesh shader（与 glass-hero hero.html makeMesh 同构，5 色点）=====
 var FREEZE=null;
-var CFG={seed:62.1,dist:0.5,swirl:0.4};
+var CFG={seed:33.3,dist:0.45,swirl:0.33};
 var cv=document.getElementById('sh');
 function makeMesh(cv,n){
   var gl=cv.getContext('webgl2',{antialias:false,premultipliedAlpha:false,preserveDrawingBuffer:true});
@@ -75,8 +75,8 @@ function makeMesh(cv,n){
 }
 // ===== 贴缝颗粒绸带（实验八）：黑蓝 PAL，颗粒四参 = 实验八定稿 =====
 (function(){
-  var COLORS=['#06010f','#0a0c22','#040410','#4771f0','#050717'];   // 黑蓝（4 近黑域 + 1 宝蓝主色槽）
-  var BASE=0.035,K=0.7,MID=0.6,SIZE=1.2,GSEED=0.71;
+  var COLORS=['#030303','#0e0e0e','#050505','#7a7a7a','#080808'];   // 黑白 PAL（gen.mjs seamColors 无彩版：4 近黑灰域 + 1 银灰主槽）
+  var BASE=0.09,K=1.1,MID=0.6,SIZE=1.2,GSEED=0.52;
   var m=makeMesh(cv,5);
   m.setColors(COLORS);
   m.setParams({dist:CFG.dist,swirl:CFG.swirl,grain:0,seed:CFG.seed});
@@ -135,7 +135,7 @@ function makeMesh(cv,n){
     render(FREEZE);
     new ResizeObserver(function(){render(FREEZE);}).observe(cv);
   }else{
-    var st=18.4,last=performance.now();   // 动态起始时刻对齐 FREEZE，静/动同画面
+    var st=51.0,last=performance.now();   // 动态起始时刻对齐 FREEZE，静/动同画面
     var frame=function(now){var dt=Math.min(0.05,(now-last)/1000);last=now;st+=dt*0.9;
       render(st);requestAnimationFrame(frame);};
     new ResizeObserver(function(){render(st);}).observe(cv);
