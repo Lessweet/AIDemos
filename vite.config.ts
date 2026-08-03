@@ -9,10 +9,11 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, 'site');
 const DOCS = resolve(__dirname, 'docs');
 
-/* 13 篇文章 slug(与 docs/writing/article-<slug>.html 一一对应) */
+/* 14 篇文章 slug(与 docs/writing/article-<slug>.html 一一对应) */
 const ARTICLE_SLUGS = [
   'app-shape-for-ai',
   'claude-code-verification-loops',
+  'genui-no-style-to-write',
   'figma-agent',
   'figma-config-2026',
   'figma-make-designer-pr',

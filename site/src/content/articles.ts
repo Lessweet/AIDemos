@@ -38,6 +38,25 @@ export interface ArticleMeta {
 
 export const ARTICLES: ArticleMeta[] = [
   {
+    slug: 'genui-no-style-to-write',
+    file: 'article-genui-no-style-to-write.html',
+    title: '跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线',
+    date: '2026-08-02',
+    readTime: '6 分钟',
+    tags: ['GenUI', '设计系统'],
+    cat: 'ui',
+    accent: '#1C1B1B',
+    collection: '',
+    excerpt:
+      '视觉决策前置到 token，使用规则显式化成契约，agent 手里只剩组装；7 天 330 个提交跑下来，真实环境的失控让我确定暂时走不了 A2UI 那条路。',
+    listCover: 'assets/genui-no-style-to-write/cover5.png',
+    cardCover: 'assets/cards/genui-no-style-to-write.webp',
+    inBlogGrid: true,
+    blogTag: 'GenUI',
+    blogDelay: 550,
+    blogCover: { type: 'iframe', src: 'writing/assets/genui-no-style-to-write/cover5.html' },
+  },
+  {
     slug: 'claude-code-verification-loops',
     file: 'article-claude-code-verification-loops.html',
     title: '验证循环，把手动检查写进 Skill',

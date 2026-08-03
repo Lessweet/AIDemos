@@ -8,6 +8,7 @@ import figma_make_gpt_5_6 from './fragments/figma-make-gpt-5-6.reading.html?raw'
 import figma_shader_motion from './fragments/figma-shader-motion.reading.html?raw';
 import figma_skills from './fragments/figma-skills.reading.html?raw';
 import genie from './fragments/genie.reading.html?raw';
+import genui_no_style_to_write from './fragments/genui-no-style-to-write.reading.html?raw';
 import remove_ai_taste_in_design from './fragments/remove-ai-taste-in-design.reading.html?raw';
 import review_ai_output from './fragments/review-ai-output.reading.html?raw';
 import sparkle from './fragments/sparkle.reading.html?raw';
@@ -23,6 +24,7 @@ export const FRAGMENTS: Record<string, string> = {
   "figma-shader-motion": figma_shader_motion,
   "figma-skills": figma_skills,
   "genie": genie,
+  "genui-no-style-to-write": genui_no_style_to_write,
   "remove-ai-taste-in-design": remove_ai_taste_in_design,
   "review-ai-output": review_ai_output,
   "sparkle": sparkle,
