@@ -2,7 +2,7 @@
   "articles": [
     {
       "slug": "genui-no-style-to-write",
-      "title": "我跳过 Figma 直接用 GenUI 做设计，并且跑通上线了",
+      "title": "跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线",
       "date": "2026-08-02",
       "read_time": "6 分钟",
       "tags": [

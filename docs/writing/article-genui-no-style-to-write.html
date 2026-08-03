@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>我跳过 Figma 直接用 GenUI 做设计，并且跑通上线了 · VibeUX</title>
+<title>跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线 · VibeUX</title>
 <link href="../favicon.png?v=12" rel="icon" type="image/png"/>
 <link href="../favicon.png?v=12" rel="shortcut icon"/>
 <link href="../apple-touch-icon.png?v=12" rel="apple-touch-icon"/>
@@ -47,7 +47,7 @@
 </aside>
 <!-- 正文 -->
 <article class="article-reading">
-<h1 class="article-h1">我跳过 Figma 直接用 GenUI 做设计<br/>并且跑通上线了</h1>
+<h1 class="article-h1">跳过 Figma 直接用 GenUI 做设计<br/>踩了一路坑<br/>也跑通了上线</h1>
 <div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-tag">GenUI</span></div><span>2026-08-02</span><span>阅读约 6 分钟</span></div>
 <div class="article-cover"><iframe loading="lazy" src="assets/genui-no-style-to-write/cover5.html"></iframe></div>
 <div class="article-body"><style>
@@ -497,7 +497,7 @@
 <p>整个过程比较花时间的就是一一校验、对应 token 和样式，要把每个 token 和站点内的元素对应，所以我才内嵌了设计系统看板，一是可以实时改样式，二是还能确保 token 是真实有效的。第一个下午就创建了约 50 个提交、14 条裁决（裁决主要是旧版和新版对不上的需要删减），其实仍然是在<strong>维护设计规范，只是格式从 Figma 的画板转变成了 token MD文档和看板</strong>，差别在于真实环境的问题更加明显、逃不了。</p>
 <img alt="站点内嵌的 GenUI 看板实景" src="assets/genui-no-style-to-write/03-dock-看板并排调token.png"/><div class="img-caption">站点内嵌的 GenUI 看板实景</div>
 <p>设计 token 看板的代价是我现在维护着两套：可视化的看板和底层的 token 逻辑。有改动的话，是先改看板，再验证代码那边是不是对齐了，OK 了就 合并提交到 main。其中大部分精力花在看板管理上，自我校验对齐交给 Claude 来，从设计 → 开发 → 上线全流程还是 AI agent 执行、人工校验的角色定位。</p>
-<div class="section-head"><span class="icon-badge" style="background: transparent; border: 1.5px solid #E4E4E4; box-sizing: border-box;"><svg fill="none" height="32" viewBox="0 0 24 24" width="32" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1.33333)"><path d="M4.445,15.227l5.64-5.641c.781-.781,2.047-.781,2.828,0l2.336,2.336" fill="none" stroke="#1C1B1B" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path><rect fill="none" height="12.5" rx="2" ry="2" stroke="#1C1B1B" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" width="12.5" x="2.75" y="2.75"></rect><path d="M9.158,6.508l-1.263-.421-.421-1.263c-.137-.408-.812-.408-.949,0l-.421,1.263-1.263,.421c-.204,.068-.342,.259-.342,.474s.138,.406,.342,.474l1.263,.421,.421,1.263c.068,.204,.26,.342,.475,.342s.406-.138,.475-.342l.421-1.263,1.263-.421c.204-.068,.342-.259,.342-.474s-.138-.406-.342-.474Z" fill="#1C1B1B"></path></g></svg></span><h2 style="color: #1C1B1B;">用搭好的设计系统<br/>生成新的一致性页面</h2></div>
+<div class="section-head"><span class="icon-badge" style="background: transparent; border: 1.5px solid #E4E4E4; box-sizing: border-box;"><svg fill="none" height="32" viewBox="0 0 24 24" width="32" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1.33333)"><path d="M4.445,15.227l5.64-5.641c.781-.781,2.047-.781,2.828,0l2.336,2.336" fill="none" stroke="#1C1B1B" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path><rect fill="none" height="12.5" rx="2" ry="2" stroke="#1C1B1B" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0" width="12.5" x="2.75" y="2.75"></rect><path d="M9.158,6.508l-1.263-.421-.421-1.263c-.137-.408-.812-.408-.949,0l-.421,1.263-1.263,.421c-.204,.068-.342,.259-.342,.474s.138,.406,.342,.474l1.263,.421,.421,1.263c.068,.204,.26,.342,.475,.342s.406-.138,.475-.342l.421-1.263,1.263-.421c.204-.068,.342-.259,.342-.474s-.138-.406-.342-.474Z" fill="#1C1B1B"></path></g></svg></span><h2 style="color: #1C1B1B;">用搭好的设计系统<br/>生成新的一致性页面</h2></div>
 <p>要检验 GenUI design system 是否可行、是否可靠，我觉得首要的、也是最底层的就是生成新页面是不是在一个设计体系下、细节处理的到不到位、遇到未设定的边界是否推理后也能生成高质量的结果。</p>
 <p>于是，我就开始新建一个 showcase 信息流，主要是收集设计工作室、个人设计师和 AI 公司的作品，做一个以图为主的 Showcase Feed。我发给 Claude 的还是一段很直白的需求："我现在想新增另一个频道，搜集 AI 设计、设计工作室、个人设计师的作品，大概先分为几类吧，Feed 卡片以大横图为主、展示官网首页首屏、下方展示 3*2 的代表作或官网截图，你觉得怎么弄，先规划。"我看了Claude 的文字版规划之后就开始执行了。</p>
 <p>这一次的生成质量就是我认为可以到 90% ，中间也有反复，基本围绕封面展示问题，我后面几轮简单对话，调整适配问题后，单个卡片图片展示规则 16:9 首屏大图加 3×2 六宫格的效果还是很可以的，我觉得最不可控的就是 layout，所以我就此有新增了 layout 的 token</p>
