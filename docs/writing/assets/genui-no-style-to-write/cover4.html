@@ -32,8 +32,8 @@ fit();addEventListener('resize',fit);})();
 (function(){
   var FREEZE=null;
   var cv=document.getElementById('sh');
-  // 黑白灰中性配色（用户定）：c1 顶部银灰 / c2 底部深灰 / 光带 c3 近白核心 → c4 中灰 → c5 深灰
-  var COLORS=['#8f8f8f','#262626','#f4f4f4','#9a9a9a','#262626'];
+  // 黑白灰中性配色（用户定，2026-08-03 二调：顶部压暗）：c1 顶部中灰 / c2 底部深灰 / 光带 c3 浅灰核心 → c4 中灰 → c5 深灰
+  var COLORS=['#585858','#262626','#d9d9d9','#7d7d7d','#262626'];
   var BAND=0.9,START=0.85,ARC=-0.25,WAVE=0,GRAIN=0.35,MODE=2;
   var HOLD=0,CYCLE=10,SPEED=1;
   var CV=[0.42,0,0.58,1],SWEEP0=0.0;
