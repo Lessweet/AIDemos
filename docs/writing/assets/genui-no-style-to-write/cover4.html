@@ -1,6 +1,6 @@
 <!-- posters 封面 cover4（20260801 GenUI建站实录）：封底 = warmband 热带扫描（卡面一 KEYNOTE），
      黑白灰中性配色；光带 BAND/START/ARC/曲线 = 原卡面定稿，GRAIN=0.35 原卡面胶片颗粒；
-     排版 = 三图对角（showcaseFeed 中 / 可视化看板 左下 / designsystemWEB 右上）。SWEEP=0.45 -->
+     排版 = 三图对角（showcaseFeed 中 / 可视化看板 左下 / designsystemWEB 右上）。SWEEP=0.2 -->
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -36,7 +36,7 @@ fit();addEventListener('resize',fit);})();
   var COLORS=['#958b9f','#121a12','#f1a02b','#958b9f','#121a12'];
   var BAND=0.9,START=0.85,ARC=-0.25,WAVE=0,GRAIN=0,MODE=2;
   var HOLD=0,CYCLE=10,SPEED=1;
-  var CV=[0.42,0,0.58,1],SWEEP0=0.45;
+  var CV=[0.42,0,0.58,1],SWEEP0=0.2;
   function bezierY(x){if(x<=0)return 0;if(x>=1)return 1;
     var bx=function(u){return 3*(1-u)*(1-u)*u*CV[0]+3*(1-u)*u*u*CV[2]+u*u*u;};
     var by=function(u){return 3*(1-u)*(1-u)*u*CV[1]+3*(1-u)*u*u*CV[3]+u*u*u;};
