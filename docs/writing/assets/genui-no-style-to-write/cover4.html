@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
 *{margin:0;padding:0;box-sizing:border-box;}
-.wrap{position:fixed;inset:0;overflow:hidden;background:#262626;}
+.wrap{position:fixed;inset:0;overflow:hidden;background:#121a12;}
 #sh{position:absolute;inset:0;width:100%;height:100%;display:block;}
 .stage{position:absolute;left:50%;top:50%;width:1080px;height:460px;transform:translate(-50%,-50%);transform-origin:center center;}
 
@@ -32,9 +32,9 @@ fit();addEventListener('resize',fit);})();
 (function(){
   var FREEZE=null;
   var cv=document.getElementById('sh');
-  // 黑白灰中性配色（用户定，2026-08-03 二调：顶部压暗）：c1 顶部中灰 / c2 底部深灰 / 光带 c3 浅灰核心 → c4 中灰 → c5 深灰
-  var COLORS=['#585858','#262626','#d9d9d9','#7d7d7d','#262626'];
-  var BAND=0.9,START=0.85,ARC=-0.25,WAVE=0,GRAIN=0.35,MODE=2;
+  // Toxin 预设（design-gallery warm-band presets 原值，用户定 2026-08-03）：顶部灰紫 / 底部墨绿黑 / 光带琥珀橙核心
+  var COLORS=['#958b9f','#121a12','#f1a02b','#958b9f','#121a12'];
+  var BAND=0.9,START=0.85,ARC=-0.25,WAVE=0,GRAIN=0,MODE=2;
   var HOLD=0,CYCLE=10,SPEED=1;
   var CV=[0.42,0,0.58,1],SWEEP0=0.0;
   function bezierY(x){if(x<=0)return 0;if(x>=1)return 1;
