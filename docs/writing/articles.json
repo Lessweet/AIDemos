@@ -2,7 +2,7 @@
   "articles": [
     {
       "slug": "genui-no-style-to-write",
-      "title": "生成式 UI 的第一步是让 AI 无样式可写",
+      "title": "我跳过 Figma 直接用 GenUI 做设计，并且跑通上线了",
       "date": "2026-08-02",
       "read_time": "6 分钟",
       "tags": [
@@ -10,9 +10,9 @@
         "设计系统"
       ],
       "cat": "ui",
-      "accent": "#1C1C1C",
+      "accent": "#1C1B1B",
       "collection": "",
-      "excerpt": "视觉决策前置到 token，使用规则显式化成契约，agent 手里只剩组装；7 天 330 个提交跑下来，真实环境的失控让我确定单人走不了 A2UI 那条路。",
+      "excerpt": "视觉决策前置到 token，使用规则显式化成契约，agent 手里只剩组装；7 天 330 个提交跑下来，真实环境的失控让我确定暂时走不了 A2UI 那条路。",
       "cover": "assets/genui-no-style-to-write/cover5.png"
     },
     {
