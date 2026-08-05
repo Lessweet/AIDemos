@@ -115,14 +115,14 @@ body.static *{animation:none!important;}
 <script>
 // ===== 配置：URL 参数可覆盖（渲图脚本用），默认动态流动 =====
 var q=new URLSearchParams(location.search);
-// 定稿（2026-08-05 用户挑帧）：终端云朵图标配色（蓝+粉紫），seed=81.9 dist=0.45 swirl=0.4，静态定格 FREEZE=63，动态起始对齐同帧
+// 定稿（2026-08-06 用户调参）：终端云朵图标配色（蓝+粉紫），seed=26 dist=0.20 swirl=0.10，静态定格 FREEZE=60，动态起始对齐同帧
 var CFG={
   colors:[q.get('c1')||'#4B5FE8', q.get('c2')||'#C9A4EC', q.get('c3')||'#2C3AD4'],
-  seed:  q.has('seed') ?parseFloat(q.get('seed')) :81.9,
-  dist:  q.has('dist') ?parseFloat(q.get('dist')) :0.45,
-  swirl: q.has('swirl')?parseFloat(q.get('swirl')):0.4,
+  seed:  q.has('seed') ?parseFloat(q.get('seed')) :26,
+  dist:  q.has('dist') ?parseFloat(q.get('dist')) :0.20,
+  swirl: q.has('swirl')?parseFloat(q.get('swirl')):0.10,
   grain: q.has('grain')?parseFloat(q.get('grain')):0.25,
-  time0: q.has('t0')   ?parseFloat(q.get('t0'))   :63,
+  time0: q.has('t0')   ?parseFloat(q.get('t0'))   :60,
   freeze:q.has('freeze')?parseFloat(q.get('freeze')):null,
   static:q.has('static')
 };
