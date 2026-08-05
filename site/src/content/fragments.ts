@@ -11,6 +11,7 @@ import genie from './fragments/genie.reading.html?raw';
 import genui_no_style_to_write from './fragments/genui-no-style-to-write.reading.html?raw';
 import remove_ai_taste_in_design from './fragments/remove-ai-taste-in-design.reading.html?raw';
 import review_ai_output from './fragments/review-ai-output.reading.html?raw';
+import selection_as_context from './fragments/selection-as-context.reading.html?raw';
 import sparkle from './fragments/sparkle.reading.html?raw';
 import voices from './fragments/voices.reading.html?raw';
 
@@ -27,6 +28,7 @@ export const FRAGMENTS: Record<string, string> = {
   "genui-no-style-to-write": genui_no_style_to_write,
   "remove-ai-taste-in-design": remove_ai_taste_in_design,
   "review-ai-output": review_ai_output,
+  "selection-as-context": selection_as_context,
   "sparkle": sparkle,
   "voices": voices,
 };

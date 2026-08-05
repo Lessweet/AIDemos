@@ -23,6 +23,7 @@ const ARTICLE_SLUGS = [
   'genie',
   'remove-ai-taste-in-design',
   'review-ai-output',
+  'selection-as-context',
   'sparkle',
   'voices',
 ];

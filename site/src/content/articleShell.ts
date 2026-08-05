@@ -12,6 +12,7 @@ export const ARTICLE_SHELL: Record<string, { title: string; accent: string; tint
   "genui-no-style-to-write": { title: "跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线 · VibeUX", accent: "#1C1B1B", tint: "gray" },
   "remove-ai-taste-in-design": { title: "看不出 AI 味的 AI 设计方式 · VibeUX", accent: "#5A6CD8", tint: "blue" },
   "review-ai-output": { title: "设计师的新工作，审查 AI 产物 · VibeUX", accent: "#0E9E6E", tint: "mint" },
+  "selection-as-context": { title: "AI 产品设计｜选中即上下文 · VibeUX", accent: "#4B5FE8", tint: "blue" },
   "sparkle": { title: "AI 符号被秒懂，是调用了成熟的用户心智模型 · VibeUX", accent: "#6F8FC4", tint: "blue" },
   "voices": { title: "Voices · VibeUX", accent: "#D6558E", tint: "rose" },
 };

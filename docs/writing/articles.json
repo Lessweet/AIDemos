@@ -1,6 +1,20 @@
 {
   "articles": [
     {
+      "slug": "selection-as-context",
+      "title": "AI 产品设计｜选中即上下文",
+      "date": "2026-08-05",
+      "read_time": "7 分钟",
+      "tags": [
+        "AI 交互模式"
+      ],
+      "cat": "product",
+      "accent": "#4B5FE8",
+      "collection": "",
+      "excerpt": "选中一段文字，它就变成对话的上下文，看得见，删得掉。Monica、Gemini、ChatGPT、Claude Code 四家取舍各不相同。",
+      "cover": "assets/selection-as-context/cover.png"
+    },
+    {
       "slug": "genui-no-style-to-write",
       "title": "跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线",
       "date": "2026-08-02",

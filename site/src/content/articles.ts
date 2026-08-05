@@ -38,6 +38,25 @@ export interface ArticleMeta {
 
 export const ARTICLES: ArticleMeta[] = [
   {
+    slug: 'selection-as-context',
+    file: 'article-selection-as-context.html',
+    title: 'AI 产品设计｜选中即上下文',
+    date: '2026-08-05',
+    readTime: '7 分钟',
+    tags: ['AI 交互模式'],
+    cat: 'product',
+    accent: '#4B5FE8',
+    collection: '',
+    excerpt:
+      '选中一段文字，它就变成对话的上下文，看得见，删得掉。Monica、Gemini、ChatGPT、Claude Code 四家取舍各不相同。',
+    listCover: 'assets/selection-as-context/cover.png',
+    cardCover: 'assets/cards/selection-as-context.webp',
+    inBlogGrid: true,
+    blogTag: 'AI 交互模式',
+    blogDelay: 600,
+    blogCover: { type: 'iframe', src: 'writing/assets/selection-as-context/cover.html' },
+  },
+  {
     slug: 'genui-no-style-to-write',
     file: 'article-genui-no-style-to-write.html',
     title: '跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线',
