@@ -48,7 +48,7 @@ export const ARTICLES: ArticleMeta[] = [
     accent: '#4B5FE8',
     collection: '',
     excerpt:
-      '选中一段文字，它就变成对话的上下文，看得见，删得掉。Monica、Gemini、ChatGPT、Claude Code 四家取舍各不相同。',
+      '选中一段文字，它就变成对话的上下文，看得见，删得掉。Monica、Gemini、ChatGPT 三家取舍各不相同。',
     listCover: 'assets/selection-as-context/cover.png',
     cardCover: 'assets/cards/selection-as-context.webp',
     inBlogGrid: true,
