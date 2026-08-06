@@ -1,6 +1,21 @@
 {
   "articles": [
     {
+      "slug": "codex-voice-delegation",
+      "title": "把活说给 Codex 之后它停在提交前等确认",
+      "date": "2026-08-06",
+      "read_time": "6 分钟",
+      "tags": [
+        "派活式交互",
+        "可逆性边界"
+      ],
+      "cat": "product",
+      "accent": "#306DB6",
+      "collection": "",
+      "excerpt": "Codex 语音接的是完整的多线程能力，按热键唤起、读屏拿上下文、同时派出几条线程；可逆的动作自动跑，下单和提交这类不可逆的动作，全部停在人点确认之前。",
+      "cover": "assets/codex-voice-delegation/cover.png"
+    },
+    {
       "slug": "selection-as-context",
       "title": "AI 产品设计｜选中即上下文",
       "date": "2026-08-05",

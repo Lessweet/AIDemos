@@ -1,4 +1,4 @@
-const t=[{slug:"selection-as-context",file:"article-selection-as-context.html",title:"AI 产品设计｜选中即上下文",date:"2026-08-05",readTime:"7 分钟",tags:["上下文当对象"],cat:"product",accent:"#4B5FE8",collection:"",excerpt:"选中一段文字，它就变成对话的上下文，看得见，删得掉。Monica、Gemini、ChatGPT 三家取舍各不相同。",listCover:"assets/selection-as-context/cover.png",cardCover:"assets/cards/selection-as-context.webp",inBlogGrid:!0,blogTag:"上下文当对象",blogDelay:600,blogCover:{type:"iframe",src:"writing/assets/selection-as-context/cover.html"}},{slug:"genui-no-style-to-write",file:"article-genui-no-style-to-write.html",title:"跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线",date:"2026-08-02",readTime:"6 分钟",tags:["GenUI","设计系统"],cat:"ui",accent:"#1C1B1B",collection:"",excerpt:"视觉决策前置到 token，使用规则显式化成契约，agent 手里只剩组装；7 天 330 个提交跑下来，真实环境的失控让我确定暂时走不了 A2UI 那条路。",listCover:"assets/genui-no-style-to-write/cover5.png",cardCover:"assets/cards/genui-no-style-to-write.webp",inBlogGrid:!0,blogTag:"GenUI",blogDelay:550,blogCover:{type:"iframe",src:"writing/assets/genui-no-style-to-write/cover5.html"}},{slug:"claude-code-verification-loops",file:"article-claude-code-verification-loops.html",title:"验证循环，把手动检查写进 Skill",date:"2026-07-23",readTime:"6 分钟",tags:["Agent 协作"],cat:"product",accent:"#6A823F",collection:"",excerpt:"Anthropic 博客提了一个概念——验证循环：每次重复做的手动检查，写成 Skill 让 Claude 自己跑。编进去的规矩越多，AI 第一次出手就越接近你要的标准。",listCover:"assets/claude-code-verification-loops/cover4.png",cardCover:"assets/cards/claude-code-verification-loops.webp",inBlogGrid:!0,blogTag:"Agent 协作",blogDelay:500,blogCover:{type:"iframe",src:"writing/assets/claude-code-verification-loops/cover4.html"}},{slug:"figma-make-designer-pr",file:"article-figma-make-designer-pr.html",title:"AI native 设计师的交付物，不只设计稿，还有 GitHub PR",date:"2026-07-19",readTime:"5 分钟",tags:["设计协作"],cat:"product",accent:"#2F3336",collection:"Figma 观察",excerpt:"设计师直接交付，在 AI native 团队已经是常态：Figma Make 连上真实仓库改细节、发 PR，Slack 里 Claude Tag 几分钟挂出草稿 PR；不要求设计师变成工程师，判断力花在各自擅长处，从画布一路带进合并的 PR。",listCover:"assets/figma-make-designer-pr/cover4.png",cardCover:"assets/cards/figma-make-designer-pr.webp",inBlogGrid:!0,blogTag:"设计协作",blogDelay:450,blogCover:{type:"iframe",src:"writing/assets/figma-make-designer-pr/cover4.html"}},{slug:"remove-ai-taste-in-design",file:"article-remove-ai-taste-in-design.html",title:"看不出 AI 味的 AI 设计方式",date:"2026-07-16",readTime:"6 分钟",tags:["刻意零 AI"],cat:"ui",accent:"#5A6CD8",collection:"",excerpt:"AI 能实现 shader，但生成的默认值不代表想要的效果。设计师的品味得通过参数、mood board、甚至刻意零 AI 的手绘，一层层加进去。",listCover:"assets/remove-ai-taste-in-design/cover4.png",cardCover:"assets/cards/remove-ai-taste-in-design.webp",inBlogGrid:!0,blogTag:"刻意零 AI",blogDelay:400,blogCover:{type:"iframe",src:"writing/assets/remove-ai-taste-in-design/cover4.html"}},{slug:"voices",file:"article-voices.html",title:"Voices",date:"2026-07-14",readTime:"3 分钟",tags:["听觉优先","无界面交互"],cat:"ui",accent:"#D6558E",collection:"",excerpt:"当界面开始说话，设计的重心从「看」挪到「听」——一篇跑封面与发布链路的测试稿。",listCover:"assets/voices/cover.png",inBlogGrid:!1,draft:!0},{slug:"figma-make-gpt-5-6",file:"article-figma-make-gpt-5-6.html",title:"设计师的新习惯，给 AI 模型分工",date:"2026-07-11",readTime:"6 分钟",tags:["AI 设计工作流"],cat:"product",accent:"#5F82F5",collection:"Figma 观察",excerpt:"Fable 做复杂设计，Opus 做常规实现，Sonnet 干辅助活；新模型发布就拿旧任务再做一遍，感知质量的进步，再决定要不要换进工作流。",listCover:"assets/figma-make-gpt-5-6/cover3.png",cardCover:"assets/cards/figma-make-gpt-5-6.webp",inBlogGrid:!0,blogTag:"AI 设计工作流",blogDelay:350,blogCover:{type:"iframe",src:"writing/assets/figma-make-gpt-5-6/cover3.html"}},{slug:"review-ai-output",file:"article-review-ai-output.html",title:"设计师的新工作，审查 AI 产物",date:"2026-07-05",readTime:"7 分钟",tags:["AI 辅助工作流"],cat:"ui",accent:"#0E9E6E",collection:"",excerpt:"AI 生成的半成品完成度越来越高，设计师的活儿正从「从零创作」变成「审查与打磨」——怎么在 AI 产物上继续投入，直到做出无法被反驳的东西。",listCover:"assets/review-ai-output/cover.png",cardCover:"assets/cards/review-ai-output.webp",inBlogGrid:!0,blogTag:"AI 辅助工作流",blogDelay:300,blogCover:{type:"iframe",src:"writing/assets/review-ai-output/cover.html"}},{slug:"figma-skills",file:"article-figma-skills.html",title:"设计师的新资产，是 Skills",date:"2026-07-05",readTime:"9 分钟",tags:["Agent 协作"],cat:"ui",accent:"#D4A017",collection:"",excerpt:"第一次接触 Skills 是在 vibe coding 里攒图标系列；这回在 Figma 里拿一个小需求上手，再看官方 blog 的团队协作案例。设计系统管零件，Skills 管规矩。",listCover:"assets/figma-skills/cover2.1.png",cardCover:"assets/cards/figma-skills.webp",inBlogGrid:!0,blogTag:"Agent 协作",blogDelay:250,blogCover:{type:"iframe",src:"writing/assets/figma-skills/cover2.1.html"}},{slug:"figma-shader-motion",file:"article-figma-shader-motion.html",title:"在设计系统里，Figma Shader 和 Motion ，正从效果变成可复用元素",date:"2026-07-01",readTime:"8 分钟",tags:["参数化材质","动效即组件"],cat:"ui",accent:"#7C4DFF",collection:"Figma 观察",excerpt:"不开 AE 和 C4D，我在 Figma 里用官方预设做了几张 shader 视觉图和动图；Motion 比 AE 轻，更有用的是能把一段动效做成组件、复用到整套图标上。Figma Shader 和 Motion，正在被当成组件和变量那样对待，从「加在最后」变成「一开始就在画布上」。",listCover:"assets/figma-shader-motion/cover.webp",cardCover:"assets/cards/figma-shader-motion.webp",inBlogGrid:!0,blogTag:"参数化材质",blogDelay:200,blogCover:{type:"video",src:"writing/assets/figma-shader-motion/cover_anim.mp4?v=2",poster:"writing/assets/figma-shader-motion/cover.webp"}},{slug:"figma-config-2026",file:"article-figma-config-2026.html",title:"设计师被 AI 替代之前，Figma 用一整套新功能抬高设计师上限",date:"2026-06-26",readTime:"7 分钟",tags:["AI 设计工作流","协作画布"],cat:"product",accent:"#D4A017",collection:"Figma 观察",excerpt:"AI 拉低了设计的下限，却没抬高上限。Config 2026 的生成式插件、Agent、代码图层、Motion，都在放大设计表达。以不受限制的方式设计，是一种持续的创作力。",listCover:"assets/figma-config-2026/cover.png",cardCover:"assets/cards/figma-config-2026.webp",inBlogGrid:!0,blogTag:"AI 设计工作流",blogDelay:150,blogCover:{type:"iframe",src:"writing/assets/figma-config-2026/cover.html"}},{slug:"app-shape-for-ai",file:"article-app-shape-for-ai.html",title:"SiriAI 设计",date:"2026-06-25",readTime:"9 分钟",tags:["即将发布"],cat:"product",accent:"#5B7FFF",collection:"",excerpt:"WWDC26 上 Apple 把 App 接入 Siri 的逻辑整个反转——不再让开发者写话术，而是让 App 把自己暴露成 AI 读得懂的结构。设计师要交付的，多了一份给机器看的设计稿。",listCover:"assets/app-shape-for-ai/cover_v9.png",cardCover:"assets/cards/app-shape-for-ai.webp",inBlogGrid:!0,blogTag:"即将发布",blogDelay:100,blogCover:{type:"iframe",src:"writing/assets/app-shape-for-ai/cover_v9.html"}},{slug:"sparkle",file:"article-sparkle.html",title:"AI 符号被秒懂，是调用了成熟的用户心智模型",date:"2026-05-24",readTime:"9 分钟",tags:["认知设计","图形设计"],cat:"ui",accent:"#6F8FC4",collection:"",excerpt:"那颗四角星 ✦ 不是被发明的，是被借来的——AI 入口设计的真相，是调用用户脑子里早就成熟的心智模型；而越成熟的 AI，越不需要被标出来。",listCover:"assets/sparkle/cover.png",cardCover:"assets/cards/sparkle.webp",inBlogGrid:!0,blogTag:"认知设计",blogDelay:50,blogCover:{type:"iframe",src:"writing/assets/sparkle/cover.html"}},{slug:"figma-agent",file:"article-figma-agent.html",title:"Figma Agent",date:"2026-06-20",readTime:"",tags:[],cat:"product",accent:"#2F3336",collection:"Figma 观察",excerpt:"",listCover:"",inBlogGrid:!1,unlisted:!0},{slug:"genie",file:"article-genie.html",title:"Genie",date:"2026-03-01",readTime:"",tags:[],cat:"ui",accent:"#5B7FFF",collection:"AI 设计语言",excerpt:"",listCover:"",inBlogGrid:!1,unlisted:!0}],v=n=>t.find(a=>a.slug===n),u=n=>t.find(a=>a.file===n),b=()=>t.filter(n=>n.inBlogGrid).sort((n,a)=>a.date.localeCompare(n.date)),k=()=>t.filter(n=>!n.draft&&!n.unlisted).sort((n,a)=>a.date.localeCompare(n.date)),e=`
+const t=[{slug:"codex-voice-delegation",file:"article-codex-voice-delegation.html",title:"把活说给 Codex 之后它停在提交前等确认",date:"2026-08-06",readTime:"6 分钟",tags:["派活式交互"],cat:"product",accent:"#306DB6",collection:"",excerpt:"Codex 语音接的是完整的多线程能力，按热键唤起、读屏拿上下文、同时派出几条线程；可逆的动作自动跑，下单和提交这类不可逆的动作，全部停在人点确认之前。",listCover:"assets/codex-voice-delegation/cover.png",cardCover:"assets/cards/codex-voice-delegation.webp",inBlogGrid:!0,blogTag:"派活式交互",blogDelay:600},{slug:"selection-as-context",file:"article-selection-as-context.html",title:"AI 产品设计｜选中即上下文",date:"2026-08-05",readTime:"7 分钟",tags:["上下文当对象"],cat:"product",accent:"#4B5FE8",collection:"",excerpt:"选中一段文字，它就变成对话的上下文，看得见，删得掉。Monica、Gemini、ChatGPT 三家取舍各不相同。",listCover:"assets/selection-as-context/cover.png",cardCover:"assets/cards/selection-as-context.webp",inBlogGrid:!0,blogTag:"上下文当对象",blogDelay:600,blogCover:{type:"iframe",src:"writing/assets/selection-as-context/cover.html"}},{slug:"genui-no-style-to-write",file:"article-genui-no-style-to-write.html",title:"跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线",date:"2026-08-02",readTime:"6 分钟",tags:["GenUI","设计系统"],cat:"ui",accent:"#1C1B1B",collection:"",excerpt:"视觉决策前置到 token，使用规则显式化成契约，agent 手里只剩组装；7 天 330 个提交跑下来，真实环境的失控让我确定暂时走不了 A2UI 那条路。",listCover:"assets/genui-no-style-to-write/cover5.png",cardCover:"assets/cards/genui-no-style-to-write.webp",inBlogGrid:!0,blogTag:"GenUI",blogDelay:550,blogCover:{type:"iframe",src:"writing/assets/genui-no-style-to-write/cover5.html"}},{slug:"claude-code-verification-loops",file:"article-claude-code-verification-loops.html",title:"验证循环，把手动检查写进 Skill",date:"2026-07-23",readTime:"6 分钟",tags:["Agent 协作"],cat:"product",accent:"#6A823F",collection:"",excerpt:"Anthropic 博客提了一个概念——验证循环：每次重复做的手动检查，写成 Skill 让 Claude 自己跑。编进去的规矩越多，AI 第一次出手就越接近你要的标准。",listCover:"assets/claude-code-verification-loops/cover4.png",cardCover:"assets/cards/claude-code-verification-loops.webp",inBlogGrid:!0,blogTag:"Agent 协作",blogDelay:500,blogCover:{type:"iframe",src:"writing/assets/claude-code-verification-loops/cover4.html"}},{slug:"figma-make-designer-pr",file:"article-figma-make-designer-pr.html",title:"AI native 设计师的交付物，不只设计稿，还有 GitHub PR",date:"2026-07-19",readTime:"5 分钟",tags:["设计协作"],cat:"product",accent:"#2F3336",collection:"Figma 观察",excerpt:"设计师直接交付，在 AI native 团队已经是常态：Figma Make 连上真实仓库改细节、发 PR，Slack 里 Claude Tag 几分钟挂出草稿 PR；不要求设计师变成工程师，判断力花在各自擅长处，从画布一路带进合并的 PR。",listCover:"assets/figma-make-designer-pr/cover4.png",cardCover:"assets/cards/figma-make-designer-pr.webp",inBlogGrid:!0,blogTag:"设计协作",blogDelay:450,blogCover:{type:"iframe",src:"writing/assets/figma-make-designer-pr/cover4.html"}},{slug:"remove-ai-taste-in-design",file:"article-remove-ai-taste-in-design.html",title:"看不出 AI 味的 AI 设计方式",date:"2026-07-16",readTime:"6 分钟",tags:["刻意零 AI"],cat:"ui",accent:"#5A6CD8",collection:"",excerpt:"AI 能实现 shader，但生成的默认值不代表想要的效果。设计师的品味得通过参数、mood board、甚至刻意零 AI 的手绘，一层层加进去。",listCover:"assets/remove-ai-taste-in-design/cover4.png",cardCover:"assets/cards/remove-ai-taste-in-design.webp",inBlogGrid:!0,blogTag:"刻意零 AI",blogDelay:400,blogCover:{type:"iframe",src:"writing/assets/remove-ai-taste-in-design/cover4.html"}},{slug:"voices",file:"article-voices.html",title:"Voices",date:"2026-07-14",readTime:"3 分钟",tags:["听觉优先","无界面交互"],cat:"ui",accent:"#D6558E",collection:"",excerpt:"当界面开始说话，设计的重心从「看」挪到「听」——一篇跑封面与发布链路的测试稿。",listCover:"assets/voices/cover.png",inBlogGrid:!1,draft:!0},{slug:"figma-make-gpt-5-6",file:"article-figma-make-gpt-5-6.html",title:"设计师的新习惯，给 AI 模型分工",date:"2026-07-11",readTime:"6 分钟",tags:["AI 设计工作流"],cat:"product",accent:"#5F82F5",collection:"Figma 观察",excerpt:"Fable 做复杂设计，Opus 做常规实现，Sonnet 干辅助活；新模型发布就拿旧任务再做一遍，感知质量的进步，再决定要不要换进工作流。",listCover:"assets/figma-make-gpt-5-6/cover3.png",cardCover:"assets/cards/figma-make-gpt-5-6.webp",inBlogGrid:!0,blogTag:"AI 设计工作流",blogDelay:350,blogCover:{type:"iframe",src:"writing/assets/figma-make-gpt-5-6/cover3.html"}},{slug:"review-ai-output",file:"article-review-ai-output.html",title:"设计师的新工作，审查 AI 产物",date:"2026-07-05",readTime:"7 分钟",tags:["AI 辅助工作流"],cat:"ui",accent:"#0E9E6E",collection:"",excerpt:"AI 生成的半成品完成度越来越高，设计师的活儿正从「从零创作」变成「审查与打磨」——怎么在 AI 产物上继续投入，直到做出无法被反驳的东西。",listCover:"assets/review-ai-output/cover.png",cardCover:"assets/cards/review-ai-output.webp",inBlogGrid:!0,blogTag:"AI 辅助工作流",blogDelay:300,blogCover:{type:"iframe",src:"writing/assets/review-ai-output/cover.html"}},{slug:"figma-skills",file:"article-figma-skills.html",title:"设计师的新资产，是 Skills",date:"2026-07-05",readTime:"9 分钟",tags:["Agent 协作"],cat:"ui",accent:"#D4A017",collection:"",excerpt:"第一次接触 Skills 是在 vibe coding 里攒图标系列；这回在 Figma 里拿一个小需求上手，再看官方 blog 的团队协作案例。设计系统管零件，Skills 管规矩。",listCover:"assets/figma-skills/cover2.1.png",cardCover:"assets/cards/figma-skills.webp",inBlogGrid:!0,blogTag:"Agent 协作",blogDelay:250,blogCover:{type:"iframe",src:"writing/assets/figma-skills/cover2.1.html"}},{slug:"figma-shader-motion",file:"article-figma-shader-motion.html",title:"在设计系统里，Figma Shader 和 Motion ，正从效果变成可复用元素",date:"2026-07-01",readTime:"8 分钟",tags:["参数化材质","动效即组件"],cat:"ui",accent:"#7C4DFF",collection:"Figma 观察",excerpt:"不开 AE 和 C4D，我在 Figma 里用官方预设做了几张 shader 视觉图和动图；Motion 比 AE 轻，更有用的是能把一段动效做成组件、复用到整套图标上。Figma Shader 和 Motion，正在被当成组件和变量那样对待，从「加在最后」变成「一开始就在画布上」。",listCover:"assets/figma-shader-motion/cover.webp",cardCover:"assets/cards/figma-shader-motion.webp",inBlogGrid:!0,blogTag:"参数化材质",blogDelay:200,blogCover:{type:"video",src:"writing/assets/figma-shader-motion/cover_anim.mp4?v=2",poster:"writing/assets/figma-shader-motion/cover.webp"}},{slug:"figma-config-2026",file:"article-figma-config-2026.html",title:"设计师被 AI 替代之前，Figma 用一整套新功能抬高设计师上限",date:"2026-06-26",readTime:"7 分钟",tags:["AI 设计工作流","协作画布"],cat:"product",accent:"#D4A017",collection:"Figma 观察",excerpt:"AI 拉低了设计的下限，却没抬高上限。Config 2026 的生成式插件、Agent、代码图层、Motion，都在放大设计表达。以不受限制的方式设计，是一种持续的创作力。",listCover:"assets/figma-config-2026/cover.png",cardCover:"assets/cards/figma-config-2026.webp",inBlogGrid:!0,blogTag:"AI 设计工作流",blogDelay:150,blogCover:{type:"iframe",src:"writing/assets/figma-config-2026/cover.html"}},{slug:"app-shape-for-ai",file:"article-app-shape-for-ai.html",title:"SiriAI 设计",date:"2026-06-25",readTime:"9 分钟",tags:["即将发布"],cat:"product",accent:"#5B7FFF",collection:"",excerpt:"WWDC26 上 Apple 把 App 接入 Siri 的逻辑整个反转——不再让开发者写话术，而是让 App 把自己暴露成 AI 读得懂的结构。设计师要交付的，多了一份给机器看的设计稿。",listCover:"assets/app-shape-for-ai/cover_v9.png",cardCover:"assets/cards/app-shape-for-ai.webp",inBlogGrid:!0,blogTag:"即将发布",blogDelay:100,blogCover:{type:"iframe",src:"writing/assets/app-shape-for-ai/cover_v9.html"}},{slug:"sparkle",file:"article-sparkle.html",title:"AI 符号被秒懂，是调用了成熟的用户心智模型",date:"2026-05-24",readTime:"9 分钟",tags:["认知设计","图形设计"],cat:"ui",accent:"#6F8FC4",collection:"",excerpt:"那颗四角星 ✦ 不是被发明的，是被借来的——AI 入口设计的真相，是调用用户脑子里早就成熟的心智模型；而越成熟的 AI，越不需要被标出来。",listCover:"assets/sparkle/cover.png",cardCover:"assets/cards/sparkle.webp",inBlogGrid:!0,blogTag:"认知设计",blogDelay:50,blogCover:{type:"iframe",src:"writing/assets/sparkle/cover.html"}},{slug:"figma-agent",file:"article-figma-agent.html",title:"Figma Agent",date:"2026-06-20",readTime:"",tags:[],cat:"product",accent:"#2F3336",collection:"Figma 观察",excerpt:"",listCover:"",inBlogGrid:!1,unlisted:!0},{slug:"genie",file:"article-genie.html",title:"Genie",date:"2026-03-01",readTime:"",tags:[],cat:"ui",accent:"#5B7FFF",collection:"AI 设计语言",excerpt:"",listCover:"",inBlogGrid:!1,unlisted:!0}],u=n=>t.find(a=>a.slug===n),b=n=>t.find(a=>a.file===n),k=()=>t.filter(n=>n.inBlogGrid).sort((n,a)=>a.date.localeCompare(n.date)),w=()=>t.filter(n=>!n.draft&&!n.unlisted).sort((n,a)=>a.date.localeCompare(n.date)),e=`
 <div class="article-eyebrow article-eyebrow-top"><span class="a-tag">即将发布</span></div>
 <h1 class="article-h1">SiriAI 设计</h1>
 <div class="article-byline"></div>
@@ -491,6 +491,461 @@ const t=[{slug:"selection-as-context",file:"article-selection-as-context.html",t
 <div class="same-collection"></div>
 </footer>
 `,i=`
+<h1 class="article-h1">把活说给 Codex 之后它停在提交前等确认</h1>
+<div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-tag">派活式交互</span></div><span>2026-08-06</span><span>阅读约 6 分钟</span></div>
+<div class="article-cover"><img alt="封面" src="assets/codex-voice-delegation/cover.png"/></div>
+<div class="article-body"><style>
+/* article-template 样式 inline 到网站，仅作用于 .article-body 内 */
+.article-eyebrow { text-align: center; justify-content: center; }
+.article-eyebrow .a-tag { font-weight: 400; }
+.article-h1 { text-align: center; }
+.article-byline { text-align: center; justify-content: center; }
+.article-body { color: #1a1a1a; line-height: 1.4; }
+.article-body p { font-size: var(--fs-body); font-weight: 300; margin: 40px 0; color: #1a1a1a; }
+.article-body strong { font-weight: 400; color: #306DB6; }
+.article-body .list-dot { font-weight: 600; margin-right: 4px; color: #1a1a1a; }
+.article-body .section-head { text-align: center; margin: 56px 0; }
+/* 图标居中：svg display:block + margin auto，别改回 vertical-align/line-height/padding（微信按基线对齐会贴底、border-box 下 padding 挤小图标）。跟 template.html 保持一致。详见记忆 wechat-icon-vertical-center。 */
+.article-body .icon-badge { display: inline-block; width: 40px; height: 40px; border-radius: 10px; background: rgba(102, 102, 102, 0.08); margin-bottom: 14px; }
+.article-body .section-head svg { display: block; width: 32px; height: 32px; margin: 4px auto; overflow: visible; }
+.article-body h2 { font-size: var(--fs-h2); font-weight: 400; color: #1a1a1a; line-height: 1.2; margin: 0; letter-spacing: 0; text-align: center; }
+.article-body img { width: 100%; margin: 16px 0 0 0; display: block; border-radius: 8px; }
+.article-body .img-caption { font-size: var(--fs-caption); color: #aaa; text-align: center; margin: 4px 0 18px 0; line-height: 1.4; }
+.article-body .img-ph { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 160px; margin: 24px 0; padding: 28px 20px; border: 1px dashed #d6d6de; border-radius: 12px; background: repeating-linear-gradient(45deg, #fafafb, #fafafb 10px, #f3f3f6 10px, #f3f3f6 20px); }
+.article-body .img-ph .img-ph-cap { font-size: var(--fs-caption); color: #9a9aa6; line-height: 1.5; max-width: 80%; }
+.article-body .highlight { font-size: var(--fs-body); font-weight: 300; line-height: 1.4; color: #1a1a1a; margin: 40px 0; }
+.article-body .highlight strong { font-weight: 400; color: #306DB6; }
+
+/* outlined 图标动画 CSS（自动从 design-gallery 抽取，不要手改） */
+/* 时长/延迟变量（在 design-gallery 基础上整体提速 ~40%，文章里看着更精神） */
+.section-head {
+  --dur-1-5: 0.9s; --dur-1-8: 1.1s; --dur-2-1: 1.2s; --dur-2-2: 1.3s;
+  --dur-2-3: 1.4s; --dur-2-4: 1.4s; --dur-2-5: 1.5s; --dur-2-6: 1.6s;
+  --dur-2-8: 1.7s; --dur-4-0: 2.4s; --dur-5-0: 3s;
+  --delay-150: 100ms; --delay-300: 180ms; --delay-600: 360ms;
+}
+/* 通用 transform-box */
+.section-head svg [class*="anim-"],
+.section-head svg .favorite-star,
+.section-head svg .favorite-rays {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.section-head svg .anim-viewBox {
+  transform-box: view-box;
+  transform-origin: center;
+}
+
+/* ---- 各图标动画规则 ---- */
+.section-head svg .anim-doc-line {
+    animation: doc-line-write var(--dur-2-8) ease-in-out infinite;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+.section-head svg .anim-doc-line-2 { animation-delay: var(--delay-300); }
+.section-head svg .anim-doc-line-3 { animation-delay: var(--delay-600); }
+.section-head svg .anim-user-head { animation: user-head var(--dur-2-3) ease-out infinite; }
+.section-head svg .anim-user-shoulders { animation: user-shoulders var(--dur-2-3) ease-out infinite; }
+.section-head svg .anim-gear { animation: gear-turn var(--dur-2-8) cubic-bezier(0.25, 0.8, 0.2, 1) infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .anim-search { animation: search-scan var(--dur-4-0) cubic-bezier(0.16, 0.9, 0.2, 1) infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-cart-burst {
+    animation: cart-burst var(--dur-2-5) ease-out infinite;
+    opacity: 0;
+  }
+.section-head svg .anim-cart-burst-1 { --tx: -5px; --ty: -9px; }
+.section-head svg .anim-cart-burst-2 { --tx: -1px; --ty: -11px; animation-delay: var(--delay-150); }
+.section-head svg .anim-cart-burst-3 { --tx: 3px; --ty: -10px; animation-delay: var(--delay-300); }
+.section-head svg .anim-cart-burst-4 { --tx: 6px; --ty: -8px; animation-delay: var(--delay-300); }
+.section-head svg .anim-clap-hand { animation: clap-hand var(--dur-1-8) ease-in-out infinite; transform-box: view-box; transform-origin: 9px 14px; }
+.section-head svg .anim-clap-lines { animation: clap-lines var(--dur-1-8) ease-out infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-music-note {
+    animation: music-float var(--dur-2-8) ease-in-out infinite;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: center;
+  }
+.section-head svg .anim-music-base {
+    animation: music-tilt var(--dur-2-8) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 14px;
+  }
+.section-head svg .anim-music-note-2 { animation-delay: calc(var(--dur-2-8) / 2); }
+.section-head svg .anim-lightning {
+    animation: lightning-flash var(--dur-2-4) ease-in-out infinite;
+  }
+.section-head svg .anim-pencil { animation: pencil-write var(--dur-5-0) ease-in-out infinite; transform-box: view-box; transform-origin: 13px 12px; }
+.section-head svg .anim-pencil-trace {
+    animation: pencil-trace var(--dur-5-0) ease-in-out infinite;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+.section-head svg .anim-eye-shape { animation: eye-blink var(--dur-2-8) ease-in-out infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .anim-eye-pupil { animation: eye-pupil-blink var(--dur-2-8) ease-in-out infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-bell { animation: bell-rattle var(--dur-5-0) cubic-bezier(0.3, 0.7, 0.2, 1) infinite; transform-box: view-box; transform-origin: 12px 4px; }
+.section-head svg .anim-bell-clapper { animation: bell-clapper var(--dur-5-0) linear infinite; transform-box: view-box; transform-origin: 12px 17px; }
+.section-head svg .anim-ide-cursor { animation: ide-blink var(--dur-1-5) step-end infinite; }
+.section-head svg .anim-pin-ripple {
+    animation: pin-ripple var(--dur-2-5) ease-out infinite;
+    opacity: 0;
+  }
+.section-head svg .anim-pin-ripple-2 { animation-delay: calc(var(--dur-2-5) / 3); }
+.section-head svg .anim-pin-ripple-3 { animation-delay: calc(var(--dur-2-5) * 2 / 3); }
+.section-head svg .anim-brain {
+    animation: brain-pulse var(--dur-2-2) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+  }
+.section-head svg .anim-ai-spark {
+    animation: ai-twinkle var(--dur-2-2) ease-in-out infinite;
+  }
+.section-head svg .anim-ai-spark-small {
+    animation-delay: calc(var(--dur-2-2) / 2);
+  }
+.section-head svg .anim-cursor {
+    animation: cursor-nudge var(--dur-2-2) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 10px 12px;
+  }
+.section-head svg .anim-cursor-click {
+    animation: cursor-click var(--dur-2-2) ease-out infinite;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: 6px 5px;
+  }
+.section-head svg .anim-cursor-spark {
+    animation: ai-twinkle var(--dur-2-2) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 18px 6px;
+  }
+.section-head svg .anim-hourglass-top {
+    animation: hourglass-top var(--dur-2-8) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 8px;
+  }
+.section-head svg .anim-hourglass-stream {
+    animation: hourglass-stream var(--dur-2-8) ease-in-out infinite;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+.section-head svg .anim-hourglass-bottom {
+    animation: hourglass-bottom var(--dur-2-8) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 18px;
+  }
+.section-head svg .anim-shape-cycle {
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+  }
+.section-head svg .anim-home { animation: home-settle var(--dur-2-4) ease-out infinite; }
+.section-head svg .anim-lock-shackle { animation: lock-shackle var(--dur-2-6) ease-in-out infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .anim-lock-dot { animation: lock-dot var(--dur-2-6) ease-out infinite; }
+.section-head svg .anim-message-dot-1 { animation: typing-dot var(--dur-1-5) ease-in-out infinite 0ms; }
+.section-head svg .anim-message-dot-2 { animation: typing-dot var(--dur-1-5) ease-in-out infinite var(--delay-150); }
+.section-head svg .anim-message-dot-3 { animation: typing-dot var(--dur-1-5) ease-in-out infinite var(--delay-300); }
+.section-head svg .anim-heart { animation: heart-flutter var(--dur-2-8) cubic-bezier(0.2, 0.85, 0.25, 1) infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .favorite-star { animation: favorite-pop var(--dur-2-2) cubic-bezier(0.2, 0.85, 0.25, 1) infinite; }
+.section-head svg .favorite-rays { animation: favorite-rays var(--dur-2-2) ease-out infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-gift-lid { animation: gift-lid var(--dur-2-8) ease-in-out infinite; transform-box: view-box; transform-origin: 12px 8px; }
+.section-head svg .anim-gift-particle {
+    animation: gift-particle var(--dur-2-8) ease-out infinite;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: center;
+  }
+.section-head svg .anim-gift-particle-1 { --tx: -5px; --ty: -9px; }
+.section-head svg .anim-gift-particle-2 { --tx: 4px; --ty: -10px; animation-delay: var(--delay-150); }
+.section-head svg .anim-gift-particle-3 { --tx: -8px; --ty: -6px; animation-delay: var(--delay-300); }
+.section-head svg .anim-gift-particle-4 { --tx: 7px; --ty: -7px; animation-delay: var(--delay-300); }
+.section-head svg .anim-gift-particle-5 { --tx: -2px; --ty: -11px; animation-delay: var(--delay-600); }
+.section-head svg .anim-gift-particle-6 { --tx: 6px; --ty: -5px; animation-delay: var(--delay-600); }
+/* 以下两条此前未接入(class 存在但没有匹配规则,design-gallery 里同样是孤儿 keyframe)。
+   现补上选择器,和 icons-outlined/*.svg 里新加的 SMIL 保持一致。 */
+.section-head svg .anim-bookmark { animation: bookmark-tuck var(--dur-2-4) ease-in-out infinite; }
+.section-head svg .anim-clock-minute { animation: clock-hand 3s linear infinite; transform-box: view-box; transform-origin: 12px 12px; }
+
+/* ---- keyframes ---- */
+@keyframes ai-twinkle {
+    0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    50% { opacity: 0.35; transform: scale(0.6) rotate(25deg); }
+  }
+@keyframes bell-clapper {
+    0%, 8%, 84%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(13deg); }
+    36% { transform: rotate(-9deg); }
+    52% { transform: rotate(6deg); }
+    68% { transform: rotate(-3deg); }
+  }
+@keyframes bell-rattle {
+    0%, 8%, 84%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(-11deg); }
+    36% { transform: rotate(8deg); }
+    52% { transform: rotate(-5deg); }
+    68% { transform: rotate(3deg); }
+  }
+@keyframes bookmark-tuck {
+    0%, 100% { transform: translateY(0); }
+    42% { transform: translateY(2px); }
+    72% { transform: translateY(-1px); }
+  }
+@keyframes brain-pulse {
+    0%, 100% { transform: scale(1); }
+    22% { transform: scale(1.06); }
+    44% { transform: scale(0.98); }
+    62% { transform: scale(1.06); }
+    82% { transform: scale(0.98); }
+  }
+@keyframes calendar-page {
+    0%, 100% { transform: translateY(0); }
+    45% { transform: translateY(1.2px); }
+  }
+@keyframes calendar-tabs {
+    0%, 100% { transform: translateY(0); }
+    35% { transform: translateY(-1.8px); }
+  }
+@keyframes cart-burst {
+    0%, 14% { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); }
+    28% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+    72% { opacity: 0.85; transform: translate(var(--tx), var(--ty)) scale(1) rotate(18deg); }
+    100% { opacity: 0; transform: translate(calc(var(--tx) * 1.25), calc(var(--ty) * 1.2)) scale(0.7) rotate(30deg); }
+  }
+@keyframes cart-roll {
+    0%, 100% { transform: translateX(0); }
+    42% { transform: translateX(3px); }
+    75% { transform: translateX(-1px); }
+  }
+@keyframes clap-hand {
+    0%, 100% { transform: translateX(-1.5px) rotate(-7deg); }
+    24%, 50% { transform: translateX(1px) rotate(3deg); }
+    70% { transform: translateX(-0.6px) rotate(-3deg); }
+  }
+@keyframes clap-lines {
+    0%, 14%, 72%, 100% { opacity: 0; transform: scale(0.88); }
+    26%, 48% { opacity: 1; transform: scale(1); }
+    58% { opacity: 0.45; transform: scale(1.08); }
+  }
+@keyframes clock-hand {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+@keyframes cursor-click {
+    0%, 34% { opacity: 0; transform: scale(0.45); }
+    46% { opacity: 0.85; transform: scale(0.78); }
+    74%, 100% { opacity: 0; transform: scale(1.55); }
+  }
+@keyframes cursor-nudge {
+    0%, 100% { transform: translate(0, 0); }
+    42% { transform: translate(1px, -1px); }
+    66% { transform: translate(0.35px, -0.35px); }
+  }
+@keyframes doc-line-write {
+    0%, 12% {
+      opacity: 0;
+      stroke-dashoffset: 1;
+    }
+    42%, 76% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 0;
+    }
+  }
+@keyframes eye-blink {
+    0%, 44%, 58%, 70%, 100% { transform: scaleY(1); }
+    50%, 64% { transform: scaleY(0.08); }
+  }
+@keyframes eye-pupil-blink {
+    0%, 44%, 58%, 70%, 100% { opacity: 1; transform: scaleY(1); }
+    50%, 64% { opacity: 0; transform: scaleY(0.08); }
+  }
+@keyframes favorite-pop {
+    0%   { transform: scale(1); }
+    20%  { transform: scale(0.72); }
+    46%  { transform: scale(1.2); }
+    72%  { transform: scale(0.94); }
+    100% { transform: scale(1); }
+  }
+@keyframes favorite-rays {
+    0%   { opacity: 0; transform: scale(0.58) rotate(0deg); }
+    18%  { opacity: 0; transform: scale(0.62) rotate(0deg); }
+    34%  { opacity: 1; }
+    76%  { opacity: 0.75; }
+    100% { opacity: 0; transform: scale(1.28) rotate(10deg); }
+  }
+@keyframes gear-turn {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(90deg); }
+  }
+@keyframes gift-box {
+    0%, 100% { transform: scaleY(1); }
+    42% { transform: scaleY(0.96); }
+  }
+@keyframes gift-lid {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    42% { transform: translateY(-3px) rotate(-4deg); }
+    70% { transform: translateY(-1px) rotate(2deg); }
+  }
+@keyframes gift-particle {
+    0%, 18% { opacity: 0; transform: translate(0, 3px) scale(0.62) rotate(0deg); }
+    32% { opacity: 1; transform: translate(0, 0) scale(1) rotate(8deg); }
+    72% { opacity: 0.9; transform: translate(var(--tx), var(--ty)) scale(1.05) rotate(18deg); }
+    100% { opacity: 0; transform: translate(calc(var(--tx) * 1.2), calc(var(--ty) * 1.25)) scale(0.78) rotate(28deg); }
+  }
+@keyframes heart-flutter {
+    0%, 10%, 68%, 100% { transform: scale(1) rotate(0deg); }
+    16% { transform: scale(0.94) rotate(-1.5deg); }
+    23% { transform: scale(1.18) rotate(1.5deg); }
+    31% { transform: scale(0.98) rotate(0deg); }
+    42% { transform: scale(1.1) rotate(-0.8deg); }
+    54% { transform: scale(1.01) rotate(0.4deg); }
+  }
+@keyframes home-settle {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-2px); }
+    70% { transform: translateY(1px); }
+  }
+@keyframes hourglass-bottom {
+    0%, 100% { opacity: 0.68; transform: scaleX(0.72); }
+    60% { opacity: 1; transform: scaleX(1.08); }
+  }
+@keyframes hourglass-stream {
+    0%, 14% { opacity: 0; stroke-dashoffset: 1; }
+    30% { opacity: 1; }
+    68% { opacity: 1; stroke-dashoffset: 0; }
+    100% { opacity: 0; stroke-dashoffset: -1; }
+  }
+@keyframes hourglass-top {
+    0%, 100% { opacity: 0.95; transform: scaleY(1); }
+    54% { opacity: 0.5; transform: scaleY(0.64); }
+    78% { opacity: 0.9; transform: scaleY(0.86); }
+  }
+@keyframes ide-blink {
+    0%, 49% { opacity: 1; }
+    50%, 99% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+@keyframes lightning-flash {
+    0%, 100% { opacity: 0.92; transform: scale(1); }
+    42% { opacity: 1; transform: scale(1.08); }
+    72% { opacity: 0.78; transform: scale(0.98); }
+  }
+@keyframes lightning-pulse {
+    0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+    36% { transform: translateY(-1px) rotate(-3deg) scale(1.04); }
+    64% { transform: translateY(0.6px) rotate(2deg) scale(0.98); }
+  }
+@keyframes lock-dot {
+    0%, 100% { transform: scale(1); }
+    45% { transform: scale(1.35); }
+  }
+@keyframes lock-shackle {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    36% { transform: translateY(-2px) rotate(-9deg); }
+    72% { transform: translateY(0) rotate(0deg); }
+  }
+@keyframes music-float {
+    0% { opacity: 0; transform: translate(0, 3px) scale(0.82) rotate(-5deg); }
+    18% { opacity: 1; }
+    68% { opacity: 1; transform: translate(0.8px, -4px) scale(1) rotate(6deg); }
+    100% { opacity: 0; transform: translate(-0.5px, -7px) scale(0.86) rotate(-8deg); }
+  }
+@keyframes music-tilt {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    34% { transform: rotate(-5deg) translateY(-0.8px); }
+    68% { transform: rotate(4deg) translateY(0.5px); }
+  }
+@keyframes pencil-trace {
+    0%, 14% {
+      opacity: 0;
+      stroke-dashoffset: 1;
+    }
+    46% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    72% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 0;
+    }
+  }
+@keyframes pencil-write {
+    0%, 100% { transform: translate(-0.8px, -0.8px) rotate(-4deg); }
+    18% { transform: translate(1.4px, -2.4px) rotate(-1deg); }
+    36% { transform: translate(3.8px, -0.5px) rotate(3deg); }
+    56% { transform: translate(6.4px, -2.2px) rotate(1deg); }
+    76% { transform: translate(9px, -0.7px) rotate(4deg); }
+    88% { transform: translate(4.2px, -1.5px) rotate(-1deg); }
+  }
+@keyframes pin-drop {
+    0% { transform: translateY(-6px); opacity: 0; }
+    55% { transform: translateY(1px); opacity: 1; }
+    75% { transform: translateY(-1px); }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+@keyframes pin-ripple {
+    0% { opacity: 0; transform: scale(0.45); }
+    20% { opacity: 0.9; }
+    100% { opacity: 0; transform: scale(1.8); }
+  }
+@keyframes search-scan {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-4.2px, 0.4px) rotate(-10deg); }
+    18% { transform: translate(-1.1px, -0.2px) rotate(-2deg); }
+    30% { transform: translate(0.6px, -3.8px) rotate(7deg); }
+    39% { transform: translate(1.6px, -1px) rotate(2deg); }
+    52% { transform: translate(3px, 3.4px) rotate(9deg); }
+    62% { transform: translate(0.8px, 1px) rotate(2deg); }
+    78% { transform: translate(-0.7px, 0.2px) rotate(-1deg); }
+  }
+@keyframes search-sway {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(-1.4px) rotate(-7deg); }
+    55% { transform: translateX(1.4px) rotate(7deg); }
+    78% { transform: translateX(-0.5px) rotate(-3deg); }
+  }
+@keyframes typing-dot {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+    38% { transform: translateY(-2px) scale(1.18); opacity: 0.75; }
+  }
+@keyframes user-head {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-2px); }
+  }
+@keyframes user-shoulders {
+    0%, 100% { transform: scaleX(1); }
+    45% { transform: scaleX(1.08); }
+  }
+@keyframes wheel-pulse {
+    0%, 100% { transform: scale(1); }
+    42% { transform: scale(1.2); }
+  }
+</style>
+<p>Codex 语音刚上线两天，Codex 团队工程师 Nick Baumann 就在一期访谈里现场做了演示：按下全局热键，屏幕上弹出一个悬浮球（orb），对着它交代几句出差和报销的安排，两条 agent 线程在后台跑起来，Chrome 已经开始查航班。</p>
+<img alt="Codex 语音对话：查日历派差旅任务，底部是悬浮球" src="assets/codex-voice-delegation/01.png"/>
+<div class="section-head"><span class="icon-badge" style="background: rgba(48, 109, 182, 0.1);"><svg fill="none" height="24" style="display:block;width:19.2px;height:19.2px;margin:10.4px auto;overflow:visible" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1.33333)"><rect fill="none" height="9.5" rx="3.25" ry="3.25" stroke="#306DB6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0" width="6.5" x="5.75" y="1.75"></rect><path d="M15.25,8c0,3.452-2.798,6.25-6.25,6.25h0c-3.452,0-6.25-2.798-6.25-6.25" fill="none" stroke="#306DB6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path><line fill="none" stroke="#306DB6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0" x1="9" x2="9" y1="14.25" y2="16.25"></line></g></svg></span><h2 style="color: #306DB6;">全局热键唤起一个能读屏的悬浮球</h2></div>
+<p>语音的入口不应该只是被包裹在某个应用里。不管当前开着什么界面，按热键就能唤起悬浮球（官方文档写明热键在 Settings &gt; Voice &gt; Voice chat hotkey 里自定义），它能对话，也能看到屏幕上的内容。读屏用的是 appshot，连按两下 command，把当前窗口截成一张带上下文的智能截图，这原本是个独立功能，语音把这一步内置了。演示里 Nick 问它"你能看到我在 Slack 里开着的那个 offsite 吗"，它读完屏幕报出来：DX 团队巴黎 offsite，8 月 26 到 28 日，航班和酒店本周要在 Navan 订好。</p>
+<img alt="悬浮球读屏：Slack 里的巴黎 offsite 行程" src="assets/codex-voice-delegation/02.png"/>
+<p>传统语音助手接的通常是能力较弱的模型，聊得再自然也只能一来一回地问答。Codex 语音接的是完整的 Codex 能力：可以开新线程、给已有线程发消息、从线程分叉（fork）、翻旧数据和自己的记忆，同时管理五六条并行的线程。语音在这套产品里的位置也随之变了，从问答通道变成了往各条线程派活的调度层。</p>
+<div class="section-head"><span class="icon-badge" style="background: rgba(48, 109, 182, 0.1);"><svg fill="none" height="24" style="display:block;width:19.2px;height:19.2px;margin:10.4px auto;overflow:visible" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M11.97 22C17.4928 22 21.97 17.5228 21.97 12C21.97 6.47715 17.4928 2 11.97 2C6.44712 2 1.96997 6.47715 1.96997 12C1.96997 17.5228 6.44712 22 11.97 22Z" stroke="#306DB6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path><path d="M10.72 14.53V9.47005C10.72 8.99005 10.52 8.80005 10.01 8.80005H8.71C8.2 8.80005 8 8.99005 8 9.47005V14.53C8 15.01 8.2 15.2 8.71 15.2H10C10.52 15.2 10.72 15.01 10.72 14.53Z" stroke="#306DB6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path><path d="M16 14.53V9.47005C16 8.99005 15.8 8.80005 15.29 8.80005H14C13.49 8.80005 13.29 8.99005 13.29 9.47005V14.53C13.29 15.01 13.49 15.2 14 15.2H15.29C15.8 15.2 16 15.01 16 14.53Z" stroke="#306DB6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path></svg></span><h2 style="color: #306DB6;">不可逆的动作停在人点确认之前</h2></div>
+<p>派活的流程在演示里走了完整一遍。巴黎那场 offsite 的正式日程周三上午开始、周五下午结束，Nick 想留到周末，再往后多待两天，就让它查日历看这几天排不排得开；它报出 9 月 1 日周二下午有个会冲突，给出的方案是 8 月 31 日周一返程；Nick 决定周一周二请 PTO，让它开一条任务，从 SFO 出发，去 Navan 找航班和一家符合公司差旅政策的酒店，行程按 8 月 25 日到 9 月 2 日排，准备好选项之后由他来点预订。任务跑起来之后他立刻又补了一句"这条用我现有的 Chrome"，这句话被投递给正在跑的线程，配置随之更新。</p>
+<img alt="Codex 接管 Chrome，在 Navan 上填 SFO 到 Paris 的机票" src="assets/codex-voice-delegation/03.png"/>
+<p>同一段对话里的第二条线程是报销一支麦克风。线程的回话把这套权限设计说得很清楚："报销任务在跑了，会找到 Amazon 收据，把 Navan 的报销单准备好，但你确认之前不提交，可以审阅时我叫你。"</p>
+<p>两条任务同时在 Chrome 里跑，一条比价机票，一条翻收据。整场演示里，查日历、读屏、比价、填表这类可逆的动作全部自动执行；下单和提交这类不可逆的动作，全部停在人点确认之前。<strong>委派的边界划在动作的可逆性上</strong>，而中途追加的指令能随时投递给运行中的线程，改主意不用推倒重来。</p>
+<p>这些能力的发现性是产品目前明显的短板。开线程、发消息、fork 这些功能早就在 ChatGPT 应用里，但入口并不显眼，都是偶然碰上模型主动说"我要开一个新线程"才知道有线程分叉。</p>
+<p>录到最后主持人 Claire 问了个很现实的问题，办公室里人人都对着电脑说话，工位上要怎么用语音。Nick 的回答挺诚实：</p>
+<p>"我在家的时候完全用口述。在工位上周围有人，我顶多小声嘀咕，更多时候还是换回键盘。我们办公室有那种小电话亭，现在常看到有人钻进去，进去却没在接电话，明显是去用口述、用语音和 Codex 干活。我不知道最终的答案是不是每人戴一个只让 agent 听得见的罩子，现在这样确实不理想，但看得出来现在最好的版本就是用语音。"</p>
+<p style="display:flex; align-items:center; margin:40px 0;"><span style="flex:1 1 auto;height:1px;background:#306DB6;opacity:0.35;font-size:0;line-height:0;overflow:hidden;"></span><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" fill="#306DB6" r="4.3"></circle></svg><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><polygon fill="#306DB6" points="8,3.50 4.10,10.25 11.90,10.25"></polygon></svg><svg height="15" style="display:inline-block;vertical-align:middle;margin:0 9px;flex:0 0 auto;" width="15" xmlns="http://www.w3.org/2000/svg"><polygon fill="#306DB6" points="8,3.20 9.18,6.38 12.57,6.52 9.90,8.62 10.82,11.88 8,10.00 5.18,11.88 6.10,8.62 3.44,6.52 6.82,6.38"></polygon></svg><span style="flex:1 1 auto;height:1px;background:#306DB6;opacity:0.35;font-size:0;line-height:0;overflow:hidden;"></span></p>
+<p style="color:#aaa; font-size:var(--fs-caption); text-align:center; margin:24px 0;">本文素材来自 How I AI 播客 2026 年 8 月 3 日节目 How this OpenAI engineer uses Codex + ChatGPT Work to automate everything。</p></div>
+<!-- 底部 -->
+<footer class="article-footer">
+<div class="same-collection"></div>
+</footer>
+`,s=`
 <div class="article-eyebrow article-eyebrow-top"><span class="a-tag">反假选择</span></div>
 <h1 class="article-h1">Figma 把 Agent 装进画布<br/>让设计师同时开多个方向</h1>
 <div class="article-byline"><span>2026-05-31</span><span>阅读约 8 分钟</span></div>
@@ -1017,7 +1472,7 @@ const t=[{slug:"selection-as-context",file:"article-selection-as-context.html",t
 <p style="text-align:center; margin:40px 0; font-size:16px; letter-spacing:10px; color:#bbb;">◎  △  ○</p>
 <p style="color:#aaa; font-size:14px; text-align:center; margin:24px 0;">本文素材来自 Figma 官方博客 The Figma design agent is here。</p></div>
 <!-- 底部 -->
-`,s=`
+`,o=`
 <h1 class="article-h1">设计师被 AI 替代之前<br/>Figma 用一整套新功能抬高设计师上限</h1>
 <div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-tag">AI 设计工作流</span></div><span>2026-06-26</span><span>阅读约 7 分钟</span></div>
 <div class="article-cover"><iframe loading="lazy" src="assets/figma-config-2026/cover.html"></iframe></div>
@@ -1565,7 +2020,7 @@ const t=[{slug:"selection-as-context",file:"article-selection-as-context.html",t
 <footer class="article-footer">
 <div class="same-collection"><div class="sc-title">合集 · Figma 观察</div><a href="article-figma-config-2026.html"><span class="sc-num">01</span><span>设计师被 AI 替代之前，Figma 用一整套新功能抬高设计师上限</span></a><a href="article-figma-shader-motion.html"><span class="sc-num">02</span><span>在设计系统里，Figma Shader 和 Motion ，正从效果变成可复用元素</span></a><a href="article-figma-make-gpt-5-6.html"><span class="sc-num">03</span><span>设计师的新习惯，给 AI 模型分工</span></a><a href="article-figma-make-designer-pr.html"><span class="sc-num">04</span><span>AI native 设计师的交付物，不只设计稿，还有 GitHub PR</span></a></div>
 </footer>
-`,o=`
+`,l=`
 <h1 class="article-h1">AI native 设计师的交付物<br/>不只设计稿<br/>还有 GitHub PR</h1>
 <div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-tag">设计协作</span></div><span>2026-07-19</span><span>阅读约 5 分钟</span></div>
 <div class="article-cover"><iframe loading="lazy" src="assets/figma-make-designer-pr/cover4.html"></iframe></div>
@@ -2043,7 +2498,7 @@ const t=[{slug:"selection-as-context",file:"article-selection-as-context.html",t
 <footer class="article-footer">
 <div class="same-collection"><div class="sc-title">合集 · Figma 观察</div><a href="article-figma-config-2026.html"><span class="sc-num">01</span><span>设计师被 AI 替代之前，Figma 用一整套新功能抬高设计师上限</span></a><a href="article-figma-shader-motion.html"><span class="sc-num">02</span><span>在设计系统里，Figma Shader 和 Motion ，正从效果变成可复用元素</span></a><a href="article-figma-make-gpt-5-6.html"><span class="sc-num">03</span><span>设计师的新习惯，给 AI 模型分工</span></a><a href="article-figma-make-designer-pr.html"><span class="sc-num">04</span><span>AI native 设计师的交付物，不只设计稿，还有 GitHub PR</span></a></div>
 </footer>
-`,l=`
+`,c=`
 <div class="article-eyebrow article-eyebrow-top"><span class="a-tag">AI 设计工作流</span></div>
 <h1 class="article-h1">设计师的新习惯<br/>给 AI 模型分工</h1>
 <div class="article-byline"><span>2026-07-11</span><span>阅读约 6 分钟</span></div>
@@ -2514,7 +2969,7 @@ const t=[{slug:"selection-as-context",file:"article-selection-as-context.html",t
 <footer class="article-footer">
 <div class="same-collection"><div class="sc-title">合集 · Figma 观察</div><a href="article-figma-config-2026.html"><span class="sc-num">01</span><span>设计师被 AI 替代之前，Figma 用一整套新功能抬高设计师上限</span></a><a href="article-figma-shader-motion.html"><span class="sc-num">02</span><span>在设计系统里，Figma Shader 和 Motion ，正从效果变成可复用元素</span></a><a href="article-figma-make-gpt-5-6.html"><span class="sc-num">03</span><span>设计师的新习惯，给 AI 模型分工</span></a><a href="article-figma-make-designer-pr.html"><span class="sc-num">04</span><span>AI native 设计师的交付物，不只设计稿，还有 GitHub PR</span></a></div>
 </footer>
-`,c=`
+`,m=`
 <div class="article-eyebrow article-eyebrow-top"><span class="a-tag">参数化材质</span></div>
 <h1 class="article-h1">在设计系统里<br/>Figma Shader 和 Motion<br/>正从效果变成可复用元素</h1>
 <div class="article-byline"><span>2026-07-01</span><span>阅读约 8 分钟</span></div>
@@ -2998,7 +3453,7 @@ const t=[{slug:"selection-as-context",file:"article-selection-as-context.html",t
 <footer class="article-footer">
 <div class="same-collection"><div class="sc-title">合集 · Figma 观察</div><a href="article-figma-config-2026.html"><span class="sc-num">01</span><span>设计师被 AI 替代之前，Figma 用一整套新功能抬高设计师上限</span></a><a href="article-figma-shader-motion.html"><span class="sc-num">02</span><span>在设计系统里，Figma Shader 和 Motion ，正从效果变成可复用元素</span></a><a href="article-figma-make-gpt-5-6.html"><span class="sc-num">03</span><span>设计师的新习惯，给 AI 模型分工</span></a><a href="article-figma-make-designer-pr.html"><span class="sc-num">04</span><span>AI native 设计师的交付物，不只设计稿，还有 GitHub PR</span></a></div>
 </footer>
-`,m=`
+`,p=`
 <div class="article-eyebrow article-eyebrow-top"><span class="a-tag">Agent 协作</span></div>
 <h1 class="article-h1">设计师的新资产<br/>是 Skills</h1>
 <div class="article-byline"><span>2026-07-05</span><span>阅读约 9 分钟</span></div>
@@ -3508,7 +3963,7 @@ const t=[{slug:"selection-as-context",file:"article-selection-as-context.html",t
 <footer class="article-footer">
 <div class="same-collection"></div>
 </footer>
-`,p=`
+`,d=`
 <div class="article-eyebrow article-eyebrow-top"><span class="a-tag">反聊天框</span></div>
 <h1 class="article-h1">Genie 给 AI 装了一具身体：光、物理和触感</h1>
 <div class="article-byline"><span>2026-05-30</span><span>·</span><span>阅读约 8 分钟</span></div>
@@ -3638,7 +4093,7 @@ Nelson 把设计师的任务概括成一句话：<strong>别再把 AI 当文字�
 <footer class="article-footer">
 <div class="same-collection"><div class="sc-title">合集 · AI 设计语言</div><a href="article-genie.html"><span class="sc-num">01</span><span>Genie 给 AI 装了一具身体：光、物理和触感</span></a></div>
 </footer>
-`,d=`
+`,g=`
 <h1 class="article-h1">跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线</h1>
 <div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-tag">GenUI</span></div><span>2026-08-02</span><span>阅读约 6 分钟</span></div>
 <div class="article-cover"><iframe loading="lazy" src="assets/genui-no-style-to-write/cover5.html"></iframe></div>
@@ -4118,7 +4573,7 @@ Nelson 把设计师的任务概括成一句话：<strong>别再把 AI 当文字�
 <footer class="article-footer">
 <div class="same-collection"></div>
 </footer>
-`,g=`
+`,f=`
 <h1 class="article-h1">看不出 AI 味的 AI 设计方式</h1>
 <div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-tag">刻意零 AI</span></div><span>2026-07-16</span><span>阅读约 6 分钟</span></div>
 <div class="article-cover"><iframe loading="lazy" src="assets/remove-ai-taste-in-design/cover4.html"></iframe></div>
@@ -4605,7 +5060,7 @@ Nelson 把设计师的任务概括成一句话：<strong>别再把 AI 当文字�
 <footer class="article-footer">
 <div class="same-collection"></div>
 </footer>
-`,f=`
+`,h=`
 <div class="article-eyebrow article-eyebrow-top"><span class="a-tag">AI 辅助工作流</span></div>
 <h1 class="article-h1">设计师的新工作<br/>审查 AI 产物</h1>
 <div class="article-byline"><span>2026-07-05</span><span>阅读约 7 分钟</span></div>
@@ -5099,7 +5554,7 @@ Nelson 把设计师的任务概括成一句话：<strong>别再把 AI 当文字�
 <footer class="article-footer">
 <div class="same-collection"></div>
 </footer>
-`,h=`
+`,x=`
 <h1 class="article-h1">AI 产品设计｜选中即上下文</h1>
 <div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-tag">上下文当对象</span></div><span>2026-08-05</span><span>阅读约 7 分钟</span></div>
 <div class="article-cover"><iframe loading="lazy" src="assets/selection-as-context/cover.html"></iframe></div>
@@ -5560,7 +6015,7 @@ Nelson 把设计师的任务概括成一句话：<strong>别再把 AI 当文字�
 <footer class="article-footer">
 <div class="same-collection"></div>
 </footer>
-`,x=`
+`,y=`
 <div class="article-eyebrow article-eyebrow-top"><span class="a-tag">认知设计</span></div>
 <h1 class="article-h1">AI 符号被秒懂<br/>是调用了成熟的用户心智模型</h1>
 <div class="article-byline"><span>2026-05-24</span><span>阅读约 9 分钟</span></div>
@@ -6095,7 +6550,7 @@ Nelson 把设计师的任务概括成一句话：<strong>别再把 AI 当文字�
 <footer class="article-footer">
 <div class="same-collection"></div>
 </footer>
-`,y=`
+`,v=`
 <div class="article-eyebrow article-eyebrow-top"><span class="a-tag">听觉优先</span></div>
 <h1 class="article-h1">Voices</h1>
 <div class="article-byline"><span>2026-07-14</span><span>阅读约 3 分钟</span></div>
@@ -6544,4 +6999,4 @@ Nelson 把设计师的任务概括成一句话：<strong>别再把 AI 当文字�
 <footer class="article-footer">
 <div class="same-collection"></div>
 </footer>
-`,w={"app-shape-for-ai":e,"claude-code-verification-loops":r,"figma-agent":i,"figma-config-2026":s,"figma-make-designer-pr":o,"figma-make-gpt-5-6":l,"figma-shader-motion":c,"figma-skills":m,genie:p,"genui-no-style-to-write":d,"remove-ai-taste-in-design":g,"review-ai-output":f,"selection-as-context":h,sparkle:x,voices:y},C={"app-shape-for-ai":{title:"SiriAI 设计 · VibeUX",accent:"#5B7FFF",tint:"blue"},"claude-code-verification-loops":{title:"验证循环，把手动检查写进 Skill · VibeUX",accent:"#6A823F",tint:"sand"},"figma-agent":{title:"Figma 把 Agent 装进画布，让设计师同时开多个方向 · VibeUX",accent:"#3B82F6",tint:"blue"},"figma-config-2026":{title:"设计师被 AI 替代之前，Figma 用一整套新功能抬高设计师上限 · VibeUX",accent:"#D4A017",tint:"sand"},"figma-make-designer-pr":{title:"AI native 设计师的交付物，不只设计稿，还有 GitHub PR · VibeUX",accent:"#2F3336",tint:"gray"},"figma-make-gpt-5-6":{title:"设计师的新习惯，给 AI 模型分工 · VibeUX",accent:"#5F82F5",tint:"blue"},"figma-shader-motion":{title:"在设计系统里，Figma Shader 和 Motion ，正从效果变成可复用元素 · VibeUX",accent:"#7C4DFF",tint:"violet"},"figma-skills":{title:"设计师的新资产，是 Skills · VibeUX",accent:"#D4A017",tint:"sand"},genie:{title:"Genie 给 AI 装了一具身体：光、物理和触感 · VibeUX",accent:"#06B6D4",tint:"mint"},"genui-no-style-to-write":{title:"跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线 · VibeUX",accent:"#1C1B1B",tint:"gray"},"remove-ai-taste-in-design":{title:"看不出 AI 味的 AI 设计方式 · VibeUX",accent:"#5A6CD8",tint:"blue"},"review-ai-output":{title:"设计师的新工作，审查 AI 产物 · VibeUX",accent:"#0E9E6E",tint:"mint"},"selection-as-context":{title:"AI 产品设计｜选中即上下文 · VibeUX",accent:"#4B5FE8",tint:"blue"},sparkle:{title:"AI 符号被秒懂，是调用了成熟的用户心智模型 · VibeUX",accent:"#6F8FC4",tint:"blue"},voices:{title:"Voices · VibeUX",accent:"#D6558E",tint:"rose"}};export{C as A,w as F,v as a,b,u as c,k as r};
+`,C={"app-shape-for-ai":e,"claude-code-verification-loops":r,"codex-voice-delegation":i,"figma-agent":s,"figma-config-2026":o,"figma-make-designer-pr":l,"figma-make-gpt-5-6":c,"figma-shader-motion":m,"figma-skills":p,genie:d,"genui-no-style-to-write":g,"remove-ai-taste-in-design":f,"review-ai-output":h,"selection-as-context":x,sparkle:y,voices:v},A={"app-shape-for-ai":{title:"SiriAI 设计 · VibeUX",accent:"#5B7FFF",tint:"blue"},"claude-code-verification-loops":{title:"验证循环，把手动检查写进 Skill · VibeUX",accent:"#6A823F",tint:"sand"},"codex-voice-delegation":{title:"把活说给 Codex 之后它停在提交前等确认 · VibeUX",accent:"#306DB6",tint:"blue"},"figma-agent":{title:"Figma 把 Agent 装进画布，让设计师同时开多个方向 · VibeUX",accent:"#3B82F6",tint:"blue"},"figma-config-2026":{title:"设计师被 AI 替代之前，Figma 用一整套新功能抬高设计师上限 · VibeUX",accent:"#D4A017",tint:"sand"},"figma-make-designer-pr":{title:"AI native 设计师的交付物，不只设计稿，还有 GitHub PR · VibeUX",accent:"#2F3336",tint:"gray"},"figma-make-gpt-5-6":{title:"设计师的新习惯，给 AI 模型分工 · VibeUX",accent:"#5F82F5",tint:"blue"},"figma-shader-motion":{title:"在设计系统里，Figma Shader 和 Motion ，正从效果变成可复用元素 · VibeUX",accent:"#7C4DFF",tint:"violet"},"figma-skills":{title:"设计师的新资产，是 Skills · VibeUX",accent:"#D4A017",tint:"sand"},genie:{title:"Genie 给 AI 装了一具身体：光、物理和触感 · VibeUX",accent:"#06B6D4",tint:"mint"},"genui-no-style-to-write":{title:"跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线 · VibeUX",accent:"#1C1B1B",tint:"gray"},"remove-ai-taste-in-design":{title:"看不出 AI 味的 AI 设计方式 · VibeUX",accent:"#5A6CD8",tint:"blue"},"review-ai-output":{title:"设计师的新工作，审查 AI 产物 · VibeUX",accent:"#0E9E6E",tint:"mint"},"selection-as-context":{title:"AI 产品设计｜选中即上下文 · VibeUX",accent:"#4B5FE8",tint:"blue"},sparkle:{title:"AI 符号被秒懂，是调用了成熟的用户心智模型 · VibeUX",accent:"#6F8FC4",tint:"blue"},voices:{title:"Voices · VibeUX",accent:"#D6558E",tint:"rose"}};export{A,C as F,u as a,k as b,b as c,w as r};

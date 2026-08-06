@@ -20,6 +20,7 @@ const ARTICLE_SLUGS = [
   'figma-make-gpt-5-6',
   'figma-shader-motion',
   'figma-skills',
+  'codex-voice-delegation',
   'genie',
   'remove-ai-taste-in-design',
   'review-ai-output',

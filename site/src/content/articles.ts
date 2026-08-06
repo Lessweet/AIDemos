@@ -38,6 +38,25 @@ export interface ArticleMeta {
 
 export const ARTICLES: ArticleMeta[] = [
   {
+    slug: 'codex-voice-delegation',
+    file: 'article-codex-voice-delegation.html',
+    title: '把活说给 Codex 之后它停在提交前等确认',
+    date: '2026-08-06',
+    readTime: '6 分钟',
+    tags: ['派活式交互'],
+    cat: 'product',
+    accent: '#306DB6',
+    collection: '',
+    excerpt:
+      'Codex 语音接的是完整的多线程能力，按热键唤起、读屏拿上下文、同时派出几条线程；可逆的动作自动跑，下单和提交这类不可逆的动作，全部停在人点确认之前。',
+    listCover: 'assets/codex-voice-delegation/cover.png',
+    cardCover: 'assets/cards/codex-voice-delegation.webp',
+    inBlogGrid: true,
+    blogTag: '派活式交互',
+    blogDelay: 600,
+    /* 人物合成封面,没有动态版 —— BlogPage 会退到 cardCover 静态图 */
+  },
+  {
     slug: 'selection-as-context',
     file: 'article-selection-as-context.html',
     title: 'AI 产品设计｜选中即上下文',

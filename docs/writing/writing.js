@@ -423,6 +423,7 @@ function initTOC() {
    ======================================== */
 /* READER_ARTICLES:AUTO —— 发布时 render.py 从 articles.json 自动重生成此数组,勿手改。 */
 let READER_ARTICLES = [
+    { file: "article-codex-voice-delegation.html", cat: "product", title: "把活说给 Codex 之后它停在提交前等确认", date: "2026-08-06", cover: "assets/codex-voice-delegation/cover.png", accent: "#306DB6" },
     { file: "article-selection-as-context.html", cat: "product", title: "AI 产品设计｜选中即上下文", date: "2026-08-05", cover: "assets/selection-as-context/cover.png", accent: "#4B5FE8" },
     { file: "article-genui-no-style-to-write.html", cat: "ui", title: "跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线", date: "2026-08-02", cover: "assets/genui-no-style-to-write/cover5.png", accent: "#1C1B1B" },
     { file: "article-claude-code-verification-loops.html", cat: "product", title: "验证循环，把手动检查写进 Skill", date: "2026-07-23", cover: "assets/claude-code-verification-loops/cover4.png", accent: "#6A823F" },
