@@ -12,10 +12,10 @@
 <link href="writing.css?v=428" rel="stylesheet"/>
 <!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁(React 迁移后的原生 boot 层) -->
 <script src="../nav-boot.js?v=9"></script>
-  <script type="module" crossorigin src="/assets/index-BOwIwFzp.js"></script>
-  <script type="module" crossorigin src="/assets/article-content-DVVnmY2b.js"></script>
-  <script type="module" crossorigin src="/assets/ArticlePage-qN2I8tAz.js"></script>
-  <script type="module" crossorigin src="/assets/main-BNrd68oY.js"></script>
+<script crossorigin="" src="/assets/index-BOwIwFzp.js" type="module"></script>
+<script crossorigin="" src="/assets/article-content-DVVnmY2b.js" type="module"></script>
+<script crossorigin="" src="/assets/ArticlePage-qN2I8tAz.js" type="module"></script>
+<script crossorigin="" src="/assets/main-BNrd68oY.js" type="module"></script>
 </head>
 <!-- 复用首页 index.html 的胶囊顶栏:home-v2 控制顶栏内边距,design-page 提供胶囊样式 -->
 <body class="writing-page home-v2 design-page reading-page" data-accent="#0E9E6E" data-tint="mint">
@@ -40,6 +40,6 @@
             window.addEventListener('load', set);
         })();
     </script>
-<div class="reading-layout" id="app" data-slug="review-ai-output"></div>
+<div class="reading-layout" data-slug="review-ai-output" id="app"></div>
 </body>
 </html>

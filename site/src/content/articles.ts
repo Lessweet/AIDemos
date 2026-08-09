@@ -69,8 +69,11 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       '聊天框里改一句话，得先把它说成一段话。提示词增强、智能文档、输出级撤销这三个模式围着同一条线转，写作流程里的修改、调整、编辑和回退，各自该长成什么控件。',
     listCover: 'assets/beyond-chat-edit-in-place/cover.png',
-    inBlogGrid: false,
-    draft: true, // 2026-08-09 用户下线:站上完全不存在(voices 同款,docs 页面进 .gitignore)
+    cardCover: 'assets/cards/beyond-chat-edit-in-place.webp', // CI build-card-covers 生成
+    inBlogGrid: true,
+    blogTag: 'AI 界面模式',
+    blogDelay: 0,
+    blogCover: { type: 'iframe', src: 'writing/assets/beyond-chat-edit-in-place/cover.html' },
   },
   {
     slug: 'code-connect-mcp-coverage',
