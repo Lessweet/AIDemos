@@ -773,6 +773,7 @@ body.reading-page .article-eyebrow .a-tag,
        卡片 meta 行用下面的覆盖对齐 gray-600。 */
     color: #969696;
     line-height: 1.2;
+    transition: color var(--hover-color-dur) ease;   /* hover 淡化与同排角标同步;描边=currentColor 一起过渡 */
 }
 /* 卡片 meta 行:章与同排角标(态度 tag / 日期)同色 = gray-600(角标统一色) */
 .home-v2 .writing-info .w-meta .a-kind { color: var(--gray-600); }
@@ -1816,7 +1817,8 @@ body.home-v2 .header-placeholder { height: 76px; }
 @media (hover: hover) {
     .card-wrapper:hover .writing-info .w-title,
     .card-wrapper:hover .writing-info .w-excerpt { color: var(--gray-500); }   /* 简介与标题同 token,hover 同步 */
-    .card-wrapper:hover .writing-info .w-date { color: var(--gray-300); }
+    .card-wrapper:hover .writing-info .w-date,
+    .card-wrapper:hover .writing-info .w-meta .a-kind { color: var(--gray-300); }   /* 解读章随角标一起淡化 */
 }
 
 /* 填充式占位图(用于封面框内) */
@@ -2464,8 +2466,9 @@ body.theme-dark .card-wrapper:hover .writing-info .w-date { color: rgba(255, 255
 body.theme-dark .writing-info .w-meta .w-tags .a-tag {
     color: rgba(255, 255, 255, 0.6);   /* = .w-date 同色(角标统一) */
 }
-body.theme-dark .card-wrapper:hover .writing-info .w-meta .w-tags .a-tag {
-    color: rgba(255, 255, 255, 0.3);   /* = .w-date hover 同色 */
+body.theme-dark .card-wrapper:hover .writing-info .w-meta .w-tags .a-tag,
+body.theme-dark .card-wrapper:hover .writing-info .w-meta .a-kind {
+    color: rgba(255, 255, 255, 0.3);   /* = .w-date hover 同色(解读章同步) */
 }
 
 /* 模块分割线(如启用):8% 黑 → 8% 白 */
