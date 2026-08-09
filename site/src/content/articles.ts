@@ -198,6 +198,7 @@ export const ARTICLES: ArticleMeta[] = [
     tags: ['刻意零 AI'],
     cat: 'ui',
     accent: '#5A6CD8',
+    kind: '解读', // 拆读 YC 设计负责人的 AI 工作流分享
     collection: '',
     excerpt:
       'AI 能实现 shader，但生成的默认值不代表想要的效果。设计师的品味得通过参数、mood board、甚至刻意零 AI 的手绘，一层层加进去。',
@@ -312,6 +313,7 @@ export const ARTICLES: ArticleMeta[] = [
     tags: ['AI 设计工作流', '协作画布'],
     cat: 'product',
     accent: '#D4A017',
+    kind: '解读', // 拆读 Config 2026 发布会
     collection: 'Figma 观察',
     excerpt:
       'AI 拉低了设计的下限，却没抬高上限。Config 2026 的生成式插件、Agent、代码图层、Motion，都在放大设计表达。以不受限制的方式设计，是一种持续的创作力。',
