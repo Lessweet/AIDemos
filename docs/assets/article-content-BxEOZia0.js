@@ -29,7 +29,7 @@ const t=[{slug:"beyond-chat-prompt-to-controls",file:"article-beyond-chat-prompt
 </footer>
 `,r=`
 <h1 class="article-h1">AI 产品设计｜修改在内容上而不是聊天框里</h1>
-<div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-kind" style="color: #B8550F;">解读</span><span class="a-tag">AI 界面模式</span></div><span>2026-08-05</span><span>阅读约 9 分钟</span></div>
+<div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-kind">解读</span><span class="a-tag">AI 界面模式</span></div><span>2026-08-05</span><span>阅读约 9 分钟</span></div>
 <div class="article-cover"><iframe loading="lazy" src="assets/beyond-chat-edit-in-place/cover.html"></iframe></div>
 <div class="article-body"><style>
 /* article-template 样式 inline 到网站，仅作用于 .article-body 内 */
@@ -493,7 +493,7 @@ const t=[{slug:"beyond-chat-prompt-to-controls",file:"article-beyond-chat-prompt
 </footer>
 `,i=`
 <h1 class="article-h1">AI 产品设计 ｜ 把高频微调的 Prompt 转变为可复现的参数控件</h1>
-<div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-kind" style="color: #4FA02A;">解读</span><span class="a-tag">AI 界面模式</span></div><span>2026-08-04</span><span>阅读约 7 分钟</span></div>
+<div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-kind">解读</span><span class="a-tag">AI 界面模式</span></div><span>2026-08-04</span><span>阅读约 7 分钟</span></div>
 <div class="article-cover"><iframe loading="lazy" src="assets/beyond-chat-prompt-to-controls/cover.html"></iframe></div>
 <div class="article-body"><style>
 /* article-template 样式 inline 到网站，仅作用于 .article-body 内 */
@@ -965,7 +965,7 @@ const t=[{slug:"beyond-chat-prompt-to-controls",file:"article-beyond-chat-prompt
 </footer>
 `,s=`
 <h1 class="article-h1">验证循环，把手动检查写进 Skill</h1>
-<div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-kind" style="color: #6A823F;">解读</span><span class="a-tag">Agent 协作</span></div><span>2026-07-23</span><span>阅读约 6 分钟</span></div>
+<div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-kind">解读</span><span class="a-tag">Agent 协作</span></div><span>2026-07-23</span><span>阅读约 6 分钟</span></div>
 <div class="article-cover"><iframe loading="lazy" src="assets/claude-code-verification-loops/cover4.html"></iframe></div>
 <div class="article-body"><style>
 /* article-template 样式 inline 到网站，仅作用于 .article-body 内 */
