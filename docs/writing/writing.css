@@ -751,6 +751,29 @@ body.reading-page .article-eyebrow .a-tag,
     transition: color var(--hover-color-dur) ease, background-color var(--hover-color-dur) ease;
 }
 
+/* 内容类型章(kind,目前只有「解读」)—— 与态度 tag 是两个维度、两种视觉:
+   态度 tag 在卡片 meta / byline 里是纯灰字,kind 用填底圆角矩形章,示意「基于他人内容的拆读」。
+   原创是默认态、不标,所以这个章只出现在少数文章上。
+   共用一个类:Blog 卡片 meta 行(BlogPage.tsx)与文章页 byline(render.py 生成的
+   .article-eyebrow 首位)都渲染 .a-kind;byline 那条去胶囊覆盖只认 .a-tag,碰不到它。 */
+.a-kind {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    background: var(--ink-08);
+    border-radius: 6px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: 400;
+    color: #666;
+    line-height: 1.2;
+}
+/* 黑底上 8% 黑的填底会消失,手动翻色(同 .a-tag 的深色处理思路) */
+body.theme-dark .a-kind {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.6);
+}
+
 /* 文章详情页:tag 移到标题上方,纯文字加粗(不用胶囊底),与标题一起居中。
    优先级 (0,3,0) 压过各文章内联的 .article-eyebrow .a-tag{font-weight:400}。 */
 body.reading-page .article-eyebrow-top {

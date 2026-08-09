@@ -19,6 +19,9 @@ export interface ArticleMeta {
   tags: string[];
   cat: 'ui' | 'product';
   accent: string;
+  /* 内容类型章,独立于态度 tags:目前只有 '解读'(基于他人内容的拆读,learn in public)。
+     原创是默认态、不标。卡片 meta 行最左 + 文章页 byline 首位渲染成填底圆角章(.a-kind)。 */
+  kind?: string;
   collection: string;
   excerpt: string;
   listCover: string; // 阅读器左栏缩略图(articles.json cover 字段,相对 writing/)
@@ -46,6 +49,7 @@ export const ARTICLES: ArticleMeta[] = [
     tags: ['AI 界面模式'],
     cat: 'ui',
     accent: '#4FA02A',
+    kind: '解读', // 读 Beyond Chat 模式库
     collection: 'AI 产品设计',
     excerpt:
       '读 Beyond Chat 模式库的第一篇。属性面板、行内 prompt 控件、渐进式披露、语气面板这四个模式在干同一件事，把高频微调的配置从 prompt 那个文本块里拆出来，变成能看见、能复现的控件。',
@@ -65,6 +69,7 @@ export const ARTICLES: ArticleMeta[] = [
     tags: ['AI 界面模式'],
     cat: 'ui',
     accent: '#B8550F',
+    kind: '解读', // 读 Beyond Chat 模式库
     collection: 'AI 产品设计',
     excerpt:
       '聊天框里改一句话，得先把它说成一段话。提示词增强、智能文档、输出级撤销这三个模式围着同一条线转，写作流程里的修改、调整、编辑和回退，各自该长成什么控件。',
@@ -154,6 +159,7 @@ export const ARTICLES: ArticleMeta[] = [
     tags: ['Agent 协作'],
     cat: 'product',
     accent: '#6A823F',
+    kind: '解读', // 拆读 Anthropic 博客的验证循环概念
     collection: '',
     excerpt:
       'Anthropic 博客提了一个概念——验证循环：每次重复做的手动检查，写成 Skill 让 Claude 自己跑。编进去的规矩越多，AI 第一次出手就越接近你要的标准。',
