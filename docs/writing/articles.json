@@ -58,8 +58,7 @@
       "accent": "#B8550F",
       "collection": "AI 产品设计",
       "excerpt": "聊天框里改一句话，得先把它说成一段话。提示词增强、智能文档、输出级撤销这三个模式围着同一条线转，写作流程里的修改、调整、编辑和回退，各自该长成什么控件。",
-      "cover": "assets/beyond-chat-edit-in-place/cover.png",
-      "draft": true
+      "cover": "assets/beyond-chat-edit-in-place/cover.png"
     },
     {
       "slug": "beyond-chat-prompt-to-controls",
