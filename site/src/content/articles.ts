@@ -38,6 +38,25 @@ export interface ArticleMeta {
 
 export const ARTICLES: ArticleMeta[] = [
   {
+    slug: 'beyond-chat-prompt-to-controls',
+    file: 'article-beyond-chat-prompt-to-controls.html',
+    title: 'AI 产品设计 ｜ 把高频微调的 Prompt 转变为可复现的参数控件',
+    date: '2026-08-04',
+    readTime: '7 分钟',
+    tags: ['AI 界面模式'],
+    cat: 'ui',
+    accent: '#4FA02A',
+    collection: 'AI 产品设计',
+    excerpt:
+      '读 Beyond Chat 模式库的第一篇。属性面板、行内 prompt 控件、渐进式披露、语气面板这四个模式在干同一件事，把高频微调的配置从 prompt 那个文本块里拆出来，变成能看见、能复现的控件。',
+    listCover: 'assets/beyond-chat-prompt-to-controls/cover.png',
+    cardCover: 'assets/cards/beyond-chat-prompt-to-controls.webp', // CI build-card-covers 生成
+    inBlogGrid: true,
+    blogTag: 'AI 界面模式',
+    blogDelay: 0,
+    blogCover: { type: 'iframe', src: 'writing/assets/beyond-chat-prompt-to-controls/cover.html' },
+  },
+  {
     slug: 'beyond-chat-edit-in-place',
     file: 'article-beyond-chat-edit-in-place.html',
     title: 'AI 产品设计｜修改在内容上而不是聊天框里',

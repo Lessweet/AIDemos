@@ -423,10 +423,8 @@ function initTOC() {
    ======================================== */
 /* READER_ARTICLES:AUTO —— 发布时 render.py 从 articles.json 自动重生成此数组,勿手改。 */
 let READER_ARTICLES = [
-    { file: "article-code-connect-mcp-coverage.html", cat: "product", title: "Figma 新推出 Code Connect CLI，给 Agent 读取生产环境的上下文", date: "2026-08-07", cover: "assets/code-connect-mcp-coverage/cover.png", accent: "#3392CC" },
-    { file: "article-codex-voice-delegation.html", cat: "product", title: "ChatGPT Voice 用聊天的方式干活，还能随时打断", date: "2026-08-06", cover: "assets/codex-voice-delegation/cover.png", accent: "#306DB6" },
     { file: "article-selection-as-context.html", cat: "product", title: "AI 产品设计｜选中即上下文", date: "2026-08-05", cover: "assets/selection-as-context/cover.png", accent: "#4B5FE8" },
-    { file: "article-beyond-chat-edit-in-place.html", cat: "ui", title: "AI 产品设计｜修改在内容上而不是聊天框里", date: "2026-08-05", cover: "assets/beyond-chat-edit-in-place/cover.png", accent: "#B8550F" },
+    { file: "article-beyond-chat-prompt-to-controls.html", cat: "ui", title: "AI 产品设计 ｜ 把高频微调的 Prompt 转变为可复现的参数控件", date: "2026-08-04", cover: "assets/beyond-chat-prompt-to-controls/cover.png", accent: "#4FA02A" },
     { file: "article-genui-no-style-to-write.html", cat: "ui", title: "跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线", date: "2026-08-02", cover: "assets/genui-no-style-to-write/cover5.png", accent: "#1C1B1B" },
     { file: "article-claude-code-verification-loops.html", cat: "product", title: "验证循环，把手动检查写进 Skill", date: "2026-07-23", cover: "assets/claude-code-verification-loops/cover4.png", accent: "#6A823F" },
     { file: "article-figma-make-designer-pr.html", cat: "product", title: "AI native 设计师的交付物，不只设计稿，还有 GitHub PR", date: "2026-07-19", cover: "assets/figma-make-designer-pr/cover4.png", accent: "#2F3336" },
