@@ -24,6 +24,12 @@
 # 转正 = markdown frontmatter 里 draft 改 false + 重新渲染 + 把这两行删掉。
 /docs/writing/article-voices.html
 /docs/writing/assets/voices/
+/docs/writing/article-beyond-chat-edit-in-place.html
+/docs/writing/assets/beyond-chat-edit-in-place/
+/docs/writing/article-codex-voice-delegation.html
+/docs/writing/assets/codex-voice-delegation/
+/docs/writing/article-code-connect-mcp-coverage.html
+/docs/writing/assets/code-connect-mcp-coverage/
 
 # React 迁移(Vite)工具链
 node_modules/

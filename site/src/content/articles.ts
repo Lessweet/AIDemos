@@ -50,11 +50,8 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       '聊天框里改一句话，得先把它说成一段话。提示词增强、智能文档、输出级撤销这三个模式围着同一条线转，写作流程里的修改、调整、编辑和回退，各自该长成什么控件。',
     listCover: 'assets/beyond-chat-edit-in-place/cover.png',
-    cardCover: 'assets/cards/beyond-chat-edit-in-place.webp',
-    inBlogGrid: true,
-    blogTag: 'AI 界面模式',
-    blogDelay: 600,
-    blogCover: { type: 'iframe', src: 'writing/assets/beyond-chat-edit-in-place/cover.html' },
+    inBlogGrid: false,
+    draft: true, // 2026-08-09 用户下线:站上完全不存在(voices 同款,docs 页面进 .gitignore)
   },
   {
     slug: 'code-connect-mcp-coverage',
@@ -69,11 +66,8 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       'AI agent 从设计稿生成代码，图标画错 glyph、间距丢了、tab 不可交互，全是设计师走查才揪得出来的细节。组件映射喂给 AI 之后偏差消失了，像素级还原靠的是 agent 拿到了正确的组件。',
     listCover: 'assets/code-connect-mcp-coverage/cover.png',
-    cardCover: 'assets/cards/code-connect-mcp-coverage.webp',
-    inBlogGrid: true,
-    blogTag: '设计系统',
-    blogDelay: 600,
-    blogCover: { type: 'iframe', src: 'writing/assets/code-connect-mcp-coverage/cover.html' },
+    inBlogGrid: false,
+    draft: true, // 2026-08-09 用户下线:站上完全不存在(voices 同款,docs 页面进 .gitignore)
   },
   {
     slug: 'codex-voice-delegation',
@@ -88,11 +82,8 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       'Codex 语音接的是完整的多线程能力，按热键唤起、读屏拿上下文、同时派出几条线程；可逆的动作自动跑，下单和提交这类不可逆的动作，全部停在人点确认之前。',
     listCover: 'assets/codex-voice-delegation/cover.png',
-    cardCover: 'assets/cards/codex-voice-delegation.webp',
-    inBlogGrid: true,
-    blogTag: '派活式交互',
-    blogDelay: 600,
-    /* 人物合成封面,没有动态版 —— BlogPage 会退到 cardCover 静态图 */
+    inBlogGrid: false,
+    draft: true, // 2026-08-09 用户下线:站上完全不存在(voices 同款,docs 页面进 .gitignore)
   },
   {
     slug: 'selection-as-context',
