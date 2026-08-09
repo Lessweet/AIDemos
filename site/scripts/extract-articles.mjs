@@ -19,7 +19,7 @@ const FRAG_DIR = path.join(ROOT, 'site/src/content/fragments');
 const ENTRY_DIR = path.join(ROOT, 'site/writing');
 
 const SLUGS = [
-  'app-shape-for-ai', 'claude-code-verification-loops', 'figma-agent', 'figma-config-2026',
+  'app-shape-for-ai', 'beyond-chat-edit-in-place', 'claude-code-verification-loops', 'code-connect-mcp-coverage', 'codex-voice-delegation', 'figma-agent', 'figma-config-2026',
   'figma-make-designer-pr', 'figma-make-gpt-5-6', 'figma-shader-motion', 'figma-skills',
   'genie', 'genui-no-style-to-write', 'remove-ai-taste-in-design', 'review-ai-output', 'selection-as-context', 'sparkle', 'voices',
 ];

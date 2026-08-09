@@ -1,6 +1,9 @@
 /** 由 site/scripts/extract-articles.mjs 生成 —— 文章正文片段(.article-reading innerHTML,原样) */
 import app_shape_for_ai from './fragments/app-shape-for-ai.reading.html?raw';
+import beyond_chat_edit_in_place from './fragments/beyond-chat-edit-in-place.reading.html?raw';
 import claude_code_verification_loops from './fragments/claude-code-verification-loops.reading.html?raw';
+import code_connect_mcp_coverage from './fragments/code-connect-mcp-coverage.reading.html?raw';
+import codex_voice_delegation from './fragments/codex-voice-delegation.reading.html?raw';
 import figma_agent from './fragments/figma-agent.reading.html?raw';
 import figma_config_2026 from './fragments/figma-config-2026.reading.html?raw';
 import figma_make_designer_pr from './fragments/figma-make-designer-pr.reading.html?raw';
@@ -17,7 +20,10 @@ import voices from './fragments/voices.reading.html?raw';
 
 export const FRAGMENTS: Record<string, string> = {
   "app-shape-for-ai": app_shape_for_ai,
+  "beyond-chat-edit-in-place": beyond_chat_edit_in_place,
   "claude-code-verification-loops": claude_code_verification_loops,
+  "code-connect-mcp-coverage": code_connect_mcp_coverage,
+  "codex-voice-delegation": codex_voice_delegation,
   "figma-agent": figma_agent,
   "figma-config-2026": figma_config_2026,
   "figma-make-designer-pr": figma_make_designer_pr,
