@@ -118,7 +118,10 @@ function initSiteNav() {
     nav.innerHTML =
         navBg +
         '<div class="header-left">' +
-            '<a href="' + LOGO_HOME + '" class="site-title" data-wordmark="' + WORDMARK + '" aria-label="' + wm.alt + '"><img src="' + base + 'favicon.png?v=20" class="site-logo" alt=""><img src="' + base + wm.src + '" class="site-wordmark" alt="' + wm.alt + '"></a>' +
+            // 导航 logo = 去背景内联 SVG,与 React 头部同一份图形(2026-07-22 规范)。
+            // 旧写法是 favicon.png:自带白底圆角板,而且 img 吃 .design-page 的 32px 规则
+            // (回收到 26px 的修正只写给 svg.site-logo)—— 手写版详情页 logo 会突然变大(2026-08-09 用户截图)。
+            '<a href="' + LOGO_HOME + '" class="site-title" data-wordmark="' + WORDMARK + '" aria-label="' + wm.alt + '"><svg class="site-logo site-logo-svg" viewBox="0 0 200 200" aria-hidden="true"><path fill="currentColor" d="M70 30h100v70H70zM30 100h40v70H30z"></path></svg><img src="' + base + wm.src + '" class="site-wordmark" alt="' + wm.alt + '"></a>' +
         '</div>' +
         // 手机端汉堡按钮:桌面隐藏,≤600px 显示;点击展开 .nav-collapse 下拉
         '<button type="button" class="nav-toggle" aria-label="菜单" aria-expanded="false" aria-controls="nav-collapse">' +
