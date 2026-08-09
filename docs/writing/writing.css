@@ -752,25 +752,27 @@ body.reading-page .article-eyebrow .a-tag,
 }
 
 /* 内容类型章(kind,目前只有「解读」)—— 与态度 tag 是两个维度、两种视觉:
-   态度 tag 在卡片 meta / byline 里是纯灰字,kind 用填底圆角矩形章,示意「基于他人内容的拆读」。
+   态度 tag 在卡片 meta / byline 里是纯灰字,kind 是**主题色彩色文字**(无填底,
+   用户定 2026-08-09,替代最初的填底圆角版),示意「基于他人内容的拆读」。
+   颜色不写在这里:卡片端 BlogPage.tsx 用 a.accent 内联,文章页由 render.py 内联
+   文章 accent —— 内联优先级最高,深浅两个主题下都直接生效,这里只留兜底灰。
    原创是默认态、不标,所以这个章只出现在少数文章上。
-   共用一个类:Blog 卡片 meta 行(BlogPage.tsx)与文章页 byline(render.py 生成的
-   .article-eyebrow 首位)都渲染 .a-kind;byline 那条去胶囊覆盖只认 .a-tag,碰不到它。 */
+   共用一个类:Blog 卡片 meta 行与文章页 byline(render.py 生成的 .article-eyebrow
+   首位)都渲染 .a-kind;byline 那条去胶囊覆盖只认 .a-tag,碰不到它。 */
 .a-kind {
     display: inline-flex;
     align-items: center;
     flex: none;
-    background: var(--ink-05);   /* 比 .a-tag 的 ink-08 浅一档,用户定 2026-08-09 */
+    border: 1px solid currentColor;   /* 描边款(用户定 2026-08-09,替代填底):边框跟随文字色=文章 accent */
     border-radius: 6px;
-    padding: 3px 7px;
-    font-size: 12px;
+    padding: 2px 6px;
+    font-size: 12px;                /* 回到章的徽标尺寸;存在感由边框承担,字重回 400 */
     font-weight: 400;
-    color: var(--gray-700);   /* 比态度 tag 的灰(#969696/gray-600 档)深一档,用户定 2026-08-09 */
+    color: var(--gray-700);         /* 兜底色,正常会被内联 accent 覆盖 */
     line-height: 1.2;
 }
-/* 黑底上 8% 黑的填底会消失,手动翻色(同 .a-tag 的深色处理思路);文字同样比周边灰字重一档 */
+/* 深色兜底:没有内联 accent 时的可读色(有 accent 时内联样式自然压过) */
 body.theme-dark .a-kind {
-    background: rgba(255, 255, 255, 0.08);   /* 同步浅一档(原 0.12) */
     color: rgba(255, 255, 255, 0.75);
 }
 

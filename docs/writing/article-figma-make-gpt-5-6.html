@@ -9,13 +9,13 @@
 <link href="../favicon.png?v=20" rel="shortcut icon"/>
 <link href="../apple-touch-icon.png?v=12" rel="apple-touch-icon"/>
 <link href="../style.css?v=146" rel="stylesheet"/>
-<link href="writing.css?v=445" rel="stylesheet"/>
+<link href="writing.css?v=446" rel="stylesheet"/>
 <!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁(React 迁移后的原生 boot 层) -->
 <script src="../nav-boot.js?v=9"></script>
-  <script type="module" crossorigin src="/assets/index-BOwIwFzp.js"></script>
-  <script type="module" crossorigin src="/assets/article-content-BxEOZia0.js"></script>
-  <script type="module" crossorigin src="/assets/ArticlePage-B75Kd2ul.js"></script>
-  <script type="module" crossorigin src="/assets/main-BXph7hw7.js"></script>
+<script crossorigin="" src="/assets/index-BOwIwFzp.js" type="module"></script>
+<script crossorigin="" src="/assets/article-content-BxEOZia0.js" type="module"></script>
+<script crossorigin="" src="/assets/ArticlePage-B75Kd2ul.js" type="module"></script>
+<script crossorigin="" src="/assets/main-BXph7hw7.js" type="module"></script>
 </head>
 <!-- 复用首页 index.html 的胶囊顶栏:home-v2 控制顶栏内边距,design-page 提供胶囊样式 -->
 <body class="writing-page home-v2 design-page reading-page" data-accent="#5F82F5" data-tint="blue">
@@ -40,6 +40,6 @@
             window.addEventListener('load', set);
         })();
     </script>
-<div class="reading-layout" id="app" data-slug="figma-make-gpt-5-6"></div>
+<div class="reading-layout" data-slug="figma-make-gpt-5-6" id="app"></div>
 </body>
 </html>

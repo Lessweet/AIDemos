@@ -866,7 +866,11 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
                   <h3 className="w-title">{a.title}</h3>
                   <div className="w-excerpt">{a.excerpt}</div>
                   <div className="w-meta">
-                    {a.kind && <span className="a-kind">{a.kind}</span>}
+                    {a.kind && (
+                      <span className="a-kind" style={{ color: a.accent }}>
+                        {a.kind}
+                      </span>
+                    )}
                     <div className="w-tags">
                       <span className="a-tag">{a.blogTag}</span>
                     </div>
