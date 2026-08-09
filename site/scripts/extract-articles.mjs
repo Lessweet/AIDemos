@@ -18,11 +18,22 @@ const SRC = path.join(ROOT, 'docs/writing');
 const FRAG_DIR = path.join(ROOT, 'site/src/content/fragments');
 const ENTRY_DIR = path.join(ROOT, 'site/writing');
 
+/* slug 清单不再手写,从实际文件推导:docs/writing/ 的整页 ∪ 已提取的 fragment。
+   取并集是因为草稿(如 voices)的 docs 页面被 .gitignore 挡住不进仓库,
+   CI 的 checkout 里只有 fragment —— 只扫 docs/ 会把它整个丢掉(2026-08-09 实测)。 */
+const FRAG_DIR_EARLY = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src/content/fragments');
 const SLUGS = [
-  'app-shape-for-ai', 'beyond-chat-edit-in-place', 'claude-code-verification-loops', 'code-connect-mcp-coverage', 'codex-voice-delegation', 'figma-agent', 'figma-config-2026',
-  'figma-make-designer-pr', 'figma-make-gpt-5-6', 'figma-shader-motion', 'figma-skills',
-  'genie', 'genui-no-style-to-write', 'remove-ai-taste-in-design', 'review-ai-output', 'selection-as-context', 'sparkle', 'voices',
-];
+  ...new Set([
+    ...fs
+      .readdirSync(SRC)
+      .filter((f) => /^article-[\w-]+\.html$/.test(f))
+      .map((f) => f.slice('article-'.length, -'.html'.length)),
+    ...fs
+      .readdirSync(FRAG_DIR_EARLY)
+      .filter((f) => /^[\w-]+\.reading\.html$/.test(f))
+      .map((f) => f.slice(0, -'.reading.html'.length)),
+  ]),
+].sort();
 
 /* 旧版 writing.js initPageTint 的稳定哈希(输入 = 'article-<slug>',与 pathname 推导一致) */
 function autoTint(fileSlug) {
@@ -42,7 +53,8 @@ const report = [];
 
 for (const slug of SLUGS) {
   const file = path.join(SRC, `article-${slug}.html`);
-  const html = fs.readFileSync(file, 'utf8');
+  /* 草稿的 docs 页面被 .gitignore 挡在仓库外,CI 里不存在 —— 当作已迁移走复用分支 */
+  const html = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
 
   /* 已迁移的文章:docs/ 里这篇早被 build 的 React 外壳覆盖(不再含 .article-reading),
      原稿只剩上次提取出来的 fragment。复用它 + 入口里的 title/accent/tint,不重新提取。

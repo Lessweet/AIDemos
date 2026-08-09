@@ -9,27 +9,13 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, 'site');
 const DOCS = resolve(__dirname, 'docs');
 
-/* 14 篇文章 slug(与 docs/writing/article-<slug>.html 一一对应) */
-const ARTICLE_SLUGS = [
-  'app-shape-for-ai',
-  'claude-code-verification-loops',
-  'genui-no-style-to-write',
-  'figma-agent',
-  'figma-config-2026',
-  'figma-make-designer-pr',
-  'figma-make-gpt-5-6',
-  'figma-shader-motion',
-  'figma-skills',
-  'codex-voice-delegation',
-  'code-connect-mcp-coverage',
-  'beyond-chat-edit-in-place',
-  'genie',
-  'remove-ai-taste-in-design',
-  'review-ai-output',
-  'selection-as-context',
-  'sparkle',
-  'voices',
-];
+/* 文章 slug 从 site/writing/ 实际入口文件推导(入口由 extract-articles.mjs 生成,
+   与 docs/writing/article-<slug>.html 一一对应),不再维护手写清单 */
+const ARTICLE_SLUGS = fs
+  .readdirSync(resolve(ROOT, 'writing'))
+  .filter((f) => /^article-[\w-]+\.html$/.test(f))
+  .map((f) => f.slice('article-'.length, -'.html'.length))
+  .sort();
 
 /* 16 个入口。按 site/ 里实际存在的文件过滤,迁移期间可逐页添加 */
 const ALL_ENTRIES: Record<string, string> = {
