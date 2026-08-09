@@ -2,6 +2,7 @@
 export const ARTICLE_SHELL: Record<string, { title: string; accent: string; tint: string }> = {
   "app-shape-for-ai": { title: "SiriAI 设计 · VibeUX", accent: "#5B7FFF", tint: "blue" },
   "beyond-chat-edit-in-place": { title: "AI 产品设计｜修改在内容上而不是聊天框里 · VibeUX", accent: "#B8550F", tint: "peach" },
+  "beyond-chat-prompt-to-controls": { title: "AI 产品设计 ｜ 把高频微调的 Prompt 转变为可复现的参数控件 · VibeUX", accent: "#4FA02A", tint: "mint" },
   "claude-code-verification-loops": { title: "验证循环，把手动检查写进 Skill · VibeUX", accent: "#6A823F", tint: "sand" },
   "code-connect-mcp-coverage": { title: "Figma 新推出 Code Connect CLI，给 Agent 读取生产环境的上下文 · VibeUX", accent: "#3392CC", tint: "blue" },
   "codex-voice-delegation": { title: "ChatGPT Voice 用聊天的方式干活，还能随时打断 · VibeUX", accent: "#306DB6", tint: "blue" },
