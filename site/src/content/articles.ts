@@ -83,18 +83,22 @@ export const ARTICLES: ArticleMeta[] = [
   {
     slug: 'code-connect-mcp-coverage',
     file: 'article-code-connect-mcp-coverage.html',
-    title: '设计走查揪的细节恰好是 AI 生成代码差的那一点',
+    title: 'Figma 新推出 Code Connect CLI，给 Agent 读取生产环境的上下文',
     date: '2026-08-07',
     readTime: '7 分钟',
     tags: ['设计系统', 'AI 代码生成'],
     cat: 'product',
-    accent: '#17A57E',
+    accent: '#3392CC',
+    kind: '解读', // 拆读 Figma 官方博客 Code Connect MCP
     collection: 'Figma 观察',
     excerpt:
-      'AI agent 从设计稿生成代码，图标画错 glyph、间距丢了、tab 不可交互，全是设计师走查才揪得出来的细节。组件映射喂给 AI 之后偏差消失了，像素级还原靠的是 agent 拿到了正确的组件。',
+      'AI agent 从设计稿生成代码，图标画错 glyph、间距丢了、tab 不可交互，全是设计师走查才揪得出来的细节。组件映射喂给 AI 之后偏差基本消失，靠的是 agent 拿到了正确的组件，而不是模型更聪明。',
     listCover: 'assets/code-connect-mcp-coverage/cover.png',
-    inBlogGrid: false,
-    draft: true, // 2026-08-09 用户下线:站上完全不存在(voices 同款,docs 页面进 .gitignore)
+    cardCover: 'assets/cards/code-connect-mcp-coverage.webp', // CI build-card-covers 生成
+    inBlogGrid: true,
+    blogTag: '设计系统',
+    blogDelay: 0,
+    blogCover: { type: 'iframe', src: 'writing/assets/code-connect-mcp-coverage/cover.html' },
   },
   {
     slug: 'codex-voice-delegation',

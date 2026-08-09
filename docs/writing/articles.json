@@ -13,8 +13,7 @@
       "accent": "#3392CC",
       "collection": "Figma 观察",
       "excerpt": "AI agent 从设计稿生成代码，图标画错 glyph、间距丢了、tab 不可交互，全是设计师走查才揪得出来的细节。组件映射喂给 AI 之后偏差基本消失，靠的是 agent 拿到了正确的组件，而不是模型更聪明。",
-      "cover": "assets/code-connect-mcp-coverage/cover.png",
-      "draft": true
+      "cover": "assets/code-connect-mcp-coverage/cover.png"
     },
     {
       "slug": "codex-voice-delegation",

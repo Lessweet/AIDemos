@@ -763,8 +763,8 @@ body.reading-page .article-eyebrow .a-tag,
     display: inline-flex;
     align-items: center;
     flex: none;
-    /* 边框比文字浅两档:文字=角标统一色 gray-600 → 边框 gray-400(用户定 2026-08-09,替代 currentColor 同色) */
-    border: 1px solid var(--gray-400);
+    /* 边框极浅:gray-400 再降 3 档到 gray-100(用户定 2026-08-09),轮廓只剩一丝,辨识靠文字 */
+    border: 1px solid var(--gray-100);
     border-radius: 6px;
     padding: 2px 6px;
     font-size: 12px;                /* 章的徽标尺寸;存在感由边框承担,字重 400 */
@@ -776,7 +776,7 @@ body.reading-page .article-eyebrow .a-tag,
     line-height: 1.2;
     transition: color var(--hover-color-dur) ease, border-color var(--hover-color-dur) ease;   /* hover 淡化与同排角标同步 */
 }
-body.theme-dark .a-kind { border-color: rgba(255, 255, 255, 0.3); }   /* 暗色:文字 0.6 → 边框低两档 0.3 */
+body.theme-dark .a-kind { border-color: rgba(255, 255, 255, 0.08); }   /* 暗色同步极浅(0.3 再降 3 档) */
 /* 卡片 meta 行:章与同排角标(态度 tag / 日期)同色 = gray-600(角标统一色) */
 .home-v2 .writing-info .w-meta .a-kind { color: var(--gray-600); }
 body.theme-dark .writing-info .w-meta .a-kind { color: rgba(255, 255, 255, 0.6); }   /* = 暗色角标同值 */
@@ -1821,7 +1821,7 @@ body.home-v2 .header-placeholder { height: 76px; }
     .card-wrapper:hover .writing-info .w-excerpt { color: var(--gray-500); }   /* 简介与标题同 token,hover 同步 */
     .card-wrapper:hover .writing-info .w-date,
     .card-wrapper:hover .writing-info .w-meta .a-kind { color: var(--gray-400); }   /* 角标默认加深到 gray-600 后,hover 收到 400 档,落差与标题(900→500)一致 */
-    .card-wrapper:hover .writing-info .w-meta .a-kind { border-color: var(--gray-200); }   /* 边框保持比文字浅两档:400→200 */
+    .card-wrapper:hover .writing-info .w-meta .a-kind { border-color: var(--gray-50); }   /* 极浅边框 hover 再退半档 */
 }
 
 /* 填充式占位图(用于封面框内) */
@@ -2473,7 +2473,7 @@ body.theme-dark .card-wrapper:hover .writing-info .w-meta .w-tags .a-tag,
 body.theme-dark .card-wrapper:hover .writing-info .w-meta .a-kind {
     color: rgba(255, 255, 255, 0.4);   /* 暗色角标默认提到 0.6 后,hover 同步收到 0.4(解读章同步) */
 }
-body.theme-dark .card-wrapper:hover .writing-info .w-meta .a-kind { border-color: rgba(255, 255, 255, 0.2); }   /* 边框保持低两档:0.4→0.2 */
+body.theme-dark .card-wrapper:hover .writing-info .w-meta .a-kind { border-color: rgba(255, 255, 255, 0.06); }   /* 极浅边框 hover 再退半档 */
 
 /* 模块分割线(如启用):8% 黑 → 8% 白 */
 body.theme-dark .design-content .category-section .section-divider {

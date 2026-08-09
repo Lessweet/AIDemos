@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Figma 新推出 Code Connect CLI，给 Agent 读取生产环境的上下文 · VibeUX</title>
+<link href="../favicon.png?v=12" rel="icon" type="image/png"/>
+<link href="../favicon.png?v=12" rel="shortcut icon"/>
+<link href="../apple-touch-icon.png?v=12" rel="apple-touch-icon"/>
+<link href="../style.css?v=146" rel="stylesheet"/>
+<link href="writing.css?v=452" rel="stylesheet"/>
+<!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁(与首页一致) -->
+<script src="writing.js?v=86"></script>
+</head>
+<!-- 复用首页 index.html 的胶囊顶栏:home-v2 控制顶栏内边距,design-page 提供胶囊样式 -->
+<body class="writing-page home-v2 design-page reading-page" data-accent="#3392CC" data-tint="blue">
+<!-- 顶部导航:与首页同一个组件(initSiteNav);data-base="../" 把站内链接/资源指回 docs 根目录。
+         返回入口 = 左侧 VIBEUX 与高亮的 Writing 胶囊,均回到 index.html#writing -->
+<header class="header home-nav" data-active="writing" data-base="../" id="site-nav"></header>
+<script>initSiteNav();</script>
+<div class="header-placeholder"></div>
+<script>
+        // 顶栏 fixed 脱流,占位块高度跟随顶栏实际高度(big VIBEUX 标题在不同断点高度不同)
+        // 同时把左侧固定目录的 top 对齐到正文顶部 = 顶栏高度 + 正文上间距(56px,见 .reading-layout)
+        (function () {
+            const READING_TOP = 104;
+            const h = document.querySelector('.header');
+            const ph = document.querySelector('.header-placeholder');
+            const set = () => {
+                if (!h) return;
+                if (ph) ph.style.height = h.offsetHeight + 'px';
+                document.documentElement.style.setProperty('--toc-top', (h.offsetHeight + READING_TOP) + 'px');
+            };
+            set();
+            window.addEventListener('resize', set);
+            window.addEventListener('load', set);
+        })();
+    </script>
+<div class="reading-layout">
+<!-- ① 文章列表(JS 渲染,master–detail 左栏) -->
+<aside aria-label="文章列表" class="reader-list"></aside>
+<!-- ③ 浮动目录(JS 自动生成) -->
+<aside aria-label="目录" class="article-toc">
+<div class="article-toc-title">目录</div>
+<nav id="toc"></nav>
+</aside>
+<!-- 正文 -->
+<article class="article-reading">
+<h1 class="article-h1">Figma 新推出 Code Connect CLI，给 Agent 读取生产环境的上下文</h1>
+<div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-kind">解读</span><span class="a-tag">设计系统</span></div><span>2026-08-07</span><span>阅读约 7 分钟</span></div>
+<div class="article-cover"><iframe loading="lazy" src="assets/code-connect-mcp-coverage/cover.html"></iframe></div>
+<div class="article-body"><style>
+/* article-template 样式 inline 到网站，仅作用于 .article-body 内 */
+.article-eyebrow { text-align: center; justify-content: center; }
+.article-eyebrow .a-tag { font-weight: 400; }
+.article-h1 { text-align: center; }
+.article-byline { text-align: center; justify-content: center; }
+.article-body { color: #1a1a1a; line-height: 1.4; }
+.article-body p { font-size: var(--fs-body); font-weight: 300; margin: 40px 0; color: #1a1a1a; }
+.article-body strong { font-weight: 400; color: #3392CC; }
+.article-body .list-dot { font-weight: 600; margin-right: 4px; color: #1a1a1a; }
+.article-body .section-head { text-align: center; margin: 0; }
+/* 图标居中与上下间距已全部内化进 svg 本体和 h2（全宽 svg + 内部 x=50% 钉中 + rect 底块 +
+   svg margin-top 40 + h2 margin-bottom 56，见 wrap_h2_blocks 注释）。这里不能再写
+   .section-head 的 margin 或 .section-head svg 的尺寸规则——微信编辑器会拆散 div，规则会失效或压坏布局。 */
+.article-body h2 { font-size: var(--fs-h2); font-weight: 400; color: #1a1a1a; line-height: 1.2; margin: 0 0 56px; letter-spacing: 0; text-align: center; }
+.article-body img { width: 100%; margin: 16px 0 0 0; display: block; border-radius: 8px; }
+.article-body .img-caption { font-size: var(--fs-caption); color: #aaa; text-align: center; margin: 4px 0 18px 0; line-height: 1.4; }
+.article-body .img-ph { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 160px; margin: 24px 0; padding: 28px 20px; border: 1px dashed #d6d6de; border-radius: 12px; background: repeating-linear-gradient(45deg, #fafafb, #fafafb 10px, #f3f3f6 10px, #f3f3f6 20px); }
+.article-body .img-ph .img-ph-cap { font-size: var(--fs-caption); color: #9a9aa6; line-height: 1.5; max-width: 80%; }
+.article-body .highlight { font-size: var(--fs-body); font-weight: 300; line-height: 1.4; color: #1a1a1a; margin: 40px 0; }
+.article-body .highlight strong { font-weight: 400; color: #3392CC; }
+
+/* outlined 图标动画 CSS（自动从 design-gallery 抽取，不要手改） */
+/* 时长/延迟变量（在 design-gallery 基础上整体提速 ~40%，文章里看着更精神） */
+.section-head {
+  --dur-1-5: 0.9s; --dur-1-8: 1.1s; --dur-2-1: 1.2s; --dur-2-2: 1.3s;
+  --dur-2-3: 1.4s; --dur-2-4: 1.4s; --dur-2-5: 1.5s; --dur-2-6: 1.6s;
+  --dur-2-8: 1.7s; --dur-4-0: 2.4s; --dur-5-0: 3s;
+  --delay-150: 100ms; --delay-300: 180ms; --delay-600: 360ms;
+}
+/* 通用 transform-box */
+.section-head svg [class*="anim-"],
+.section-head svg .favorite-star,
+.section-head svg .favorite-rays {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.section-head svg .anim-viewBox {
+  transform-box: view-box;
+  transform-origin: center;
+}
+
+/* ---- 各图标动画规则 ---- */
+.section-head svg .anim-doc-line {
+    animation: doc-line-write var(--dur-2-8) ease-in-out infinite;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+.section-head svg .anim-doc-line-2 { animation-delay: var(--delay-300); }
+.section-head svg .anim-doc-line-3 { animation-delay: var(--delay-600); }
+.section-head svg .anim-user-head { animation: user-head var(--dur-2-3) ease-out infinite; }
+.section-head svg .anim-user-shoulders { animation: user-shoulders var(--dur-2-3) ease-out infinite; }
+.section-head svg .anim-gear { animation: gear-turn var(--dur-2-8) cubic-bezier(0.25, 0.8, 0.2, 1) infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .anim-search { animation: search-scan var(--dur-4-0) cubic-bezier(0.16, 0.9, 0.2, 1) infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-cart-burst {
+    animation: cart-burst var(--dur-2-5) ease-out infinite;
+    opacity: 0;
+  }
+.section-head svg .anim-cart-burst-1 { --tx: -5px; --ty: -9px; }
+.section-head svg .anim-cart-burst-2 { --tx: -1px; --ty: -11px; animation-delay: var(--delay-150); }
+.section-head svg .anim-cart-burst-3 { --tx: 3px; --ty: -10px; animation-delay: var(--delay-300); }
+.section-head svg .anim-cart-burst-4 { --tx: 6px; --ty: -8px; animation-delay: var(--delay-300); }
+.section-head svg .anim-clap-hand { animation: clap-hand var(--dur-1-8) ease-in-out infinite; transform-box: view-box; transform-origin: 9px 14px; }
+.section-head svg .anim-clap-lines { animation: clap-lines var(--dur-1-8) ease-out infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-music-note {
+    animation: music-float var(--dur-2-8) ease-in-out infinite;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: center;
+  }
+.section-head svg .anim-music-base {
+    animation: music-tilt var(--dur-2-8) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 14px;
+  }
+.section-head svg .anim-music-note-2 { animation-delay: calc(var(--dur-2-8) / 2); }
+.section-head svg .anim-lightning {
+    animation: lightning-flash var(--dur-2-4) ease-in-out infinite;
+  }
+.section-head svg .anim-pencil { animation: pencil-write var(--dur-5-0) ease-in-out infinite; transform-box: view-box; transform-origin: 13px 12px; }
+.section-head svg .anim-pencil-trace {
+    animation: pencil-trace var(--dur-5-0) ease-in-out infinite;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+.section-head svg .anim-eye-shape { animation: eye-blink var(--dur-2-8) ease-in-out infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .anim-eye-pupil { animation: eye-pupil-blink var(--dur-2-8) ease-in-out infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-bell { animation: bell-rattle var(--dur-5-0) cubic-bezier(0.3, 0.7, 0.2, 1) infinite; transform-box: view-box; transform-origin: 12px 4px; }
+.section-head svg .anim-bell-clapper { animation: bell-clapper var(--dur-5-0) linear infinite; transform-box: view-box; transform-origin: 12px 17px; }
+.section-head svg .anim-ide-cursor { animation: ide-blink var(--dur-1-5) step-end infinite; }
+.section-head svg .anim-pin-ripple {
+    animation: pin-ripple var(--dur-2-5) ease-out infinite;
+    opacity: 0;
+  }
+.section-head svg .anim-pin-ripple-2 { animation-delay: calc(var(--dur-2-5) / 3); }
+.section-head svg .anim-pin-ripple-3 { animation-delay: calc(var(--dur-2-5) * 2 / 3); }
+.section-head svg .anim-brain {
+    animation: brain-pulse var(--dur-2-2) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+  }
+.section-head svg .anim-ai-spark {
+    animation: ai-twinkle var(--dur-2-2) ease-in-out infinite;
+  }
+.section-head svg .anim-ai-spark-small {
+    animation-delay: calc(var(--dur-2-2) / 2);
+  }
+.section-head svg .anim-cursor {
+    animation: cursor-nudge var(--dur-2-2) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 10px 12px;
+  }
+.section-head svg .anim-cursor-click {
+    animation: cursor-click var(--dur-2-2) ease-out infinite;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: 6px 5px;
+  }
+.section-head svg .anim-cursor-spark {
+    animation: ai-twinkle var(--dur-2-2) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 18px 6px;
+  }
+.section-head svg .anim-hourglass-top {
+    animation: hourglass-top var(--dur-2-8) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 8px;
+  }
+.section-head svg .anim-hourglass-stream {
+    animation: hourglass-stream var(--dur-2-8) ease-in-out infinite;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+.section-head svg .anim-hourglass-bottom {
+    animation: hourglass-bottom var(--dur-2-8) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 18px;
+  }
+.section-head svg .anim-shape-cycle {
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+  }
+.section-head svg .anim-home { animation: home-settle var(--dur-2-4) ease-out infinite; }
+.section-head svg .anim-lock-shackle { animation: lock-shackle var(--dur-2-6) ease-in-out infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .anim-lock-dot { animation: lock-dot var(--dur-2-6) ease-out infinite; }
+.section-head svg .anim-message-dot-1 { animation: typing-dot var(--dur-1-5) ease-in-out infinite 0ms; }
+.section-head svg .anim-message-dot-2 { animation: typing-dot var(--dur-1-5) ease-in-out infinite var(--delay-150); }
+.section-head svg .anim-message-dot-3 { animation: typing-dot var(--dur-1-5) ease-in-out infinite var(--delay-300); }
+.section-head svg .anim-heart { animation: heart-flutter var(--dur-2-8) cubic-bezier(0.2, 0.85, 0.25, 1) infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .favorite-star { animation: favorite-pop var(--dur-2-2) cubic-bezier(0.2, 0.85, 0.25, 1) infinite; }
+.section-head svg .favorite-rays { animation: favorite-rays var(--dur-2-2) ease-out infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-gift-lid { animation: gift-lid var(--dur-2-8) ease-in-out infinite; transform-box: view-box; transform-origin: 12px 8px; }
+.section-head svg .anim-gift-particle {
+    animation: gift-particle var(--dur-2-8) ease-out infinite;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: center;
+  }
+.section-head svg .anim-gift-particle-1 { --tx: -5px; --ty: -9px; }
+.section-head svg .anim-gift-particle-2 { --tx: 4px; --ty: -10px; animation-delay: var(--delay-150); }
+.section-head svg .anim-gift-particle-3 { --tx: -8px; --ty: -6px; animation-delay: var(--delay-300); }
+.section-head svg .anim-gift-particle-4 { --tx: 7px; --ty: -7px; animation-delay: var(--delay-300); }
+.section-head svg .anim-gift-particle-5 { --tx: -2px; --ty: -11px; animation-delay: var(--delay-600); }
+.section-head svg .anim-gift-particle-6 { --tx: 6px; --ty: -5px; animation-delay: var(--delay-600); }
+/* 以下两条此前未接入(class 存在但没有匹配规则,design-gallery 里同样是孤儿 keyframe)。
+   现补上选择器,和 icons-outlined/*.svg 里新加的 SMIL 保持一致。 */
+.section-head svg .anim-bookmark { animation: bookmark-tuck var(--dur-2-4) ease-in-out infinite; }
+.section-head svg .anim-clock-minute { animation: clock-hand 3s linear infinite; transform-box: view-box; transform-origin: 12px 12px; }
+
+/* ---- keyframes ---- */
+@keyframes ai-twinkle {
+    0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    50% { opacity: 0.35; transform: scale(0.6) rotate(25deg); }
+  }
+@keyframes bell-clapper {
+    0%, 8%, 84%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(13deg); }
+    36% { transform: rotate(-9deg); }
+    52% { transform: rotate(6deg); }
+    68% { transform: rotate(-3deg); }
+  }
+@keyframes bell-rattle {
+    0%, 8%, 84%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(-11deg); }
+    36% { transform: rotate(8deg); }
+    52% { transform: rotate(-5deg); }
+    68% { transform: rotate(3deg); }
+  }
+@keyframes bookmark-tuck {
+    0%, 100% { transform: translateY(0); }
+    42% { transform: translateY(2px); }
+    72% { transform: translateY(-1px); }
+  }
+@keyframes brain-pulse {
+    0%, 100% { transform: scale(1); }
+    22% { transform: scale(1.06); }
+    44% { transform: scale(0.98); }
+    62% { transform: scale(1.06); }
+    82% { transform: scale(0.98); }
+  }
+@keyframes calendar-page {
+    0%, 100% { transform: translateY(0); }
+    45% { transform: translateY(1.2px); }
+  }
+@keyframes calendar-tabs {
+    0%, 100% { transform: translateY(0); }
+    35% { transform: translateY(-1.8px); }
+  }
+@keyframes cart-burst {
+    0%, 14% { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); }
+    28% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+    72% { opacity: 0.85; transform: translate(var(--tx), var(--ty)) scale(1) rotate(18deg); }
+    100% { opacity: 0; transform: translate(calc(var(--tx) * 1.25), calc(var(--ty) * 1.2)) scale(0.7) rotate(30deg); }
+  }
+@keyframes cart-roll {
+    0%, 100% { transform: translateX(0); }
+    42% { transform: translateX(3px); }
+    75% { transform: translateX(-1px); }
+  }
+@keyframes clap-hand {
+    0%, 100% { transform: translateX(-1.5px) rotate(-7deg); }
+    24%, 50% { transform: translateX(1px) rotate(3deg); }
+    70% { transform: translateX(-0.6px) rotate(-3deg); }
+  }
+@keyframes clap-lines {
+    0%, 14%, 72%, 100% { opacity: 0; transform: scale(0.88); }
+    26%, 48% { opacity: 1; transform: scale(1); }
+    58% { opacity: 0.45; transform: scale(1.08); }
+  }
+@keyframes clock-hand {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+@keyframes cursor-click {
+    0%, 34% { opacity: 0; transform: scale(0.45); }
+    46% { opacity: 0.85; transform: scale(0.78); }
+    74%, 100% { opacity: 0; transform: scale(1.55); }
+  }
+@keyframes cursor-nudge {
+    0%, 100% { transform: translate(0, 0); }
+    42% { transform: translate(1px, -1px); }
+    66% { transform: translate(0.35px, -0.35px); }
+  }
+@keyframes doc-line-write {
+    0%, 12% {
+      opacity: 0;
+      stroke-dashoffset: 1;
+    }
+    42%, 76% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 0;
+    }
+  }
+@keyframes eye-blink {
+    0%, 44%, 58%, 70%, 100% { transform: scaleY(1); }
+    50%, 64% { transform: scaleY(0.08); }
+  }
+@keyframes eye-pupil-blink {
+    0%, 44%, 58%, 70%, 100% { opacity: 1; transform: scaleY(1); }
+    50%, 64% { opacity: 0; transform: scaleY(0.08); }
+  }
+@keyframes favorite-pop {
+    0%   { transform: scale(1); }
+    20%  { transform: scale(0.72); }
+    46%  { transform: scale(1.2); }
+    72%  { transform: scale(0.94); }
+    100% { transform: scale(1); }
+  }
+@keyframes favorite-rays {
+    0%   { opacity: 0; transform: scale(0.58) rotate(0deg); }
+    18%  { opacity: 0; transform: scale(0.62) rotate(0deg); }
+    34%  { opacity: 1; }
+    76%  { opacity: 0.75; }
+    100% { opacity: 0; transform: scale(1.28) rotate(10deg); }
+  }
+@keyframes gear-turn {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(90deg); }
+  }
+@keyframes gift-box {
+    0%, 100% { transform: scaleY(1); }
+    42% { transform: scaleY(0.96); }
+  }
+@keyframes gift-lid {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    42% { transform: translateY(-3px) rotate(-4deg); }
+    70% { transform: translateY(-1px) rotate(2deg); }
+  }
+@keyframes gift-particle {
+    0%, 18% { opacity: 0; transform: translate(0, 3px) scale(0.62) rotate(0deg); }
+    32% { opacity: 1; transform: translate(0, 0) scale(1) rotate(8deg); }
+    72% { opacity: 0.9; transform: translate(var(--tx), var(--ty)) scale(1.05) rotate(18deg); }
+    100% { opacity: 0; transform: translate(calc(var(--tx) * 1.2), calc(var(--ty) * 1.25)) scale(0.78) rotate(28deg); }
+  }
+@keyframes heart-flutter {
+    0%, 10%, 68%, 100% { transform: scale(1) rotate(0deg); }
+    16% { transform: scale(0.94) rotate(-1.5deg); }
+    23% { transform: scale(1.18) rotate(1.5deg); }
+    31% { transform: scale(0.98) rotate(0deg); }
+    42% { transform: scale(1.1) rotate(-0.8deg); }
+    54% { transform: scale(1.01) rotate(0.4deg); }
+  }
+@keyframes home-settle {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-2px); }
+    70% { transform: translateY(1px); }
+  }
+@keyframes hourglass-bottom {
+    0%, 100% { opacity: 0.68; transform: scaleX(0.72); }
+    60% { opacity: 1; transform: scaleX(1.08); }
+  }
+@keyframes hourglass-stream {
+    0%, 14% { opacity: 0; stroke-dashoffset: 1; }
+    30% { opacity: 1; }
+    68% { opacity: 1; stroke-dashoffset: 0; }
+    100% { opacity: 0; stroke-dashoffset: -1; }
+  }
+@keyframes hourglass-top {
+    0%, 100% { opacity: 0.95; transform: scaleY(1); }
+    54% { opacity: 0.5; transform: scaleY(0.64); }
+    78% { opacity: 0.9; transform: scaleY(0.86); }
+  }
+@keyframes ide-blink {
+    0%, 49% { opacity: 1; }
+    50%, 99% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+@keyframes lightning-flash {
+    0%, 100% { opacity: 0.92; transform: scale(1); }
+    42% { opacity: 1; transform: scale(1.08); }
+    72% { opacity: 0.78; transform: scale(0.98); }
+  }
+@keyframes lightning-pulse {
+    0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+    36% { transform: translateY(-1px) rotate(-3deg) scale(1.04); }
+    64% { transform: translateY(0.6px) rotate(2deg) scale(0.98); }
+  }
+@keyframes lock-dot {
+    0%, 100% { transform: scale(1); }
+    45% { transform: scale(1.35); }
+  }
+@keyframes lock-shackle {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    36% { transform: translateY(-2px) rotate(-9deg); }
+    72% { transform: translateY(0) rotate(0deg); }
+  }
+@keyframes music-float {
+    0% { opacity: 0; transform: translate(0, 3px) scale(0.82) rotate(-5deg); }
+    18% { opacity: 1; }
+    68% { opacity: 1; transform: translate(0.8px, -4px) scale(1) rotate(6deg); }
+    100% { opacity: 0; transform: translate(-0.5px, -7px) scale(0.86) rotate(-8deg); }
+  }
+@keyframes music-tilt {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    34% { transform: rotate(-5deg) translateY(-0.8px); }
+    68% { transform: rotate(4deg) translateY(0.5px); }
+  }
+@keyframes pencil-trace {
+    0%, 14% {
+      opacity: 0;
+      stroke-dashoffset: 1;
+    }
+    46% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    72% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 0;
+    }
+  }
+@keyframes pencil-write {
+    0%, 100% { transform: translate(-0.8px, -0.8px) rotate(-4deg); }
+    18% { transform: translate(1.4px, -2.4px) rotate(-1deg); }
+    36% { transform: translate(3.8px, -0.5px) rotate(3deg); }
+    56% { transform: translate(6.4px, -2.2px) rotate(1deg); }
+    76% { transform: translate(9px, -0.7px) rotate(4deg); }
+    88% { transform: translate(4.2px, -1.5px) rotate(-1deg); }
+  }
+@keyframes pin-drop {
+    0% { transform: translateY(-6px); opacity: 0; }
+    55% { transform: translateY(1px); opacity: 1; }
+    75% { transform: translateY(-1px); }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+@keyframes pin-ripple {
+    0% { opacity: 0; transform: scale(0.45); }
+    20% { opacity: 0.9; }
+    100% { opacity: 0; transform: scale(1.8); }
+  }
+@keyframes search-scan {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-4.2px, 0.4px) rotate(-10deg); }
+    18% { transform: translate(-1.1px, -0.2px) rotate(-2deg); }
+    30% { transform: translate(0.6px, -3.8px) rotate(7deg); }
+    39% { transform: translate(1.6px, -1px) rotate(2deg); }
+    52% { transform: translate(3px, 3.4px) rotate(9deg); }
+    62% { transform: translate(0.8px, 1px) rotate(2deg); }
+    78% { transform: translate(-0.7px, 0.2px) rotate(-1deg); }
+  }
+@keyframes search-sway {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(-1.4px) rotate(-7deg); }
+    55% { transform: translateX(1.4px) rotate(7deg); }
+    78% { transform: translateX(-0.5px) rotate(-3deg); }
+  }
+@keyframes typing-dot {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+    38% { transform: translateY(-2px) scale(1.18); opacity: 0.75; }
+  }
+@keyframes user-head {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-2px); }
+  }
+@keyframes user-shoulders {
+    0%, 100% { transform: scaleX(1); }
+    45% { transform: scaleX(1.08); }
+  }
+@keyframes wheel-pulse {
+    0%, 100% { transform: scale(1); }
+    42% { transform: scale(1.2); }
+  }
+</style>
+<p>Coding agent 从 Figma  MCP 设计稿生成前端代码时，经常不能 100% 还原设计样式，尽管设计师在 Figma 里已经事无巨细地整理好 Button 样式、文字字号、卡片布局、间距排版这些 componets 和 variables ，最终实现效果总是会出现各种各种、大大小小的不按设计规则来写样式的情况。</p>
+<p>这类问题根源在于<strong>设计环境与代码环境不是同一种语言</strong>，而且 coding agent 读取 Figma 的设计稿时，<strong>缺少生产组件的上下文，它会从零重新搭建</strong> UI 设计系统，自己开发基础元素、组件，生成看起来差不多的样式。这是一种<strong>模仿行为</strong>，实际上与代码库并不匹配，多个 agent 同时生成代码的场景下，情况更糟糕。</p>
+<div class="section-head"><svg height="70" style="display:block;margin:40px 0 0 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="70" overflow="visible" style="overflow:visible" width="40" x="50%"><g transform="translate(-20 16)"><rect fill="rgba(51, 146, 204, 0.1)" height="40" rx="10" width="40" x="0" y="0"></rect><svg fill="none" height="19.2" overflow="visible" viewBox="0 0 24 24" width="19.2" x="10.4" xmlns="http://www.w3.org/2000/svg" y="10.4"><path d="M8 2.25C8.41421 2.25 8.75 2.58579 8.75 3V4.25H11.9829C11.9939 4.24976 12.0049 4.24976 12.016 4.25H14C14.4142 4.25 14.75 4.58579 14.75 5C14.75 5.41421 14.4142 5.75 14 5.75H12.5951C12.0785 7.83556 11.3151 9.58586 10.0899 11.1452C9.79327 11.5227 9.47146 11.8866 9.12228 12.2396C10.0146 12.9532 11.0796 13.6436 12.3591 14.3416C12.7228 14.54 12.8568 14.9955 12.6584 15.3592C12.4601 15.7228 12.0045 15.8568 11.6409 15.6584C10.2166 14.8816 9.015 14.0962 8.00008 13.2606C6.98357 14.0975 5.7815 14.8827 4.35931 15.6584C3.99568 15.8567 3.5401 15.7228 3.34175 15.3591C3.1434 14.9955 3.2774 14.5399 3.64103 14.3416C4.9224 13.6426 5.98696 12.952 6.8778 12.2396C6.00565 11.358 5.30575 10.4096 4.74209 9.35303C4.54713 8.98757 4.68535 8.53325 5.05082 8.33829C5.41628 8.14334 5.8706 8.28156 6.06555 8.64702C6.5644 9.58214 7.19121 10.4335 8.00008 11.2408C8.33344 10.9081 8.63557 10.5682 8.91043 10.2184C9.90599 8.95135 10.5718 7.51782 11.0461 5.75H2C1.58579 5.75 1.25 5.41421 1.25 5C1.25 4.58579 1.58579 4.25 2 4.25H7.25V3C7.25 2.58579 7.58579 2.25 8 2.25Z" fill="#3392CC"></path> <path clip-rule="evenodd" d="M17.5 10.25C17.7951 10.25 18.0628 10.4231 18.1839 10.6922L21.3273 17.6774C21.3321 17.6874 21.3366 17.6976 21.341 17.7078L22.6839 20.6922C22.8539 21.07 22.6855 21.514 22.3078 21.6839C21.93 21.8539 21.486 21.6855 21.3161 21.3078L20.1651 18.75H14.8349L13.6839 21.3078C13.514 21.6855 13.07 21.8539 12.6922 21.6839C12.3145 21.514 12.1461 21.07 12.3161 20.6922L13.6591 17.7078C13.6634 17.6976 13.6679 17.6874 13.6727 17.6775L16.8161 10.6922C16.9372 10.4231 17.2049 10.25 17.5 10.25ZM19.4901 17.25L17.5 12.8276L15.5099 17.25H19.4901Z" fill="#3392CC" fill-rule="evenodd"></path></svg></g></svg></svg><h2 style="color: #3392CC;">将设计环境与代码环境<br/>转换为同一种语言</h2></div>
+<p>Figma 的 Code Connect 就是为了解决这个问题的，配置 Code Connect 后，同时连上 MCP 后可以获取到代码库中对应的 UI 代码和对应的更多上下文信息，这样就能顺着代码库中的逻辑去生成。</p>
+<img alt="" src="assets/code-connect-mcp-coverage/03-prop-mapping.png"/>
+<p>Code Connect 的配置是在项目里 npm 装一个 @figma/code-connect 安装包，放一份 figma.config.json，然后给每个要映射的组件写一个 .figma.tsx 文件，文件里写 Figma 组件链接、真实组件的 import、props 对应关系和使用示例。写完跑一条 npx figma connect publish 带上 personal access token 发布，Dev Mode 和 MCP 就都能读到这份映射了，各种代码格式 React、SwiftUI、Jetpack Compose、HTML 也都支持。</p>
+<p>这里可以联想到 GitHub 的系统架构师 Lukas Oppermann 说过的：设计师和开发者说着"略有不同的语言"。这个语言差一直是设计系统的老问题，设计师在 Figma 里叫一个名字，开发者在代码里叫另一个名字，组件用法文档又是第三套说法，沟通成本一直在。Code Connect 的做法是让设计是和代码各自在最舒服的环境里工作，中间靠组件映射对齐，是一个非常平衡的解决方式。</p>
+<div class="section-head"><svg height="70" style="display:block;margin:40px 0 0 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="70" overflow="visible" style="overflow:visible" width="40" x="50%"><g transform="translate(-20 16)"><rect fill="rgba(51, 146, 204, 0.1)" height="40" rx="10" width="40" x="0" y="0"></rect><svg fill="none" height="19.2" overflow="visible" viewBox="0 0 24 24" width="19.2" x="10.4" xmlns="http://www.w3.org/2000/svg" y="10.4"><path d="M18.2892 2.88976C17.2615 2.75159 15.9068 2.75 14 2.75C13.5858 2.75 13.25 2.41421 13.25 2C13.25 1.58579 13.5858 1.25 14 1.25H14.0564C15.8942 1.24998 17.3498 1.24997 18.489 1.40314C19.6615 1.56076 20.6104 1.89288 21.3588 2.64124C22.0432 3.32568 22.417 3.97665 22.5924 4.98199C22.7501 5.88571 22.7501 7.1045 22.75 8.90369L22.75 9C22.75 9.41422 22.4142 9.75 22 9.75C21.5858 9.75 21.25 9.41422 21.25 9C21.25 7.08092 21.2471 5.9986 21.1147 5.23984C20.9973 4.56666 20.7852 4.18904 20.2981 3.7019C19.8749 3.27869 19.2952 3.02503 18.2892 2.88976Z" fill="#3392CC"></path><path d="M2.75001 15C2.75001 14.5858 2.41422 14.25 2.00001 14.25C1.58579 14.25 1.25001 14.5858 1.25001 15L1.25 15.0963C1.24995 16.8955 1.24992 18.1143 1.40762 19.018C1.58304 20.0233 1.95681 20.6743 2.64125 21.3588C3.38961 22.1071 4.33856 22.4392 5.51098 22.5969C6.6502 22.75 8.10583 22.75 9.94359 22.75H10C10.4142 22.75 10.75 22.4142 10.75 22C10.75 21.5858 10.4142 21.25 10 21.25C8.09318 21.25 6.73852 21.2484 5.71085 21.1102C4.70476 20.975 4.12512 20.7213 3.70191 20.2981C3.21477 19.811 3.00275 19.4333 2.88529 18.7602C2.75289 18.0014 2.75001 16.9191 2.75001 15Z" fill="#3392CC"></path><path d="M22.75 15C22.75 14.5858 22.4142 14.25 22 14.25C21.5858 14.25 21.25 14.5858 21.25 15C21.25 16.9191 21.2471 18.0014 21.1147 18.7602C20.9973 19.4333 20.7852 19.811 20.2981 20.2981C19.8749 20.7213 19.2952 20.975 18.2892 21.1102C17.2615 21.2484 15.9068 21.25 14 21.25C13.5858 21.25 13.25 21.5858 13.25 22C13.25 22.4142 13.5858 22.75 14 22.75H14.0564C15.8942 22.75 17.3498 22.75 18.489 22.5969C19.6615 22.4392 20.6104 22.1071 21.3588 21.3588C22.0432 20.6743 22.417 20.0233 22.5924 19.018C22.7501 18.1143 22.7501 16.8955 22.75 15.0963L22.75 15Z" fill="#3392CC"></path><path d="M10 1.25H9.94359C8.10584 1.24998 6.65019 1.24997 5.51098 1.40314C4.33856 1.56076 3.38961 1.89288 2.64125 2.64124C1.95681 3.32568 1.58304 3.97665 1.40762 4.98199C1.24992 5.8857 1.24995 7.10448 1.25 8.90364L1.25001 9C1.25001 9.41422 1.58579 9.75 2.00001 9.75C2.41422 9.75 2.75001 9.41422 2.75001 9C2.75001 7.08092 2.75289 5.9986 2.88529 5.23984C3.00275 4.56666 3.21477 4.18904 3.70191 3.7019C4.12512 3.27869 4.70476 3.02503 5.71085 2.88976C6.73852 2.75159 8.09319 2.75 10 2.75C10.4142 2.75 10.75 2.41421 10.75 2C10.75 1.58579 10.4142 1.25 10 1.25Z" fill="#3392CC"></path><path clip-rule="evenodd" d="M12 9.25C10.4812 9.25 9.25001 10.4812 9.25001 12C9.25001 13.5188 10.4812 14.75 12 14.75C13.5188 14.75 14.75 13.5188 14.75 12C14.75 10.4812 13.5188 9.25 12 9.25ZM10.75 12C10.75 11.3096 11.3096 10.75 12 10.75C12.6904 10.75 13.25 11.3096 13.25 12C13.25 12.6904 12.6904 13.25 12 13.25C11.3096 13.25 10.75 12.6904 10.75 12Z" fill="#3392CC" fill-rule="evenodd"></path><path clip-rule="evenodd" d="M5.32438 9.45049C6.59435 7.97738 8.77637 6.25 12 6.25C15.2236 6.25 17.4057 7.97738 18.6756 9.45049L18.7079 9.48791C18.9789 9.80202 19.2576 10.125 19.4491 10.5121C19.6632 10.9448 19.75 11.4094 19.75 12C19.75 12.5906 19.6632 13.0552 19.4491 13.4879C19.2576 13.875 18.9789 14.198 18.7079 14.5121L18.6756 14.5495C17.4057 16.0226 15.2236 17.75 12 17.75C8.77637 17.75 6.59435 16.0226 5.32438 14.5495L5.29211 14.5121C5.0211 14.198 4.7424 13.875 4.5509 13.4879C4.33676 13.0552 4.25001 12.5906 4.25001 12C4.25001 11.4094 4.33676 10.9448 4.5509 10.5121C4.74241 10.125 5.02109 9.80202 5.2921 9.48791L5.32438 9.45049ZM12 7.75C9.369 7.75 7.56642 9.14707 6.46048 10.4299C6.14652 10.7941 5.99368 10.9785 5.89533 11.1773C5.81198 11.3457 5.75001 11.566 5.75001 12C5.75001 12.434 5.81198 12.6543 5.89533 12.8227C5.99368 13.0215 6.14652 13.2059 6.46048 13.5701C7.56642 14.8529 9.369 16.25 12 16.25C14.631 16.25 16.4336 14.8529 17.5395 13.5701C17.8535 13.2059 18.0063 13.0215 18.1047 12.8227C18.188 12.6543 18.25 12.434 18.25 12C18.25 11.566 18.188 11.3457 18.1047 11.1773C18.0063 10.9785 17.8535 10.7941 17.5395 10.4299C16.4336 9.14707 14.631 7.75 12 7.75Z" fill="#3392CC" fill-rule="evenodd"></path></svg></g></svg></svg><h2 style="color: #3392CC;">映射配置后 Agent<br/>生成效果只差了一条分割线</h2></div>
+<p>Figma 用了内部的 Pattern Library 做的测试用例，配置了 Code Connect 模板后，UI 实现的准确率提升了一个档次。三张都是同一个 Assets 面板，乍看几乎一样，仔细看能看出很大的差别。</p>
+<img alt="" src="assets/code-connect-mcp-coverage/02-fpl-threeway.png"/>
+<p>没配置 Code Connect 的那张生成效果最差：左上角 logo 比例不对，右上角侧栏开关 icon 多了个箭头；内容卡片贴上了 tab 栏的分隔线，没加卡片上方的间距，libaray icon 也没画对。这就是因为 coding Agent 手动编写原始的 React 代码和 CSS 来实现 UI 元素样式，而且交互层面上，还无法点击操作。所以硬编码只是模仿了设计稿的外观，并没有实现交互逻辑。</p>
+<p>而配置了 Code Connect 之后，只有一处错误。</p>
+<p>同时，任务执行时间减少了19.6%、代码质量提高了一个档次、token 使用量减少了 29.5%。</p>
+<div class="section-head"><svg height="70" style="display:block;margin:40px 0 0 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="70" overflow="visible" style="overflow:visible" width="40" x="50%"><g transform="translate(-20 16)"><rect fill="rgba(51, 146, 204, 0.1)" height="40" rx="10" width="40" x="0" y="0"></rect><svg fill="none" height="19.2" overflow="visible" viewBox="0 0 24 24" width="19.2" x="10.4" xmlns="http://www.w3.org/2000/svg" y="10.4"><path d="M5 9V16" stroke="#3392CC" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path><path d="M5.25 8.5C7.04493 8.5 8.5 7.04493 8.5 5.25C8.5 3.45507 7.04493 2 5.25 2C3.45507 2 2 3.45507 2 5.25C2 7.04493 3.45507 8.5 5.25 8.5Z" stroke="#3392CC" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path><path d="M5 22C6.65685 22 8 20.6569 8 19C8 17.3431 6.65685 16 5 16C3.34315 16 2 17.3431 2 19C2 20.6569 3.34315 22 5 22Z" stroke="#3392CC" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path><path d="M19 22C20.6569 22 22 20.6569 22 19C22 17.3431 20.6569 16 19 16C17.3431 16 16 17.3431 16 19C16 20.6569 17.3431 22 19 22Z" stroke="#3392CC" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path><path d="M5.13 9C5.58 10.75 7.18 12.05 9.07 12.04L12.5 12.03C15.12 12.02 17.35 13.7 18.17 16.04" stroke="#3392CC" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path></svg></g></svg></svg><h2 style="color: #3392CC;">与 Dev Mode、MCP 结合<br/>一份映射多 Agent 可读</h2></div>
+<p>早在 2024 年 4 月，Code Connect 就上了 beta 版，但那时候的版本跟 AI 没什么关系，解决的是一个更老的问题：设计系统建了但没被充分用起来，开发者会无意中误用组件或者跳过组件库自己写。Figma 的 Dev Mode 能自动生成代码片段，但生成的是通用 CSS 和原生 React，跟团队自己的生产组件不一定完全对上。现在的 Code Connect 是让 coding Agent把 Figma 组件映射到自家组件库的真实用法，开发者可以从设计稿拿到正确的 import 和 props，大幅度减少 Agent 自己重构的概率。</p>
+<img alt="" src="assets/code-connect-mcp-coverage/04-devmode-button-snippet.png"/>
+<p>配好映射之后在 Dev Mode 里选中这个 Button，检查面板的 Code Connect 区域显示的是团队自己组件库的真实用法，再往下是这个组件在 Figma 里的 props 面板，Variant、State、Size、Label 跟代码里的 props 一一对上，设计稿里调一个属性，开发者和 coding agent 拿到的代码片段就跟着变。</p>
+<p>配置 Code Connect 也可以直接交给 Coding Agent 来处理，脸上 Figma MCP ，figma-code-connect 这个 skill 会自动生成配置模板文件，用.figma.ts 在代码库中生成文件，就可以使用 CLI 发布和使用。</p>
+<p>这个配置具体来说，就是把一个 Figma 组件跟它对应的生产环境下的代码建立映射，写清 import 路径、props 对应关系和使用示例；之后而这个配置也需要跟着代码迭代同步更新，<strong>Code Connect 映射现在跟 design token、组件文档、Storybook 示例并列，成了设计系统团队又一样需要持续维护的产物。</strong> </p>
+<svg height="15" style="display:block;margin:40px 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="15" width="50%" x="0" y="0"><g transform="translate(-49.5 0)"><rect fill="#3392CC" height="1" opacity="0.35" width="100%" x="0" y="7"></rect></g></svg><svg height="15" width="50%" x="50%" y="0"><g transform="translate(49.5 0)"><rect fill="#3392CC" height="1" opacity="0.35" width="100%" x="0" y="7"></rect></g></svg><svg height="15" overflow="visible" style="overflow:visible" x="50%" y="0"><g transform="translate(-49.5 0)"><g transform="translate(9 0)"><circle cx="8" cy="8" fill="#3392CC" r="4.3"></circle></g><g transform="translate(42 0)"><polygon fill="#3392CC" points="8,3.50 4.10,10.25 11.90,10.25"></polygon></g><g transform="translate(75 0)"><polygon fill="#3392CC" points="8,3.20 9.18,6.38 12.57,6.52 9.90,8.62 10.82,11.88 8,10.00 5.18,11.88 6.10,8.62 3.44,6.52 6.82,6.38"></polygon></g></g></svg></svg>
+<p>本文数据和案例来自 Figma Better code, fewer tokens: The benefits of Code Connect in MCP 和 Unlocking the power of Code Connect。</p></div>
+<!-- 底部 -->
+<footer class="article-footer">
+<div class="same-collection"><div class="sc-title">合集 · Figma 观察</div><a href="article-figma-config-2026.html"><span class="sc-num">01</span><span>设计师被 AI 替代之前，Figma 用一整套新功能抬高设计师上限</span></a><a href="article-figma-shader-motion.html"><span class="sc-num">02</span><span>在设计系统里，Figma Shader 和 Motion ，正从效果变成可复用元素</span></a><a href="article-figma-make-gpt-5-6.html"><span class="sc-num">03</span><span>设计师的新习惯，给 AI 模型分工</span></a><a href="article-figma-make-designer-pr.html"><span class="sc-num">04</span><span>AI native 设计师的交付物，不只设计稿，还有 GitHub PR</span></a><a href="article-code-connect-mcp-coverage.html"><span class="sc-num">05</span><span>Figma 新推出 Code Connect CLI，给 Agent 读取生产环境的上下文</span></a></div>
+</footer>
+</article>
+</div>
+<script src="../script.js?v=27"></script>
+</body>
+</html>

@@ -426,6 +426,7 @@ function initTOC() {
    ======================================== */
 /* READER_ARTICLES:AUTO —— 发布时 render.py 从 articles.json 自动重生成此数组,勿手改。 */
 let READER_ARTICLES = [
+    { file: "article-code-connect-mcp-coverage.html", cat: "product", title: "Figma 新推出 Code Connect CLI，给 Agent 读取生产环境的上下文", date: "2026-08-07", cover: "assets/code-connect-mcp-coverage/cover.png", accent: "#3392CC" },
     { file: "article-selection-as-context.html", cat: "product", title: "AI 产品设计｜选中即上下文", date: "2026-08-05", cover: "assets/selection-as-context/cover.png", accent: "#4B5FE8" },
     { file: "article-beyond-chat-edit-in-place.html", cat: "ui", title: "AI 产品设计｜修改在内容上而不是聊天框里", date: "2026-08-05", cover: "assets/beyond-chat-edit-in-place/cover.png", accent: "#B8550F" },
     { file: "article-beyond-chat-prompt-to-controls.html", cat: "ui", title: "AI 产品设计 ｜ 把高频微调的 Prompt 转变为可复现的参数控件", date: "2026-08-04", cover: "assets/beyond-chat-prompt-to-controls/cover.png", accent: "#4FA02A" },
