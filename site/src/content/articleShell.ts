@@ -1,8 +1,10 @@
 /** 由 site/scripts/extract-articles.mjs 生成 —— 每篇文章的外壳元数据(勿手改,重跑脚本更新) */
 export const ARTICLE_SHELL: Record<string, { title: string; accent: string; tint: string }> = {
   "app-shape-for-ai": { title: "SiriAI 设计 · VibeUX", accent: "#5B7FFF", tint: "blue" },
+  "beyond-chat-edit-in-place": { title: "AI 产品设计｜修改在内容上而不是聊天框里 · VibeUX", accent: "#B8550F", tint: "peach" },
   "claude-code-verification-loops": { title: "验证循环，把手动检查写进 Skill · VibeUX", accent: "#6A823F", tint: "sand" },
-  "codex-voice-delegation": { title: "把活说给 Codex 之后它停在提交前等确认 · VibeUX", accent: "#306DB6", tint: "blue" },
+  "code-connect-mcp-coverage": { title: "Figma 新推出 Code Connect CLI，给 Agent 读取生产环境的上下文 · VibeUX", accent: "#3392CC", tint: "blue" },
+  "codex-voice-delegation": { title: "ChatGPT Voice 用聊天的方式干活，还能随时打断 · VibeUX", accent: "#306DB6", tint: "blue" },
   "figma-agent": { title: "Figma 把 Agent 装进画布，让设计师同时开多个方向 · VibeUX", accent: "#3B82F6", tint: "blue" },
   "figma-config-2026": { title: "设计师被 AI 替代之前，Figma 用一整套新功能抬高设计师上限 · VibeUX", accent: "#D4A017", tint: "sand" },
   "figma-make-designer-pr": { title: "AI native 设计师的交付物，不只设计稿，还有 GitHub PR · VibeUX", accent: "#2F3336", tint: "gray" },

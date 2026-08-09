@@ -21,6 +21,8 @@ const ARTICLE_SLUGS = [
   'figma-shader-motion',
   'figma-skills',
   'codex-voice-delegation',
+  'code-connect-mcp-coverage',
+  'beyond-chat-edit-in-place',
   'genie',
   'remove-ai-taste-in-design',
   'review-ai-output',
