@@ -1,0 +1,67 @@
+# 站点自动构建 —— 把发布流水线的机械段搬到 GitHub 免费机器上跑。
+#
+# 分工(与本地发布流程对齐):
+#   本地(人/Claude):render.py 出详情页静态 HTML + 资源 → articles.ts 登记 → commit + push
+#   本机器人:extract-articles(提取片段/生成入口)→ build-card-covers(卡片 webp)
+#            → npm run build(React 壳回写 docs/)→ 有变化就以 bot 身份补一个提交
+#
+# 说明:
+# - Pages 是 legacy 模式,从 main 的 docs/ 直接托管,所以 build 产物提交回仓库即上线。
+# - GITHUB_TOKEN 的推送不会再触发 workflow,天然防循环;[skip ci] 是双保险。
+# - 分支上照常触发:PR 里就能看到构建后的完整产物,合 main 即上线,无需再跑一次。
+name: build-site
+
+on:
+  push:
+    paths:
+      - 'docs/writing/**'
+      - 'site/**'
+      - 'vite.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-site-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # build-card-covers.mjs 依赖 cwebp
+      - name: Install cwebp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq webp
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Extract article fragments
+        run: node site/scripts/extract-articles.mjs
+
+      - name: Build card covers
+        run: node site/scripts/build-card-covers.mjs
+
+      - name: Build site
+        run: npm run build
+
+      - name: Commit build output
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo '构建产物无变化,跳过提交'
+          else
+            git commit -m 'bot: 自动构建(extract + card covers + vite build)[skip ci]'
+            git push
+          fi
