@@ -777,6 +777,9 @@ body.reading-page .article-eyebrow .a-tag,
 /* 卡片 meta 行:章与同排角标(态度 tag / 日期)同色 = gray-600(角标统一色) */
 .home-v2 .writing-info .w-meta .a-kind { color: var(--gray-600); }
 body.theme-dark .writing-info .w-meta .a-kind { color: rgba(255, 255, 255, 0.6); }   /* = 暗色角标同值 */
+/* 详情页 byline:章继承 byline 行的实际文字色(阅读页整行由「浅黑」大选择器定为 #1a1a1a),
+   与右侧态度 tag 的 color:inherit 同款处理 —— byline 换色时章自动跟随,不再各写一份色值 */
+body.reading-page .article-byline .article-eyebrow .a-kind { color: inherit; }
 
 /* 文章详情页:tag 移到标题上方,纯文字加粗(不用胶囊底),与标题一起居中。
    优先级 (0,3,0) 压过各文章内联的 .article-eyebrow .a-tag{font-weight:400}。 */
