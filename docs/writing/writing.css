@@ -765,13 +765,13 @@ body.reading-page .article-eyebrow .a-tag,
     padding: 3px 7px;
     font-size: 12px;
     font-weight: 400;
-    color: #666;
+    color: var(--gray-700);   /* 比态度 tag 的灰(#969696/gray-600 档)深一档,用户定 2026-08-09 */
     line-height: 1.2;
 }
-/* 黑底上 8% 黑的填底会消失,手动翻色(同 .a-tag 的深色处理思路) */
+/* 黑底上 8% 黑的填底会消失,手动翻色(同 .a-tag 的深色处理思路);文字同样比周边灰字重一档 */
 body.theme-dark .a-kind {
     background: rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.75);
 }
 
 /* 文章详情页:tag 移到标题上方,纯文字加粗(不用胶囊底),与标题一起居中。
