@@ -19,6 +19,9 @@ export interface ArticleMeta {
   tags: string[];
   cat: 'ui' | 'product';
   accent: string;
+  /* 内容类型章,独立于态度 tags:目前只有 '解读'(基于他人内容的拆读,learn in public)。
+     原创是默认态、不标。卡片 meta 行最左 + 文章页 byline 首位渲染成填底圆角章(.a-kind)。 */
+  kind?: string;
   collection: string;
   excerpt: string;
   listCover: string; // 阅读器左栏缩略图(articles.json cover 字段,相对 writing/)
@@ -46,6 +49,7 @@ export const ARTICLES: ArticleMeta[] = [
     tags: ['AI 界面模式'],
     cat: 'ui',
     accent: '#4FA02A',
+    kind: '解读', // 读 Beyond Chat 模式库
     collection: 'AI 产品设计',
     excerpt:
       '读 Beyond Chat 模式库的第一篇。属性面板、行内 prompt 控件、渐进式披露、语气面板这四个模式在干同一件事，把高频微调的配置从 prompt 那个文本块里拆出来，变成能看见、能复现的控件。',
@@ -65,6 +69,7 @@ export const ARTICLES: ArticleMeta[] = [
     tags: ['AI 界面模式'],
     cat: 'ui',
     accent: '#B8550F',
+    kind: '解读', // 读 Beyond Chat 模式库
     collection: 'AI 产品设计',
     excerpt:
       '聊天框里改一句话，得先把它说成一段话。提示词增强、智能文档、输出级撤销这三个模式围着同一条线转，写作流程里的修改、调整、编辑和回退，各自该长成什么控件。',
@@ -78,18 +83,22 @@ export const ARTICLES: ArticleMeta[] = [
   {
     slug: 'code-connect-mcp-coverage',
     file: 'article-code-connect-mcp-coverage.html',
-    title: '设计走查揪的细节恰好是 AI 生成代码差的那一点',
+    title: 'Figma 新推出 Code Connect CLI，给 Agent 读取生产环境的上下文',
     date: '2026-08-07',
     readTime: '7 分钟',
     tags: ['设计系统', 'AI 代码生成'],
     cat: 'product',
-    accent: '#17A57E',
+    accent: '#3392CC',
+    kind: '解读', // 拆读 Figma 官方博客 Code Connect MCP
     collection: 'Figma 观察',
     excerpt:
-      'AI agent 从设计稿生成代码，图标画错 glyph、间距丢了、tab 不可交互，全是设计师走查才揪得出来的细节。组件映射喂给 AI 之后偏差消失了，像素级还原靠的是 agent 拿到了正确的组件。',
+      'AI agent 从设计稿生成代码，图标画错 glyph、间距丢了、tab 不可交互，全是设计师走查才揪得出来的细节。组件映射喂给 AI 之后偏差基本消失，靠的是 agent 拿到了正确的组件，而不是模型更聪明。',
     listCover: 'assets/code-connect-mcp-coverage/cover.png',
-    inBlogGrid: false,
-    draft: true, // 2026-08-09 用户下线:站上完全不存在(voices 同款,docs 页面进 .gitignore)
+    cardCover: 'assets/cards/code-connect-mcp-coverage.webp', // CI build-card-covers 生成
+    inBlogGrid: true,
+    blogTag: '设计系统',
+    blogDelay: 0,
+    blogCover: { type: 'iframe', src: 'writing/assets/code-connect-mcp-coverage/cover.html' },
   },
   {
     slug: 'codex-voice-delegation',
@@ -154,6 +163,7 @@ export const ARTICLES: ArticleMeta[] = [
     tags: ['Agent 协作'],
     cat: 'product',
     accent: '#6A823F',
+    kind: '解读', // 拆读 Anthropic 博客的验证循环概念
     collection: '',
     excerpt:
       'Anthropic 博客提了一个概念——验证循环：每次重复做的手动检查，写成 Skill 让 Claude 自己跑。编进去的规矩越多，AI 第一次出手就越接近你要的标准。',
@@ -192,6 +202,7 @@ export const ARTICLES: ArticleMeta[] = [
     tags: ['刻意零 AI'],
     cat: 'ui',
     accent: '#5A6CD8',
+    kind: '解读', // 拆读 YC 设计负责人的 AI 工作流分享
     collection: '',
     excerpt:
       'AI 能实现 shader，但生成的默认值不代表想要的效果。设计师的品味得通过参数、mood board、甚至刻意零 AI 的手绘，一层层加进去。',
@@ -306,6 +317,7 @@ export const ARTICLES: ArticleMeta[] = [
     tags: ['AI 设计工作流', '协作画布'],
     cat: 'product',
     accent: '#D4A017',
+    kind: '解读', // 拆读 Config 2026 发布会
     collection: 'Figma 观察',
     excerpt:
       'AI 拉低了设计的下限，却没抬高上限。Config 2026 的生成式插件、Agent、代码图层、Motion，都在放大设计表达。以不受限制的方式设计，是一种持续的创作力。',

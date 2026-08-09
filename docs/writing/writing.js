@@ -118,7 +118,10 @@ function initSiteNav() {
     nav.innerHTML =
         navBg +
         '<div class="header-left">' +
-            '<a href="' + LOGO_HOME + '" class="site-title" data-wordmark="' + WORDMARK + '" aria-label="' + wm.alt + '"><img src="' + base + 'favicon.png?v=20" class="site-logo" alt=""><img src="' + base + wm.src + '" class="site-wordmark" alt="' + wm.alt + '"></a>' +
+            // 导航 logo = 去背景内联 SVG,与 React 头部同一份图形(2026-07-22 规范)。
+            // 旧写法是 favicon.png:自带白底圆角板,而且 img 吃 .design-page 的 32px 规则
+            // (回收到 26px 的修正只写给 svg.site-logo)—— 手写版详情页 logo 会突然变大(2026-08-09 用户截图)。
+            '<a href="' + LOGO_HOME + '" class="site-title" data-wordmark="' + WORDMARK + '" aria-label="' + wm.alt + '"><svg class="site-logo site-logo-svg" viewBox="0 0 200 200" aria-hidden="true"><path fill="currentColor" d="M70 30h100v70H70zM30 100h40v70H30z"></path></svg><img src="' + base + wm.src + '" class="site-wordmark" alt="' + wm.alt + '"></a>' +
         '</div>' +
         // 手机端汉堡按钮:桌面隐藏,≤600px 显示;点击展开 .nav-collapse 下拉
         '<button type="button" class="nav-toggle" aria-label="菜单" aria-expanded="false" aria-controls="nav-collapse">' +
@@ -423,6 +426,7 @@ function initTOC() {
    ======================================== */
 /* READER_ARTICLES:AUTO —— 发布时 render.py 从 articles.json 自动重生成此数组,勿手改。 */
 let READER_ARTICLES = [
+    { file: "article-code-connect-mcp-coverage.html", cat: "product", title: "Figma 新推出 Code Connect CLI，给 Agent 读取生产环境的上下文", date: "2026-08-07", cover: "assets/code-connect-mcp-coverage/cover.png", accent: "#3392CC" },
     { file: "article-selection-as-context.html", cat: "product", title: "AI 产品设计｜选中即上下文", date: "2026-08-05", cover: "assets/selection-as-context/cover.png", accent: "#4B5FE8" },
     { file: "article-beyond-chat-edit-in-place.html", cat: "ui", title: "AI 产品设计｜修改在内容上而不是聊天框里", date: "2026-08-05", cover: "assets/beyond-chat-edit-in-place/cover.png", accent: "#B8550F" },
     { file: "article-beyond-chat-prompt-to-controls.html", cat: "ui", title: "AI 产品设计 ｜ 把高频微调的 Prompt 转变为可复现的参数控件", date: "2026-08-04", cover: "assets/beyond-chat-prompt-to-controls/cover.png", accent: "#4FA02A" },

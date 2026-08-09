@@ -751,6 +751,39 @@ body.reading-page .article-eyebrow .a-tag,
     transition: color var(--hover-color-dur) ease, background-color var(--hover-color-dur) ease;
 }
 
+/* 内容类型章(kind,目前只有「解读」)—— 与态度 tag 是两个维度、两种视觉:
+   态度 tag 在卡片 meta / byline 里是纯灰字,kind 是**主题色彩色文字**(无填底,
+   用户定 2026-08-09,替代最初的填底圆角版),示意「基于他人内容的拆读」。
+   颜色不写在这里:卡片端 BlogPage.tsx 用 a.accent 内联,文章页由 render.py 内联
+   文章 accent —— 内联优先级最高,深浅两个主题下都直接生效,这里只留兜底灰。
+   原创是默认态、不标,所以这个章只出现在少数文章上。
+   共用一个类:Blog 卡片 meta 行与文章页 byline(render.py 生成的 .article-eyebrow
+   首位)都渲染 .a-kind;byline 那条去胶囊覆盖只认 .a-tag,碰不到它。 */
+.a-kind {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    /* 边框浅灰 gray-300(用户定 2026-08-09 定稿:400 太重、100 太虚,取中) */
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 12px;                /* 章的徽标尺寸;存在感由边框承担,字重 400 */
+    font-weight: 400;
+    /* 固定灰,不吃文章主题色(用户定 2026-08-09,替代短暂的 accent 彩色版):
+       颜色对齐所在行的角标 —— 详情页 byline 是 #969696(基础值),
+       卡片 meta 行用下面的覆盖对齐 gray-600。 */
+    color: #969696;
+    line-height: 1.2;
+    transition: color var(--hover-color-dur) ease, border-color var(--hover-color-dur) ease;   /* hover 淡化与同排角标同步 */
+}
+body.theme-dark .a-kind { border-color: rgba(255, 255, 255, 0.2); }   /* 暗色对应档 */
+/* 卡片 meta 行:章与同排角标(态度 tag / 日期)同色 = gray-600(角标统一色) */
+.home-v2 .writing-info .w-meta .a-kind { color: var(--gray-600); }
+body.theme-dark .writing-info .w-meta .a-kind { color: rgba(255, 255, 255, 0.6); }   /* = 暗色角标同值 */
+/* 详情页 byline:章继承 byline 行的实际文字色(阅读页整行由「浅黑」大选择器定为 #1a1a1a),
+   与右侧态度 tag 的 color:inherit 同款处理 —— byline 换色时章自动跟随,不再各写一份色值 */
+body.reading-page .article-byline .article-eyebrow .a-kind { color: inherit; }
+
 /* 文章详情页:tag 移到标题上方,纯文字加粗(不用胶囊底),与标题一起居中。
    优先级 (0,3,0) 压过各文章内联的 .article-eyebrow .a-tag{font-weight:400}。 */
 body.reading-page .article-eyebrow-top {
@@ -827,6 +860,7 @@ body.reading-page .article-byline .article-eyebrow {
     max-width: none;
     margin: 0;
     justify-content: flex-start;
+    gap: 20px;   /* 与 byline 项间距一致:解读章→标签 的间距 = 标签→日期 的 20px(用户定 2026-08-09) */
 }
 /* eyebrow 标签与日期/阅读时长同款:剥掉胶囊底,继承 byline 的等宽灰字(#969696、14px)。
    多带一个 .article-byline 提高优先级,盖过共用 chip 块与手机端 padding 覆盖。 */
@@ -1728,7 +1762,7 @@ body.home-v2 .header-placeholder { height: 76px; }
     font-family: inherit;
     font-size: var(--fs-caption);   /* 14px,与日期一致 */
     font-weight: 400;
-    color: #969696;                 /* 与 .w-date 同色 */
+    color: var(--gray-600);         /* 角标统一色 = 原简介 token(用户定 2026-08-09,与 .w-date 同色) */
     line-height: inherit;
 }
 /* hover 时与日期同步淡化。
@@ -1736,7 +1770,7 @@ body.home-v2 .header-placeholder { height: 76px; }
    刚点过的卡标题/角标一直是淡的,旁边的卡却正常(2026-07-28 用户截图)。 */
 @media (hover: hover) {
     .card-wrapper:hover .writing-info .w-meta .w-tags .a-tag {
-        color: var(--gray-300);
+        color: var(--gray-400);   /* 角标默认加深到 gray-600 后,hover 同步收到 400 档 */
     }
 }
 .writing-info .w-title {
@@ -1754,7 +1788,7 @@ body.home-v2 .header-placeholder { height: 76px; }
 }
 .writing-info .w-excerpt {
     font-size: var(--fs-p);   /* 简介 18px */
-    color: var(--gray-600);
+    color: var(--gray-900);   /* 与标题同 token(用户定 2026-08-09,原 gray-600 让给角标行) */
     line-height: 1.6;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -1765,7 +1799,7 @@ body.home-v2 .header-placeholder { height: 76px; }
 .writing-info .w-date {
     font-family: var(--font-mono);
     font-size: var(--fs-caption);   /* 14px */
-    color: #969696;
+    color: var(--gray-600);   /* 角标统一色 = 原简介 token(用户定 2026-08-09) */
     transition: color var(--hover-color-dur) ease;
 }
 /* Design 页作品卡片日期保持等宽(否则会被 body.home-v2 * 的 Helvetica 覆盖) */
@@ -1783,9 +1817,11 @@ body.home-v2 .header-placeholder { height: 76px; }
 
 /* hover 时封面下面的文字整体变灰(同上,触屏挡掉,避免粘滞 hover) */
 @media (hover: hover) {
-    .card-wrapper:hover .writing-info .w-title { color: var(--gray-500); }
-    .card-wrapper:hover .writing-info .w-excerpt,
-    .card-wrapper:hover .writing-info .w-date { color: var(--gray-300); }
+    .card-wrapper:hover .writing-info .w-title,
+    .card-wrapper:hover .writing-info .w-excerpt { color: var(--gray-500); }   /* 简介与标题同 token,hover 同步 */
+    .card-wrapper:hover .writing-info .w-date,
+    .card-wrapper:hover .writing-info .w-meta .a-kind { color: var(--gray-400); }   /* 角标默认加深到 gray-600 后,hover 收到 400 档,落差与标题(900→500)一致 */
+    .card-wrapper:hover .writing-info .w-meta .a-kind { border-color: var(--gray-100); }   /* hover 随整卡淡化:300→100(与文字 600→400 同幅) */
 }
 
 /* 填充式占位图(用于封面框内) */
@@ -2420,22 +2456,24 @@ body.no-banner.theme-dark .home-nav .nav-cats .nav-cat.active { color: rgba(255,
 
 /* 卡片封面下方文字块。封面本身是各自独立的 iframe/video 文档,保持原样 —— 亮色封面浮在黑底上即预期效果 */
 body.theme-dark .writing-info .w-title { color: #fff; }
-body.theme-dark .writing-info .w-excerpt { color: rgba(255, 255, 255, 0.6); }
-body.theme-dark .writing-info .w-date { color: rgba(255, 255, 255, 0.4); }
+body.theme-dark .writing-info .w-excerpt { color: #fff; }   /* 与标题同色(浅色端同 token 的暗色对应) */
+body.theme-dark .writing-info .w-date { color: rgba(255, 255, 255, 0.6); }   /* 角标 = 原简介暗色值 */
 /* hover 整体淡化(浅色主题里是变灰,黑底上改为降透明度) */
-body.theme-dark .card-wrapper:hover .writing-info .w-title { color: rgba(255, 255, 255, 0.5); }
-body.theme-dark .card-wrapper:hover .writing-info .w-excerpt,
+body.theme-dark .card-wrapper:hover .writing-info .w-title,
+body.theme-dark .card-wrapper:hover .writing-info .w-excerpt { color: rgba(255, 255, 255, 0.5); }
 body.theme-dark .card-wrapper:hover .writing-info .w-date { color: rgba(255, 255, 255, 0.3); }
 
 /* 底部 meta 一行的标签:与左侧的 .w-date 同款纯灰字,不是胶囊。
    去胶囊底由上面 .home-v2 .writing-info .w-meta .w-tags .a-tag(0,5,0)负责,这里只翻颜色。
    选择器必须写满 .w-meta —— 少写这一层的话特异性算下来会盖过那条去胶囊规则,黑底上又冒出胶囊。 */
 body.theme-dark .writing-info .w-meta .w-tags .a-tag {
-    color: rgba(255, 255, 255, 0.4);   /* = .w-date 同色 */
+    color: rgba(255, 255, 255, 0.6);   /* = .w-date 同色(角标统一) */
 }
-body.theme-dark .card-wrapper:hover .writing-info .w-meta .w-tags .a-tag {
-    color: rgba(255, 255, 255, 0.3);   /* = .w-date hover 同色 */
+body.theme-dark .card-wrapper:hover .writing-info .w-meta .w-tags .a-tag,
+body.theme-dark .card-wrapper:hover .writing-info .w-meta .a-kind {
+    color: rgba(255, 255, 255, 0.4);   /* 暗色角标默认提到 0.6 后,hover 同步收到 0.4(解读章同步) */
 }
+body.theme-dark .card-wrapper:hover .writing-info .w-meta .a-kind { border-color: rgba(255, 255, 255, 0.12); }   /* 暗色 hover 同幅收淡:0.2→0.12 */
 
 /* 模块分割线(如启用):8% 黑 → 8% 白 */
 body.theme-dark .design-content .category-section .section-divider {
