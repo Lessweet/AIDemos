@@ -126,7 +126,7 @@ for (const slug of SLUGS) {
 <link href="../favicon.png?v=20" rel="shortcut icon"/>
 <link href="../apple-touch-icon.png?v=12" rel="apple-touch-icon"/>
 <link href="../style.css?v=135" rel="stylesheet"/>
-<link href="writing.css?v=422" rel="stylesheet"/>
+<link href="writing.css?v=443" rel="stylesheet"/>
 <!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁(React 迁移后的原生 boot 层) -->
 <script src="../nav-boot.js?v=7"></script>
 </head>
