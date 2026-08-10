@@ -147,10 +147,56 @@ function applySiteTheme() {
         setSiteTheme(sessionStorage.getItem('site-theme') === 'dark');
     } catch (e) { /* 隐私模式等取不到 storage 时静默,维持浅色 */ }
 }
+/* 切换动效:新主题从主题键那个圆扩开、铺满全屏(2026-08-11 用户要求)——
+   与手机端全屏菜单「从关闭键的圆长出来」同一套语汇。
+   走 View Transitions:浏览器给切换前后各拍一张全页快照,新版那张用 clip-path 圆
+   裁着放大 —— 顶栏、封面、图片、iframe 一起被揭开,不用手写遮罩、也不会漏掉某个元素。
+   本函数是全站唯一的切换入口(首页 / Blog / Archive / 文章详情页共用一颗按钮),
+   所以四个场景的切换观感天然一致,不要在别处再写第二套。
+   不支持 View Transitions(旧版 Firefox 等)或用户开了「减少动态效果」时,退回瞬切。 */
 function toggleSiteTheme() {
     var dark = !document.body.classList.contains('theme-dark');
-    setSiteTheme(dark);
-    try { sessionStorage.setItem('site-theme', dark ? 'dark' : 'light'); } catch (e) {}
+    var save = function () {
+        try { sessionStorage.setItem('site-theme', dark ? 'dark' : 'light'); } catch (e) {}
+    };
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (typeof document.startViewTransition !== 'function' || reduce) {
+        setSiteTheme(dark);
+        save();
+        return;
+    }
+
+    /* 圆心 = 主题键中心(视口坐标);按钮取不到就退到它常驻的右上角位置 */
+    var btn = document.querySelector('.theme-toggle');
+    var box = btn && btn.getBoundingClientRect();
+    var cx = box ? box.left + box.width / 2 : window.innerWidth - 42;
+    var cy = box ? box.top + box.height / 2 : 36;
+    /* 终点半径 = 圆心到最远那个视口角的距离,保证一定铺满(按钮在右上角,最远的是左下角) */
+    var end = Math.hypot(Math.max(cx, window.innerWidth - cx), Math.max(cy, window.innerHeight - cy));
+    /* 时长与缓动都读 CSS token,调节点只在 style.css 一处 */
+    var css = getComputedStyle(document.documentElement);
+    var dur = (parseFloat(css.getPropertyValue('--theme-wipe-dur')) || 0.52) * 1000;
+    var ease = css.getPropertyValue('--ease-in-out').trim() || 'cubic-bezier(0.65, 0, 0.35, 1)';
+
+    /* 揭开期间把页面自身的颜色过渡全禁掉(body.theme-vt):新版快照必须一上来就是
+       最终态,否则圆里露出来的是「还在慢慢变色」的中间态,圆的边界就糊成一团。
+       setSiteTheme 里的 .theme-switching(压到 0.18s)在这条路径上不够 —— 要的是 0。 */
+    document.body.classList.add('theme-vt');
+    var done = function () { document.body.classList.remove('theme-vt'); };
+    var vt = document.startViewTransition(function () { setSiteTheme(dark); });
+    vt.ready.then(function () {
+        document.documentElement.animate(
+            {
+                clipPath: [
+                    'circle(0px at ' + cx + 'px ' + cy + 'px)',
+                    'circle(' + end + 'px at ' + cx + 'px ' + cy + 'px)',
+                ],
+            },
+            { duration: dur, easing: ease, pseudoElement: '::view-transition-new(root)' },
+        );
+    }, done);   /* 快照失败(被打断等)就直接收尾,别把 theme-vt 留在身上 */
+    vt.finished.then(done, done);
+    save();
 }
 
 /* 手机端顶栏汉堡菜单:点击 .nav-toggle 展开/收起 .nav-collapse 下拉;点击面板外或选项后收起 */

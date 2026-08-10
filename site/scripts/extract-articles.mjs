@@ -125,10 +125,10 @@ for (const slug of SLUGS) {
 <link href="../favicon.png?v=20" rel="icon" type="image/png"/>
 <link href="../favicon.png?v=20" rel="shortcut icon"/>
 <link href="../apple-touch-icon.png?v=12" rel="apple-touch-icon"/>
-<link href="../style.css?v=146" rel="stylesheet"/>
+<link href="../style.css?v=147" rel="stylesheet"/>
 <link href="writing.css?v=454" rel="stylesheet"/>
 <!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁(React 迁移后的原生 boot 层) -->
-<script src="../nav-boot.js?v=13"></script>
+<script src="../nav-boot.js?v=14"></script>
 </head>
 <!-- 复用首页 index.html 的胶囊顶栏:home-v2 控制顶栏内边距,design-page 提供胶囊样式;
      no-banner = 顶栏不叠在 banner 上(与 Blog / Archive 同款),深色主题下顶栏整组反白靠它 -->

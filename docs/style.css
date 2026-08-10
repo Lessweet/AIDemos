@@ -1969,3 +1969,37 @@ body.theme-switching *::after {
     transition-duration: var(--theme-switch-dur) !important;
     transition-delay: 0s !important;
 }
+
+/* ---- 深/浅主题切换:圆形揭开(2026-08-11 用户要求)------------------------
+   新主题从右上角主题键那个圆扩开、铺满全屏,与手机端全屏菜单「从关闭键的圆长出来」
+   同一套语汇。切换是全站唯一入口 toggleSiteTheme()(nav-boot.js),四个场景
+   ——首页 / Blog / Archive / 文章详情页——共用这一套,不要在别处另写。
+   圆的圆心/半径由 JS 按按钮实际位置算(视口尺寸不同,写死会漏角),这里只管:
+   ① 关掉 View Transitions 的默认淡入淡出,② 叠放次序,③ 揭开期间禁掉页面自身过渡。
+   -------------------------------------------------------------------------- */
+/* 时长与缓动的唯一调节点(JS 读这两个 token)。缓动跟菜单圆形展开同一条:
+   两端都缓,小圆阶段留得住 —— 用强 ease-out 的话前 10% 时间就冲掉大半半径,
+   看不出是从圆开始的(2026-07-28 菜单那次已踩过)。 */
+:root { --theme-wipe-dur: 0.52s; }
+/* 根组的 UA 动画要关掉:它默认把「旧快照尺寸」morph 到「新快照尺寸」,
+   两者一致时是空转,但只要切换发生在窗口刚改过大小的那一帧,旧快照就会被
+   缩放着放大回来 —— 表现为整页先缩到一角再长开(实测过一次)。 */
+::view-transition-group(root) { animation: none; }
+/* isolation:none —— 否则新旧两张快照被隔离成独立层叠上下文,z-index 排不起作用 */
+::view-transition-image-pair(root) { isolation: none; }
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;          /* 默认的 cross-fade 关掉,只留 JS 写的 clip-path 圆 */
+    mix-blend-mode: normal;   /* 默认 plus-lighter 会让两张快照叠亮成灰白 */
+}
+::view-transition-old(root) { z-index: 0; }   /* 旧主题在下,静止不动 */
+::view-transition-new(root) { z-index: 1; }   /* 新主题在上,被圆裁着扩开 */
+/* 揭开期间页面自身的颜色过渡一律禁掉:圆里露出来的必须已是最终态,
+   否则边界会拖着一圈「正在变色」的中间态,圆就糊了。类由 nav-boot 加/摘。 */
+body.theme-vt,
+body.theme-vt *,
+body.theme-vt *::before,
+body.theme-vt *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+}
