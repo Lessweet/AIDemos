@@ -90,8 +90,9 @@ function initSiteNav() {
             if (e.animationName === 'nav-char-roll') el.classList.remove('nav-rolling');
         });
     });
-    /* 右上角深/浅色切换按钮:首页 / Blog / Archive 三页都有(文章详情页不放) */
-    if (bd.contains('home-landing') || bd.contains('blog-page') || bd.contains('works-page')) {
+    /* 右上角深/浅色切换按钮:首页 / Blog / Archive / 文章详情页都有
+       (2026-08-11 文章详情页补上深色主题,顶栏与 Blog 对齐,自然也要这颗切换键) */
+    if (bd.contains('home-landing') || bd.contains('blog-page') || bd.contains('works-page') || bd.contains('reading-page')) {
         var tt = document.createElement('button');
         tt.type = 'button';
         tt.className = 'theme-toggle';
@@ -111,8 +112,8 @@ function initSiteNav() {
 }
 
 /* ---- 站点主题(浅色 / 深色)----
-   首页右上角按钮切换,localStorage('site-theme') 记忆,首页 / Blog / Archive 共用;
-   文章详情页(reading-page)不参与、保持原样。theme-dark / menu-dark 是既有的
+   首页右上角按钮切换,sessionStorage('site-theme') 记忆,首页 / Blog / Archive /
+   文章详情页共用(详情页 2026-08-11 接入)。theme-dark / menu-dark 是既有的
    深色改版类,切换 = 在 body 上挂 / 摘这两个类,深浅两套样式都在 writing.css 里。
    applySiteTheme() 需在各页 body 起始的内联脚本里、initSiteNav() 之后同步调用,
    保证首次绘制前就带上主题类、不闪色。 */

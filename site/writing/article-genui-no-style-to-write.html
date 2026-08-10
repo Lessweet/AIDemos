@@ -9,15 +9,19 @@
 <link href="../favicon.png?v=20" rel="shortcut icon"/>
 <link href="../apple-touch-icon.png?v=12" rel="apple-touch-icon"/>
 <link href="../style.css?v=146" rel="stylesheet"/>
-<link href="writing.css?v=453" rel="stylesheet"/>
+<link href="writing.css?v=454" rel="stylesheet"/>
 <!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁(React 迁移后的原生 boot 层) -->
-<script src="../nav-boot.js?v=7"></script>
+<script src="../nav-boot.js?v=13"></script>
 </head>
-<!-- 复用首页 index.html 的胶囊顶栏:home-v2 控制顶栏内边距,design-page 提供胶囊样式 -->
-<body class="writing-page home-v2 design-page reading-page" data-accent="#1C1B1B" data-tint="gray">
+<!-- 复用首页 index.html 的胶囊顶栏:home-v2 控制顶栏内边距,design-page 提供胶囊样式;
+     no-banner = 顶栏不叠在 banner 上(与 Blog / Archive 同款),深色主题下顶栏整组反白靠它 -->
+<body class="writing-page home-v2 design-page reading-page no-banner" data-accent="#1C1B1B" data-tint="gray">
 <!-- 顶部导航:与首页同一个组件(initSiteNav);data-base="../" 把站内链接/资源指回 docs 根目录 -->
 <header class="header home-nav" data-active="writing" data-base="../" id="site-nav"></header>
-<script>initSiteNav();</script>
+<script>
+        initSiteNav();
+        applySiteTheme();   /* 首绘前应用记忆的深/浅色主题(nav-boot.js),与 blog.html 同一时机 */
+    </script>
 <div class="header-placeholder"></div>
 <script>
         // 顶栏 fixed 脱流,占位块高度跟随顶栏实际高度(big VIBEUX 标题在不同断点高度不同)

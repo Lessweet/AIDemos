@@ -2591,7 +2591,8 @@ body.home-landing .home-nav .nav-toggle { display: none !important; }
    最右 —— 默认 order:0 会落到最左、还把 logo 挤到右边。 */
 body.home-landing .home-nav .theme-toggle,
 body.blog-page .home-nav .theme-toggle,
-body.works-page .home-nav .theme-toggle {
+body.works-page .home-nav .theme-toggle,
+body.reading-page .home-nav .theme-toggle {
     order: 4;
     margin-left: auto;
     width: 32px;   /* 圆底后 36 略大,收到 32(2026-07-22) */
@@ -2610,10 +2611,12 @@ body.works-page .home-nav .theme-toggle {
 }
 body.home-landing .home-nav .theme-toggle:hover,
 body.blog-page .home-nav .theme-toggle:hover,
-body.works-page .home-nav .theme-toggle:hover { color: #181818; }
+body.works-page .home-nav .theme-toggle:hover,
+body.reading-page .home-nav .theme-toggle:hover { color: #181818; }
 body.home-landing .home-nav .theme-toggle svg,
 body.blog-page .home-nav .theme-toggle svg,
-body.works-page .home-nav .theme-toggle svg {
+body.works-page .home-nav .theme-toggle svg,
+body.reading-page .home-nav .theme-toggle svg {
     width: 20px;
     height: 20px;
     stroke: currentColor;
@@ -2626,17 +2629,20 @@ body.works-page .home-nav .theme-toggle svg {
 body.home-landing .home-nav .theme-toggle svg *,
 body.blog-page .home-nav .theme-toggle svg *,
 body.works-page .home-nav .theme-toggle svg *,
+body.reading-page .home-nav .theme-toggle svg *,
 body.home-landing .home-index-row .hi-arrow svg * { vector-effect: non-scaling-stroke; }
 /* 右上角按钮圆形底(2026-07-22):浅色白圆 / 深色 #1A1A1A 圆(--card-bg 同值) */
 body.home-landing .home-nav .theme-toggle,
 body.blog-page .home-nav .theme-toggle,
-body.works-page .home-nav .theme-toggle {
+body.works-page .home-nav .theme-toggle,
+body.reading-page .home-nav .theme-toggle {
     background: #fff;
     border-radius: 50%;
 }
 body.home-landing.theme-dark .home-nav .theme-toggle,
 body.blog-page.theme-dark .home-nav .theme-toggle,
-body.works-page.theme-dark .home-nav .theme-toggle { background: #1A1A1A; }
+body.works-page.theme-dark .home-nav .theme-toggle,
+body.reading-page.theme-dark .home-nav .theme-toggle { background: #1A1A1A; }
 @media (max-width: 600px) {
     /* 手机端两圆同尺寸(40px);汉堡同样圆底 */
     .home-v2 .header.home-nav .theme-toggle { width: 36px; height: 36px; }   /* 手机两圆 36px(2026-07-22) */
@@ -2659,7 +2665,8 @@ body.works-page.theme-dark .home-nav .theme-toggle { background: #1A1A1A; }
    月牙闭合路径的尖端太锋利) */
 body.home-landing .home-nav .theme-toggle svg.tt-moon,
 body.blog-page .home-nav .theme-toggle svg.tt-moon,
-body.works-page .home-nav .theme-toggle svg.tt-moon {
+body.works-page .home-nav .theme-toggle svg.tt-moon,
+body.reading-page .home-nav .theme-toggle svg.tt-moon {
     stroke-linecap: round;
     stroke-linejoin: round;
 }
@@ -2668,10 +2675,12 @@ body.theme-dark .home-nav .theme-toggle .tt-sun { display: none; }
 body.theme-dark .home-nav .theme-toggle .tt-moon { display: block; }
 body.home-landing.theme-dark .home-nav .theme-toggle,
 body.blog-page.theme-dark .home-nav .theme-toggle,
-body.works-page.theme-dark .home-nav .theme-toggle { color: rgb(152, 152, 152); }   /* 55% 白在 #1A1A1A 圆上的等效色 */
+body.works-page.theme-dark .home-nav .theme-toggle,
+body.reading-page.theme-dark .home-nav .theme-toggle { color: rgb(152, 152, 152); }   /* 55% 白在 #1A1A1A 圆上的等效色 */
 body.home-landing.theme-dark .home-nav .theme-toggle:hover,
 body.blog-page.theme-dark .home-nav .theme-toggle:hover,
-body.works-page.theme-dark .home-nav .theme-toggle:hover { color: #fff; }
+body.works-page.theme-dark .home-nav .theme-toggle:hover,
+body.reading-page.theme-dark .home-nav .theme-toggle:hover { color: #fff; }
 
 /* 主题切换按钮 hover:圆底翻成墨色、图标翻成纸色 —— 与顶栏三个 tab 同一套
    --hl-* 反色(2026-07-26 用户要求)。圆形保留,只换颜色。
@@ -4084,4 +4093,107 @@ body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-le
     /* logo 与字标浮在菜单之上(z-index 1/2),同样要回到深色 */
     body.theme-dark:not(.menu-dark) .header.home-nav.nav-open svg.site-logo { color: #101114; }
     body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .site-wordmark { filter: none; }
+}
+
+/* ========================================================================
+   文章详情页 —— 深色主题(2026-08-11 用户要求)
+   口径很窄:**只有背景色**换掉 —— 深色下不再用每篇的主题色底(--page-tint),
+   一律黑底(--page-bg)。前景的主题色(h2 内联 accent、strong、小标题 icon 底)
+   照旧不动,不参与深浅切换。
+   顶栏与 blog.html 对齐:黑底、无底部细线、右上角带主题切换键。详情页 body 已补上
+   .no-banner,字标反白 / logo 反白 / 汉堡圆底那套深色规则直接复用,不再重写。
+   两条进入路径都要覆盖:直接打开详情页(.reading-page)与 Blog 卡片展开的
+   模态(.article-modal)。
+   ======================================================================== */
+
+/* ---- 页面底 & 顶栏:主题色底 → 黑 ----
+   选择器写满 4 类,压过前面的纯色 tint(0,3,1)与 [data-bg="cover"] 实验档
+   —— 后者同级,靠本段在文件末尾的位置取胜。 */
+body.writing-page.design-page.reading-page.theme-dark::before,
+body.writing-page.design-page.reading-page.theme-dark[data-bg="cover"]::before {
+    background: var(--page-bg);
+}
+body.writing-page.design-page.reading-page.theme-dark .header,
+body.writing-page.design-page.reading-page.theme-dark[data-bg="cover"] .header {
+    background: var(--page-bg);
+    border-bottom: 0;   /* Blog 顶栏也没有这条线,深色下黑压黑更不需要 */
+    -webkit-backdrop-filter: none;   /* [data-bg="cover"] 档的磨砂白顶栏在深色下作废 */
+    backdrop-filter: none;
+}
+/* Blog 卡片展开的模态:顶栏底色由 JS 写的 --page-tint 驱动(带 !important),深色下顶回黑 */
+body.article-modal.theme-dark .header.home-nav { background: var(--page-bg) !important; }
+/* 顶栏底部的阅读进度条:浅色是纯黑,深色反白 */
+body.reading-page.theme-dark .header.home-nav::after { background: #fff; }
+
+/* ---- 正文文字:墨色反白 ----
+   正文这几档色值写死在每篇 fragment 的内联 <style> 里(render.py 出稿时带的),
+   内联 <style> 在文档里晚于本文件、同特异性会赢 —— 所以下面一律写满
+   body.theme-dark.reading-page(0,4,0),稳压内联的 .article-body p(0,2,0)。
+   唯独 strong 不在此列:19/20 篇的内联样式把它定成该篇 accent,那是有意的强调色。 */
+body.theme-dark.reading-page .article-h1,
+body.theme-dark.reading-page .article-body,
+body.theme-dark.reading-page .article-body p,
+body.theme-dark.reading-page .article-body li,
+body.theme-dark.reading-page .article-body h2,
+body.theme-dark.reading-page .article-body h3,
+body.theme-dark.reading-page .article-body .highlight,
+body.theme-dark.reading-page .article-body .list-dot,
+body.theme-dark.reading-page .article-eyebrow .a-tag,
+body.theme-dark.reading-page .article-eyebrow-top .a-tag,
+body.theme-dark.reading-page .same-collection a,
+body.theme-dark.reading-page .pn-title,
+body.theme-dark.reading-page .follow-card .ft-title,
+body.theme-dark.reading-page .back-link { color: #fff; }
+/* 次级字(署名 / 图注 / 引用 / 角标 / 合集序号)= 60% 白,对齐 Blog 深色下的角标档 */
+body.theme-dark.reading-page .article-byline,
+body.theme-dark.reading-page .article-body .img-caption,
+body.theme-dark.reading-page .article-body blockquote,
+body.theme-dark.reading-page .article-toc-title,
+body.theme-dark.reading-page .article-toc a,
+body.theme-dark.reading-page .reader-date,
+body.theme-dark.reading-page .pn-label,
+body.theme-dark.reading-page .same-collection .sc-title,
+body.theme-dark.reading-page .same-collection .sc-num,
+body.theme-dark.reading-page .follow-card .ft-desc { color: rgba(255, 255, 255, 0.6); }
+/* 正文链接:白字 + 白色下划线 */
+body.theme-dark.reading-page .article-body a { color: #fff; border-bottom-color: rgba(255, 255, 255, 0.3); }
+body.theme-dark.reading-page .article-body a:hover { border-bottom-color: #fff; }
+
+/* ---- 线与块 ----
+   分割线一律 12% 白(= Blog 深色列表分隔同值);小面积底色用 --card-bg,
+   比页面黑亮一档,给块一个边界。 */
+body.theme-dark.reading-page .article-body blockquote { border-left-color: rgba(255, 255, 255, 0.4); }
+body.theme-dark.reading-page .article-prevnext { border-top-color: rgba(255, 255, 255, 0.12); }
+body.theme-dark.reading-page .pn-link { border-color: rgba(255, 255, 255, 0.12); }
+body.theme-dark.reading-page .pn-link:hover { border-color: rgba(255, 255, 255, 0.3); }
+body.theme-dark.reading-page .same-collection a { border-bottom-color: rgba(255, 255, 255, 0.12); }
+body.theme-dark.reading-page .article-cover,
+body.theme-dark.reading-page .pn-thumb,
+body.theme-dark.reading-page .article-body code { background: var(--card-bg); }
+body.theme-dark.reading-page .follow-card {
+    background: var(--card-bg);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+/* 标题上方的 tag chip:浅色是 8% 黑填底,深色对调成 12% 白 */
+body.theme-dark.reading-page .article-eyebrow .a-tag { background: rgba(255, 255, 255, 0.12); }
+body.theme-dark.reading-page .article-eyebrow-top .a-tag { background: none; }   /* eyebrow-top 本就无底,别被上一条捡回来 */
+/* 配图占位框(内联样式里的浅灰斜纹)同样翻深 */
+body.theme-dark.reading-page .article-body .img-ph {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+body.theme-dark.reading-page .article-body .img-ph .img-ph-cap { color: rgba(255, 255, 255, 0.4); }
+
+/* ---- 左栏文章列表(≥1000px 的 master–detail 版式)---- */
+body.theme-dark.reading-page .reader-title { color: #fff; }
+body.theme-dark.reading-page .reader-item:not(.active):hover .reader-title { color: rgba(255, 255, 255, 0.6); }
+body.theme-dark.reading-page .reader-item { border-bottom-color: rgba(255, 255, 255, 0.12); }
+body.theme-dark.reading-page .reader-item:hover,
+body.theme-dark.reading-page .reader-item.active { background: rgba(255, 255, 255, 0.08); }
+body.theme-dark.reading-page .reader-thumb { background: var(--card-bg); }
+@media (min-width: 1000px) {
+    /* 三条整屏竖分割线(左 / 中 / 右)—— 浅色是 8% 黑,深色对调 */
+    body.theme-dark.reading-page .reading-layout::before,
+    body.theme-dark.reading-page .reading-layout::after,
+    body.theme-dark.reading-page .reading-layout .article-reading::after { background: rgba(255, 255, 255, 0.12); }
 }
