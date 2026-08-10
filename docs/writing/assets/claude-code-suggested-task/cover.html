@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+.wrap{position:fixed;inset:0;overflow:hidden;}
+#sh{position:absolute;inset:0;width:100%;height:100%;display:block;}
+.grain{position:absolute;inset:0;opacity:.10;mix-blend-mode:overlay;pointer-events:none;}
+.center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.group{display:flex;align-items:center;justify-content:center;transform-origin:center center;will-change:transform;}
+
+/* ===== LiquidGlass 材质（同 glass-hero .ic 配方：白 14% + blur14 saturate1.25 + 1.6px 渐变折光边，无投影）===== */
+.glass{position:relative;background:rgba(255,255,255,0.14);-webkit-backdrop-filter:blur(14px) saturate(1.25);backdrop-filter:blur(14px) saturate(1.25);}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.6px;background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.12) 42%,rgba(255,255,255,0.12) 58%,rgba(255,255,255,0.95));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:2;}
+
+/* ============================================================
+   零件库：场景（scenes/*.html）拿这些类拼自己的画面。
+   🔒 场景一篇一画（用户定 2026-08-06）——不许把上一篇的场景原样套给下一篇，
+   读文章讲的是哪个界面动作，就用这些零件把那个动作画出来。
+   通用容器：.glass 毛玻璃 / .box 圆角玻璃块 / .row 横排 / .stack 竖排
+   界面零件：.browser 窗口（.titlebar .dot .addr .panes .pane-l .pane-r）
+            .bar 骨架条（.t 标题级 / .dim 弱化）/ .selwrap+.sel 划词高亮
+            .floatbtn 浮出按钮 / .cursor 光标 / .star4 四角星 ✦
+            .aihead .reply .inputbox .chip .ph .send AI 面板一套
+   ============================================================ */
+.box{border-radius:20px;}
+.row{display:flex;align-items:center;gap:10px;}
+.stack{display:flex;flex-direction:column;gap:12px;}
+
+/* ===== 窗口零件（尺寸/高亮色走 CSS 变量，gen.mjs 注入）===== */
+.browser{width:var(--bw);height:var(--bh);border-radius:30px;display:flex;flex-direction:column;overflow:hidden;}
+.titlebar{flex:none;height:46px;display:flex;align-items:center;padding:0 18px;gap:7px;border-bottom:1px solid rgba(255,255,255,0.30);}
+.dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.55);}
+.addr{margin-left:14px;height:22px;flex:0 0 300px;border-radius:999px;background:rgba(255,255,255,0.22);display:flex;align-items:center;padding:0 10px;}
+.addr i{display:block;height:7px;width:132px;border-radius:4px;background:rgba(255,255,255,0.60);}
+.panes{flex:1;display:flex;min-height:0;}
+.pane-l{flex:1;padding:26px 28px;position:relative;}
+.pane-r{flex:0 0 var(--pw);border-left:1px solid rgba(255,255,255,0.30);background:rgba(255,255,255,0.10);display:flex;flex-direction:column;padding:18px 18px 16px;}
+
+/* 文本骨架条 */
+.bar{display:block;height:12px;border-radius:6px;background:rgba(255,255,255,0.55);margin-bottom:13px;}
+.bar.t{height:17px;border-radius:8px;background:rgba(255,255,255,0.78);margin-bottom:19px;}
+.bar.dim{background:rgba(255,255,255,0.40);}
+
+/* 选中态：高亮衬底（--sel），白条压上；右下角一个拖拽手柄点。
+   🔒 高亮和 chip 也是毛玻璃、不是实色块（用户定 2026-08-06）：主色薄染 + blur + 折光边，
+   跟 .glass 同一套材质语言——只染色不描边会在同色系底上读成实色填充。 */
+.selwrap{position:relative;margin:2px 0 15px;}
+.sel{position:absolute;inset:-5px -8px;border-radius:9px;background:var(--sel);-webkit-backdrop-filter:blur(10px) saturate(1.25);backdrop-filter:blur(10px) saturate(1.25);}
+.sel::before,.chip::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.2px;background:linear-gradient(135deg,rgba(255,255,255,0.88),rgba(255,255,255,0.10) 45%,rgba(255,255,255,0.10) 60%,rgba(255,255,255,0.88));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:2;}
+.sel::after{content:"";position:absolute;right:-5px;bottom:-5px;width:10px;height:10px;border-radius:50%;background:#FFFFFF;border:2.5px solid var(--selSolid);}
+.selwrap .bar{position:relative;margin-bottom:0;background:rgba(255,255,255,0.95);}
+.selwrap .bar+.bar{margin-top:11px;}
+
+/* 选中处浮出的小按钮（Ask AI 那类） */
+/* 位置相对左窗格右上角；关掉 panel 后左窗格变宽，记得用 FLOAT= 把它拉回划词处 */
+.floatbtn{position:absolute;right:var(--fx);top:var(--fy);height:30px;border-radius:999px;display:flex;align-items:center;gap:7px;padding:0 13px;background:rgba(255,255,255,0.24);z-index:3;animation:bob 4.5s ease-in-out infinite;}
+.floatbtn i{display:block;height:7px;width:52px;border-radius:4px;background:rgba(255,255,255,0.92);}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+/* AI 面板 */
+.aihead{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.aihead i{display:block;height:9px;width:76px;border-radius:5px;background:rgba(255,255,255,0.75);}
+.reply .bar{height:10px;margin-bottom:10px;}
+.spacer{flex:1;}
+/* 上下文 chip：选中内容被带到输入框，颜色与左侧高亮同源 */
+.inputbox{border-radius:14px;background:rgba(255,255,255,0.20);padding:11px 12px 12px;position:relative;}
+.chip{position:relative;display:inline-flex;align-items:center;gap:6px;height:26px;border-radius:8px;padding:0 9px;background:var(--sel);-webkit-backdrop-filter:blur(10px) saturate(1.25);backdrop-filter:blur(10px) saturate(1.25);animation:breathe 3.6s ease-in-out infinite;transform-origin:left center;}
+.chip i{display:block;height:7px;width:58px;border-radius:4px;background:rgba(255,255,255,0.95);}
+.chip .x{width:7px;height:7px;flex:none;position:relative;opacity:.9;}
+.chip .x::before,.chip .x::after{content:"";position:absolute;left:3px;top:-1px;width:1.8px;height:9px;background:#fff;border-radius:1px;}
+.chip .x::before{transform:rotate(45deg)}.chip .x::after{transform:rotate(-45deg)}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.ph{display:block;height:8px;width:112px;border-radius:4px;background:rgba(255,255,255,0.45);margin-top:12px;}
+.send{position:absolute;right:10px;bottom:10px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.85);}
+
+/* 四角星 ✦（AI 意象死规则：凹边四尖，代码画） */
+.star4{flex:none;animation:twinkle 3s ease-in-out infinite;transform-origin:center;}
+@keyframes twinkle{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(0.82);opacity:.72}}
+
+/* 大号鼠标箭头：Figma 式圆角指针，毛玻璃体 + 白描边，针尖朝左上压在选中区域
+   ::before 是裁成箭头形状的磨砂层，填充全部由它承担（白 40% + blur50，用户定 2026-08-10），
+   svg 只画白描边——调"填充百分比"只动 ::before 的 background 一处。
+   🔒 .cursor 必须放在场景最外层（position:relative 包裹层的直接子级）、用 z-index 压到目标上面，
+   不许嵌进任何带 backdrop-filter 的元素（.glass / .sel / .chip）里——
+   祖先的 backdrop-filter 会截断 backdrop root，磨砂层就采样不到卡片外的背景（2026-08-10 实测）。 */
+.cursor{position:absolute;left:var(--cx);top:var(--cy);width:var(--cs);height:var(--cs);z-index:4;}
+.cursor::before{content:"";position:absolute;inset:0;clip-path:url(#cursorClip);background:rgba(255,255,255,0.40);-webkit-backdrop-filter:blur(50px) saturate(1.25);backdrop-filter:blur(50px) saturate(1.25);}
+.cursor svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.cursor svg path{fill:none;}
+body.static *{animation:none!important;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style></head><body>
+<div class="wrap" id="wrap">
+<canvas id="sh"></canvas>
+<svg class="grain"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+<!-- 光标磨砂层的裁形（objectBoundingBox：随 .cursor 尺寸缩放；路径 = 场景里箭头 path ÷24） -->
+<svg width="0" height="0" style="position:absolute"><defs><clipPath id="cursorClip" clipPathUnits="objectBoundingBox"><path transform="scale(0.0416667)" d="M8.34 4.47 L17.97 10.66 Q21 12.6 17.47 13.32 L14.18 14 Q13.2 14.2 12.71 15.07 L10.97 18.16 Q9.2 21.3 8.39 17.79 L5.74 6.29 Q4.8 2.2 8.34 4.47 Z"/></clipPath></defs></svg>
+<!-- 场景（一篇一画）由 gen.mjs 从 scenes/<名>.html 注入；直接双击本文件时用下面这段内置演示 -->
+<div class="center"><div class="group" id="group">
+<!-- 场景（20260809 ClaudeCode 任务建议卡 一篇一画）：
+     Claude Code 会话窗口（左侧栏 + 会话流 + 输入框）正常干活，
+     右上角悬出一张 Suggested task 卡（✦ 标 AI 建的 + 标题 + 描述 + 玻璃按钮），光标压在按钮上。
+     零件类名真源 = ../.claude/skills/mp-cover/6-wireframe/wireframe.html 零件库。 -->
+<div style="position:relative">
+  <div class="browser glass" style="width:640px;height:396px">
+    <div class="titlebar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <div class="addr" style="flex:0 0 230px"><i style="width:96px"></i></div>
+    </div>
+    <div class="panes">
+      <div class="pane-l" data-part="sidebar" style="flex:0 0 150px;background:rgba(255,255,255,0.10);border-right:1px solid rgba(255,255,255,0.30);padding:20px 16px">
+        <span class="bar t" style="width:64%"></span>
+        <span class="bar dim" style="width:92%"></span>
+        <span class="bar" style="width:78%"></span>
+        <span class="bar dim" style="width:88%"></span>
+        <span class="bar dim" style="width:70%"></span>
+        <span class="bar dim" style="width:84%"></span>
+      </div>
+      <div class="pane-r" data-part="chat" style="flex:1;border-left:none;background:transparent;padding:24px 26px 18px;display:flex;flex-direction:column">
+        <span class="bar" style="width:94%"></span>
+        <span class="bar" style="width:86%"></span>
+        <span class="bar dim" style="width:58%"></span>
+        <div class="box glass" style="align-self:flex-end;width:38%;height:34px;border-radius:12px;margin:4px 0 17px"></div>
+        <span class="bar dim" style="width:90%"></span>
+        <span class="bar dim" style="width:44%"></span>
+        <div class="spacer"></div>
+        <div class="inputbox" style="height:40px;display:flex;align-items:center;padding:0 12px">
+          <span class="ph" style="margin-top:0"></span>
+          <span class="send" style="right:8px;bottom:8px"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Suggested task 卡：悬出窗口右上角 -->
+  <div class="box glass" data-part="card" style="position:absolute;top:-36px;right:-48px;width:262px;padding:16px 16px 14px;border-radius:18px;z-index:5">
+    <div class="row" style="margin-bottom:12px">
+      <svg class="star4" width="14" height="14" viewBox="0 0 64 64"><path d="M32 3C36.2 22.6 41.4 27.8 61 32 41.4 36.2 36.2 41.4 32 61 27.8 41.4 22.6 36.2 3 32 22.6 27.8 27.8 22.6 32 3Z" fill="#FFFFFF"/></svg>
+      <span class="bar dim" style="width:74px;height:8px;margin:0"></span>
+      <span style="flex:1"></span>
+      <svg width="11" height="11" viewBox="0 0 10 10" style="opacity:.85"><path d="M1 1 L9 9 M9 1 L1 9" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </div>
+    <span class="bar t" style="width:92%;height:14px;margin-bottom:13px"></span>
+    <span class="bar dim" style="width:100%;height:10px;margin-bottom:10px"></span>
+    <span class="bar dim" style="width:66%;height:10px;margin-bottom:14px"></span>
+    <div class="row" style="justify-content:flex-end">
+      <span class="chip" data-part="btn" style="height:30px;border-radius:10px;padding:0 12px">
+        <i style="width:66px"></i>
+        <svg width="10" height="7" viewBox="0 0 14 8"><path d="M1 1 L7 7 L13 1" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </div>
+  </div>
+
+  <!-- 光标在场景最外层压住按钮（不嵌进 .glass 卡片，否则磨砂层采样不到背后，blur 失效） -->
+  <div class="cursor" data-part="cursor" style="left:650px;top:97px;width:54px;height:54px;z-index:6"><svg viewBox="0 0 24 24"><path d="M8.34 4.47 L17.97 10.66 Q21 12.6 17.47 13.32 L14.18 14 Q13.2 14.2 12.71 15.07 L10.97 18.16 Q9.2 21.3 8.39 17.79 L5.74 6.29 Q4.8 2.2 8.34 4.47 Z" fill="rgba(255,255,255,0.34)" stroke="#FFFFFF" stroke-width="1.55" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+</div>
+
+</div></div>
+</div>
+<script>
+// ===== 配置：gen.mjs 注入 WF_CFG；直接双击打开时用下面的默认值跑演示 =====
+var CFG=Object.assign({
+  colors:['#4B5FE8','#C9A4EC','#2C3AD4'],   // 三色 mesh 底（主色 / 带主色相的浅色 / 辅色）
+  seed:26, dist:0.20, swirl:0.10, grain:0.25, // 形态三参定稿默认（用户定 2026-08-05）
+  sel:'#2F3ECE', selAlpha:0.58,             // 划词高亮 + 上下文 chip 同源色
+  bw:720, bh:430, pw:252,                   // 窗口宽高 / 右侧栏宽
+  cursor:[283,175], cursorSize:116,         // 光标位置（相对窗口左上角，光标在场景最外层）与大小
+  float:[34,118],                           // 浮出小按钮位置（相对左窗格：右偏移, 上偏移）
+  parts:{panel:true,sel:true,cursor:true,float:true,chip:true},
+  time0:60, freeze:null, static:false
+}, (typeof WF_CFG!=='undefined'?WF_CFG:{}));
+CFG=Object.assign(CFG,{"colors":["#F97F42","#F58BA0","#FAD26E"],"sel":"#F26430","selAlpha":0.4,"bw":720,"bh":430,"pw":252,"cursor":[283,175],"cursorSize":116,"float":[34,118],"parts":{"panel":true,"sel":true,"cursor":true,"float":true,"chip":true},"seed":26,"dist":0.5,"swirl":0.5,"grain":0.1,"freeze":null,"static":false,"time0":10});
+if(CFG.static)document.body.classList.add('static');
+document.getElementById('wrap').style.background=CFG.colors[0];
+(function applyCfg(){
+  function rgba(hex,a){var h=hex.replace('#','');
+    return 'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')';}
+  var s=document.documentElement.style;
+  s.setProperty('--bw',CFG.bw+'px'); s.setProperty('--bh',CFG.bh+'px'); s.setProperty('--pw',CFG.pw+'px');
+  s.setProperty('--sel',rgba(CFG.sel,CFG.selAlpha)); s.setProperty('--selSolid',CFG.sel);
+  s.setProperty('--cx',CFG.cursor[0]+'px'); s.setProperty('--cy',CFG.cursor[1]+'px'); s.setProperty('--cs',CFG.cursorSize+'px');
+  s.setProperty('--fx',CFG.float[0]+'px'); s.setProperty('--fy',CFG.float[1]+'px');
+  // 部件开关：关掉的整块摘掉（不是隐藏，免得还占位）
+  Object.keys(CFG.parts).forEach(function(k){
+    if(CFG.parts[k])return;
+    document.querySelectorAll('[data-part="'+k+'"]').forEach(function(el){el.remove();});
+  });
+})();
+console.log('BG seed='+CFG.seed+' dist='+CFG.dist+' swirl='+CFG.swirl+' t0='+CFG.time0+' freeze='+CFG.freeze);
+// ===== mesh shader（与 glass-hero 同源 soft 三色版）=====
+function makeMesh(cv,n){
+  var gl=cv.getContext('webgl2',{antialias:false,premultipliedAlpha:false,preserveDrawingBuffer:true});
+  var VERT='#version 300 es\nin vec2 a_pos;out vec2 v_uv;\nvoid main(){v_uv=a_pos*0.5+0.5;gl_Position=vec4(a_pos,0.0,1.0);}';
+  var FRAG=('#version 300 es\nprecision highp float;\nin vec2 v_uv;\nout vec4 fragColor;\nuniform float u_time;\nuniform float u_aspect;\nuniform vec4  u_colors[__N__];\nuniform float u_distortion;\nuniform float u_swirl;\nuniform float u_grain;\nuniform float u_seed;\nfloat hash21(vec2 p){p=fract(p*vec2(0.3183099,0.3678794))+0.1;p+=dot(p,p+19.19);return fract(p.x*p.y);}\nfloat valueNoise(vec2 st){vec2 i=floor(st);vec2 f=fract(st);float a=hash21(i);float b=hash21(i+vec2(1.,0.));float c=hash21(i+vec2(0.,1.));float d=hash21(i+vec2(1.,1.));vec2 u=f*f*(3.-2.*f);return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}\nvec2 rotate(vec2 p,float th){return mat2(cos(th),sin(th),-sin(th),cos(th))*p;}\nvec2 getPosition(int i,float t){\n  float a=float(i)*0.37+u_seed*(1.7+0.9*float(i));\n  float b=0.6+fract(float(i)/3.0)*0.9;\n  float c=0.8+fract(float(i+1)/4.0);\n  return 0.5+0.5*vec2(sin(t*b+a),cos(t*c+a*1.5));\n}\nvoid main(){\n  vec2 uv=v_uv;\n  vec2 uvSq=(uv-0.5)*vec2(u_aspect,1.0)+0.5;\n  vec2 grainUV=uv*vec2(u_aspect,1.0)*1000.0;\n  float mixerGrain=0.4*u_grain*(valueNoise(grainUV)-0.5);\n  float t=0.5*(u_time+41.5);\n  float radius=smoothstep(0.0,1.0,length(uvSq-0.5));\n  float center=1.0-radius;\n  for(float i=1.0;i<=2.0;i++){\n    uvSq.x+=u_distortion*center/i*sin(t+i*0.4*smoothstep(0.0,1.0,uvSq.y))*cos(0.2*t+i*2.4*smoothstep(0.0,1.0,uvSq.y));\n    uvSq.y+=u_distortion*center/i*cos(t+i*2.0*smoothstep(0.0,1.0,uvSq.x));\n  }\n  vec2 uvR=uvSq-0.5;\n  float angle=3.0*u_swirl*radius;\n  uvR=rotate(uvR,-angle);\n  uvR+=0.5;\n  vec3 color=vec3(0.0);\n  float totalWeight=0.0;\n  for(int i=0;i<__N__;i++){\n    vec2 pos=getPosition(i,t)+mixerGrain;\n    float d=length(uvR-pos);\n    d=pow(d,3.5);\n    float w=1.0/(d+1e-3);\n    color+=u_colors[i].rgb*u_colors[i].a*w;\n    totalWeight+=w;\n  }\n  color/=max(1e-4,totalWeight);\n  float go=valueNoise(rotate(grainUV,1.0)+vec2(3.0));\n  go=mix(go,valueNoise(rotate(grainUV,2.0)+vec2(-1.0)),0.5);\n  go=pow(go,1.3);\n  float goV=go*2.0-1.0;\n  float goStrength=pow(u_grain*abs(goV),0.8);\n  color=mix(color,vec3(step(0.0,goV)),0.35*goStrength);\n  fragColor=vec4(color,1.0);\n}').replace(/__N__/g,String(n));
+  function compile(t,s){var sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);
+    if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(sh));}return sh;}
+  var prog=gl.createProgram();
+  gl.attachShader(prog,compile(gl.VERTEX_SHADER,VERT));
+  gl.attachShader(prog,compile(gl.FRAGMENT_SHADER,FRAG));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  var quad=new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]);
+  var vbo=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vbo);gl.bufferData(gl.ARRAY_BUFFER,quad,gl.STATIC_DRAW);
+  var aPos=gl.getAttribLocation(prog,'a_pos');gl.enableVertexAttribArray(aPos);gl.vertexAttribPointer(aPos,2,gl.FLOAT,false,0,0);
+  function hx(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16)/255,parseInt(h.slice(2,4),16)/255,parseInt(h.slice(4,6),16)/255];}
+  var U=function(k){return gl.getUniformLocation(prog,k);};
+  return {
+    setColors:function(list){
+      var arr=new Float32Array(n*4);
+      for(var i=0;i<n;i++){var c=hx(list[i%list.length]);arr[i*4]=c[0];arr[i*4+1]=c[1];arr[i*4+2]=c[2];arr[i*4+3]=1.0;}
+      gl.useProgram(prog);gl.uniform4fv(U('u_colors[0]'),arr);
+    },
+    setParams:function(o){
+      gl.useProgram(prog);
+      gl.uniform1f(U('u_distortion'),o.dist);
+      gl.uniform1f(U('u_swirl'),o.swirl);
+      gl.uniform1f(U('u_grain'),o.grain);
+      gl.uniform1f(U('u_seed'),o.seed);
+    },
+    draw:function(t){
+      var r=cv.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,3);
+      var w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));
+      if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
+      gl.viewport(0,0,cv.width,cv.height);
+      gl.useProgram(prog);
+      gl.uniform1f(U('u_time'),t);
+      gl.uniform1f(U('u_aspect'),r.height>0?r.width/r.height:1080/460);
+      gl.drawArrays(gl.TRIANGLES,0,6);
+    }
+  };
+}
+var cv=document.getElementById('sh');
+var m=makeMesh(cv,3);
+m.setColors(CFG.colors);
+m.setParams({dist:CFG.dist,swirl:CFG.swirl,grain:CFG.grain,seed:CFG.seed});
+var shaderTime=CFG.time0,last=performance.now();
+if(CFG.freeze!=null){
+  m.draw(CFG.freeze);
+  new ResizeObserver(function(){m.draw(CFG.freeze);}).observe(cv);
+}else{
+  var frame=function(now){var dt=Math.min(0.05,(now-last)/1000);last=now;shaderTime+=dt*0.9;
+    m.draw(shaderTime);requestAnimationFrame(frame);};
+  new ResizeObserver(function(){m.draw(shaderTime);}).observe(cv);
+  requestAnimationFrame(frame);
+}
+window.__stepShader=function(t){m.draw(t);};   // GIF/MP4 逐帧驱动钩子（article-template cover_to_gif.py 用）
+window.__shaderRate=0.9;                       // u_time 每真实秒推进量
+</script>
+<script>
+// ===== 安全区自适应（bespoke 封面必备：核心组收进画布正中 560x380）=====
+(function(){
+  /* SAFE_H=312 = 线框组最高高度上限（用户定 2026-08-10：以 640×396 场景整体缩到 90%（0.875→0.7875、
+     渲染高 312px）的效果定标；312/396≈0.788，高度约束从这里接管，别再调回 380） */
+  var SAFE_W=560, SAFE_H=312;
+  function fitGroup(){
+    var g=document.querySelector(".group"); if(!g) return;
+    g.style.transform="none";
+    var sx=(window.innerWidth||1080)/1080;
+    var r=g.getBoundingClientRect();
+    var s=Math.min(1, SAFE_W/(r.width/sx), SAFE_H/(r.height/sx));
+    /* 垂直居中修正（用户定 2026-08-10：线框组必须上下居中，不许偏上/偏下）：
+       悬出的零件（卡片/光标是绝对定位）不进布局盒，flex 居中只居中布局盒，视觉重心会偏。
+       量全部子元素的视觉包围盒，把视觉中心平移回画布垂直中心；水平不动，保留场景自己的不对称构图。 */
+    var top=r.top, bot=r.bottom;
+    g.querySelectorAll("*").forEach(function(el){
+      var b=el.getBoundingClientRect(); if(!b.width&&!b.height) return;
+      if(b.top<top) top=b.top; if(b.bottom>bot) bot=b.bottom;
+    });
+    var dy=((r.top+r.bottom)/2-(top+bot)/2)*s;
+    g.style.transform="translateY("+dy.toFixed(2)+"px) scale("+s.toFixed(4)+")";
+  }
+  if(document.readyState!=="loading") fitGroup(); else document.addEventListener("DOMContentLoaded",fitGroup);
+  window.addEventListener("resize",fitGroup);
+  window.__ready=true;
+})();
+</script>
+</body></html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>活儿干到一半，Claude Code 反过来给我派任务了 · VibeUX</title>
+<link href="../favicon.png?v=12" rel="icon" type="image/png"/>
+<link href="../favicon.png?v=12" rel="shortcut icon"/>
+<link href="../apple-touch-icon.png?v=12" rel="apple-touch-icon"/>
+<link href="../style.css?v=146" rel="stylesheet"/>
+<link href="writing.css?v=453" rel="stylesheet"/>
+<!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁(与首页一致) -->
+<script src="writing.js?v=86"></script>
+</head>
+<!-- 复用首页 index.html 的胶囊顶栏:home-v2 控制顶栏内边距,design-page 提供胶囊样式 -->
+<body class="writing-page home-v2 design-page reading-page" data-accent="#D94F2E" data-tint="peach">
+<!-- 顶部导航:与首页同一个组件(initSiteNav);data-base="../" 把站内链接/资源指回 docs 根目录。
+         返回入口 = 左侧 VIBEUX 与高亮的 Writing 胶囊,均回到 index.html#writing -->
+<header class="header home-nav" data-active="writing" data-base="../" id="site-nav"></header>
+<script>initSiteNav();</script>
+<div class="header-placeholder"></div>
+<script>
+        // 顶栏 fixed 脱流,占位块高度跟随顶栏实际高度(big VIBEUX 标题在不同断点高度不同)
+        // 同时把左侧固定目录的 top 对齐到正文顶部 = 顶栏高度 + 正文上间距(56px,见 .reading-layout)
+        (function () {
+            const READING_TOP = 104;
+            const h = document.querySelector('.header');
+            const ph = document.querySelector('.header-placeholder');
+            const set = () => {
+                if (!h) return;
+                if (ph) ph.style.height = h.offsetHeight + 'px';
+                document.documentElement.style.setProperty('--toc-top', (h.offsetHeight + READING_TOP) + 'px');
+            };
+            set();
+            window.addEventListener('resize', set);
+            window.addEventListener('load', set);
+        })();
+    </script>
+<div class="reading-layout">
+<!-- ① 文章列表(JS 渲染,master–detail 左栏) -->
+<aside aria-label="文章列表" class="reader-list"></aside>
+<!-- ③ 浮动目录(JS 自动生成) -->
+<aside aria-label="目录" class="article-toc">
+<div class="article-toc-title">目录</div>
+<nav id="toc"></nav>
+</aside>
+<!-- 正文 -->
+<article class="article-reading">
+<h1 class="article-h1">活儿干到一半，Claude Code 反过来给我派任务了</h1>
+<div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-tag">主导权转移</span></div><span>2026-08-09</span><span>阅读约 5 分钟</span></div>
+<div class="article-cover"><iframe loading="lazy" src="assets/claude-code-suggested-task/cover.html"></iframe></div>
+<div class="article-body"><style>
+/* article-template 样式 inline 到网站，仅作用于 .article-body 内 */
+.article-eyebrow { text-align: center; justify-content: center; }
+.article-eyebrow .a-tag { font-weight: 400; }
+.article-h1 { text-align: center; }
+.article-byline { text-align: center; justify-content: center; }
+.article-body { color: #1a1a1a; line-height: 1.4; }
+.article-body p { font-size: var(--fs-body); font-weight: 300; margin: 40px 0; color: #1a1a1a; }
+.article-body strong { font-weight: 400; color: #D94F2E; }
+.article-body .list-dot { font-weight: 600; margin-right: 4px; color: #1a1a1a; }
+.article-body .section-head { text-align: center; margin: 0; }
+/* 图标居中与上下间距已全部内化进 svg 本体和 h2（全宽 svg + 内部 x=50% 钉中 + rect 底块 +
+   svg margin-top 40 + h2 margin-bottom 56，见 wrap_h2_blocks 注释）。这里不能再写
+   .section-head 的 margin 或 .section-head svg 的尺寸规则——微信编辑器会拆散 div，规则会失效或压坏布局。 */
+.article-body h2 { font-size: var(--fs-h2); font-weight: 400; color: #1a1a1a; line-height: 1.2; margin: 0 0 56px; letter-spacing: 0; text-align: center; }
+.article-body img { width: 100%; margin: 16px 0 0 0; display: block; border-radius: 8px; }
+.article-body .img-caption { font-size: var(--fs-caption); color: #aaa; text-align: center; margin: 4px 0 18px 0; line-height: 1.4; }
+.article-body .img-ph { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 160px; margin: 24px 0; padding: 28px 20px; border: 1px dashed #d6d6de; border-radius: 12px; background: repeating-linear-gradient(45deg, #fafafb, #fafafb 10px, #f3f3f6 10px, #f3f3f6 20px); }
+.article-body .img-ph .img-ph-cap { font-size: var(--fs-caption); color: #9a9aa6; line-height: 1.5; max-width: 80%; }
+.article-body .highlight { font-size: var(--fs-body); font-weight: 300; line-height: 1.4; color: #1a1a1a; margin: 40px 0; }
+.article-body .highlight strong { font-weight: 400; color: #D94F2E; }
+
+/* outlined 图标动画 CSS（自动从 design-gallery 抽取，不要手改） */
+/* 时长/延迟变量（在 design-gallery 基础上整体提速 ~40%，文章里看着更精神） */
+.section-head {
+  --dur-1-5: 0.9s; --dur-1-8: 1.1s; --dur-2-1: 1.2s; --dur-2-2: 1.3s;
+  --dur-2-3: 1.4s; --dur-2-4: 1.4s; --dur-2-5: 1.5s; --dur-2-6: 1.6s;
+  --dur-2-8: 1.7s; --dur-4-0: 2.4s; --dur-5-0: 3s;
+  --delay-150: 100ms; --delay-300: 180ms; --delay-600: 360ms;
+}
+/* 通用 transform-box */
+.section-head svg [class*="anim-"],
+.section-head svg .favorite-star,
+.section-head svg .favorite-rays {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.section-head svg .anim-viewBox {
+  transform-box: view-box;
+  transform-origin: center;
+}
+
+/* ---- 各图标动画规则 ---- */
+.section-head svg .anim-doc-line {
+    animation: doc-line-write var(--dur-2-8) ease-in-out infinite;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+.section-head svg .anim-doc-line-2 { animation-delay: var(--delay-300); }
+.section-head svg .anim-doc-line-3 { animation-delay: var(--delay-600); }
+.section-head svg .anim-user-head { animation: user-head var(--dur-2-3) ease-out infinite; }
+.section-head svg .anim-user-shoulders { animation: user-shoulders var(--dur-2-3) ease-out infinite; }
+.section-head svg .anim-gear { animation: gear-turn var(--dur-2-8) cubic-bezier(0.25, 0.8, 0.2, 1) infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .anim-search { animation: search-scan var(--dur-4-0) cubic-bezier(0.16, 0.9, 0.2, 1) infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-cart-burst {
+    animation: cart-burst var(--dur-2-5) ease-out infinite;
+    opacity: 0;
+  }
+.section-head svg .anim-cart-burst-1 { --tx: -5px; --ty: -9px; }
+.section-head svg .anim-cart-burst-2 { --tx: -1px; --ty: -11px; animation-delay: var(--delay-150); }
+.section-head svg .anim-cart-burst-3 { --tx: 3px; --ty: -10px; animation-delay: var(--delay-300); }
+.section-head svg .anim-cart-burst-4 { --tx: 6px; --ty: -8px; animation-delay: var(--delay-300); }
+.section-head svg .anim-clap-hand { animation: clap-hand var(--dur-1-8) ease-in-out infinite; transform-box: view-box; transform-origin: 9px 14px; }
+.section-head svg .anim-clap-lines { animation: clap-lines var(--dur-1-8) ease-out infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-music-note {
+    animation: music-float var(--dur-2-8) ease-in-out infinite;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: center;
+  }
+.section-head svg .anim-music-base {
+    animation: music-tilt var(--dur-2-8) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 14px;
+  }
+.section-head svg .anim-music-note-2 { animation-delay: calc(var(--dur-2-8) / 2); }
+.section-head svg .anim-lightning {
+    animation: lightning-flash var(--dur-2-4) ease-in-out infinite;
+  }
+.section-head svg .anim-pencil { animation: pencil-write var(--dur-5-0) ease-in-out infinite; transform-box: view-box; transform-origin: 13px 12px; }
+.section-head svg .anim-pencil-trace {
+    animation: pencil-trace var(--dur-5-0) ease-in-out infinite;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+.section-head svg .anim-eye-shape { animation: eye-blink var(--dur-2-8) ease-in-out infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .anim-eye-pupil { animation: eye-pupil-blink var(--dur-2-8) ease-in-out infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-bell { animation: bell-rattle var(--dur-5-0) cubic-bezier(0.3, 0.7, 0.2, 1) infinite; transform-box: view-box; transform-origin: 12px 4px; }
+.section-head svg .anim-bell-clapper { animation: bell-clapper var(--dur-5-0) linear infinite; transform-box: view-box; transform-origin: 12px 17px; }
+.section-head svg .anim-ide-cursor { animation: ide-blink var(--dur-1-5) step-end infinite; }
+.section-head svg .anim-pin-ripple {
+    animation: pin-ripple var(--dur-2-5) ease-out infinite;
+    opacity: 0;
+  }
+.section-head svg .anim-pin-ripple-2 { animation-delay: calc(var(--dur-2-5) / 3); }
+.section-head svg .anim-pin-ripple-3 { animation-delay: calc(var(--dur-2-5) * 2 / 3); }
+.section-head svg .anim-brain {
+    animation: brain-pulse var(--dur-2-2) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+  }
+.section-head svg .anim-ai-spark {
+    animation: ai-twinkle var(--dur-2-2) ease-in-out infinite;
+  }
+.section-head svg .anim-ai-spark-small {
+    animation-delay: calc(var(--dur-2-2) / 2);
+  }
+.section-head svg .anim-cursor {
+    animation: cursor-nudge var(--dur-2-2) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 10px 12px;
+  }
+.section-head svg .anim-cursor-click {
+    animation: cursor-click var(--dur-2-2) ease-out infinite;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: 6px 5px;
+  }
+.section-head svg .anim-cursor-spark {
+    animation: ai-twinkle var(--dur-2-2) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 18px 6px;
+  }
+.section-head svg .anim-hourglass-top {
+    animation: hourglass-top var(--dur-2-8) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 8px;
+  }
+.section-head svg .anim-hourglass-stream {
+    animation: hourglass-stream var(--dur-2-8) ease-in-out infinite;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+.section-head svg .anim-hourglass-bottom {
+    animation: hourglass-bottom var(--dur-2-8) ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 12px 18px;
+  }
+.section-head svg .anim-shape-cycle {
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+  }
+.section-head svg .anim-home { animation: home-settle var(--dur-2-4) ease-out infinite; }
+.section-head svg .anim-lock-shackle { animation: lock-shackle var(--dur-2-6) ease-in-out infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .anim-lock-dot { animation: lock-dot var(--dur-2-6) ease-out infinite; }
+.section-head svg .anim-message-dot-1 { animation: typing-dot var(--dur-1-5) ease-in-out infinite 0ms; }
+.section-head svg .anim-message-dot-2 { animation: typing-dot var(--dur-1-5) ease-in-out infinite var(--delay-150); }
+.section-head svg .anim-message-dot-3 { animation: typing-dot var(--dur-1-5) ease-in-out infinite var(--delay-300); }
+.section-head svg .anim-heart { animation: heart-flutter var(--dur-2-8) cubic-bezier(0.2, 0.85, 0.25, 1) infinite; transform-box: view-box; transform-origin: 12px 12px; }
+.section-head svg .favorite-star { animation: favorite-pop var(--dur-2-2) cubic-bezier(0.2, 0.85, 0.25, 1) infinite; }
+.section-head svg .favorite-rays { animation: favorite-rays var(--dur-2-2) ease-out infinite; transform-box: view-box; transform-origin: center; }
+.section-head svg .anim-gift-lid { animation: gift-lid var(--dur-2-8) ease-in-out infinite; transform-box: view-box; transform-origin: 12px 8px; }
+.section-head svg .anim-gift-particle {
+    animation: gift-particle var(--dur-2-8) ease-out infinite;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: center;
+  }
+.section-head svg .anim-gift-particle-1 { --tx: -5px; --ty: -9px; }
+.section-head svg .anim-gift-particle-2 { --tx: 4px; --ty: -10px; animation-delay: var(--delay-150); }
+.section-head svg .anim-gift-particle-3 { --tx: -8px; --ty: -6px; animation-delay: var(--delay-300); }
+.section-head svg .anim-gift-particle-4 { --tx: 7px; --ty: -7px; animation-delay: var(--delay-300); }
+.section-head svg .anim-gift-particle-5 { --tx: -2px; --ty: -11px; animation-delay: var(--delay-600); }
+.section-head svg .anim-gift-particle-6 { --tx: 6px; --ty: -5px; animation-delay: var(--delay-600); }
+/* 以下两条此前未接入(class 存在但没有匹配规则,design-gallery 里同样是孤儿 keyframe)。
+   现补上选择器,和 icons-outlined/*.svg 里新加的 SMIL 保持一致。 */
+.section-head svg .anim-bookmark { animation: bookmark-tuck var(--dur-2-4) ease-in-out infinite; }
+.section-head svg .anim-clock-minute { animation: clock-hand 3s linear infinite; transform-box: view-box; transform-origin: 12px 12px; }
+
+/* ---- keyframes ---- */
+@keyframes ai-twinkle {
+    0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    50% { opacity: 0.35; transform: scale(0.6) rotate(25deg); }
+  }
+@keyframes bell-clapper {
+    0%, 8%, 84%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(13deg); }
+    36% { transform: rotate(-9deg); }
+    52% { transform: rotate(6deg); }
+    68% { transform: rotate(-3deg); }
+  }
+@keyframes bell-rattle {
+    0%, 8%, 84%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(-11deg); }
+    36% { transform: rotate(8deg); }
+    52% { transform: rotate(-5deg); }
+    68% { transform: rotate(3deg); }
+  }
+@keyframes bookmark-tuck {
+    0%, 100% { transform: translateY(0); }
+    42% { transform: translateY(2px); }
+    72% { transform: translateY(-1px); }
+  }
+@keyframes brain-pulse {
+    0%, 100% { transform: scale(1); }
+    22% { transform: scale(1.06); }
+    44% { transform: scale(0.98); }
+    62% { transform: scale(1.06); }
+    82% { transform: scale(0.98); }
+  }
+@keyframes calendar-page {
+    0%, 100% { transform: translateY(0); }
+    45% { transform: translateY(1.2px); }
+  }
+@keyframes calendar-tabs {
+    0%, 100% { transform: translateY(0); }
+    35% { transform: translateY(-1.8px); }
+  }
+@keyframes cart-burst {
+    0%, 14% { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); }
+    28% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+    72% { opacity: 0.85; transform: translate(var(--tx), var(--ty)) scale(1) rotate(18deg); }
+    100% { opacity: 0; transform: translate(calc(var(--tx) * 1.25), calc(var(--ty) * 1.2)) scale(0.7) rotate(30deg); }
+  }
+@keyframes cart-roll {
+    0%, 100% { transform: translateX(0); }
+    42% { transform: translateX(3px); }
+    75% { transform: translateX(-1px); }
+  }
+@keyframes clap-hand {
+    0%, 100% { transform: translateX(-1.5px) rotate(-7deg); }
+    24%, 50% { transform: translateX(1px) rotate(3deg); }
+    70% { transform: translateX(-0.6px) rotate(-3deg); }
+  }
+@keyframes clap-lines {
+    0%, 14%, 72%, 100% { opacity: 0; transform: scale(0.88); }
+    26%, 48% { opacity: 1; transform: scale(1); }
+    58% { opacity: 0.45; transform: scale(1.08); }
+  }
+@keyframes clock-hand {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+@keyframes cursor-click {
+    0%, 34% { opacity: 0; transform: scale(0.45); }
+    46% { opacity: 0.85; transform: scale(0.78); }
+    74%, 100% { opacity: 0; transform: scale(1.55); }
+  }
+@keyframes cursor-nudge {
+    0%, 100% { transform: translate(0, 0); }
+    42% { transform: translate(1px, -1px); }
+    66% { transform: translate(0.35px, -0.35px); }
+  }
+@keyframes doc-line-write {
+    0%, 12% {
+      opacity: 0;
+      stroke-dashoffset: 1;
+    }
+    42%, 76% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 0;
+    }
+  }
+@keyframes eye-blink {
+    0%, 44%, 58%, 70%, 100% { transform: scaleY(1); }
+    50%, 64% { transform: scaleY(0.08); }
+  }
+@keyframes eye-pupil-blink {
+    0%, 44%, 58%, 70%, 100% { opacity: 1; transform: scaleY(1); }
+    50%, 64% { opacity: 0; transform: scaleY(0.08); }
+  }
+@keyframes favorite-pop {
+    0%   { transform: scale(1); }
+    20%  { transform: scale(0.72); }
+    46%  { transform: scale(1.2); }
+    72%  { transform: scale(0.94); }
+    100% { transform: scale(1); }
+  }
+@keyframes favorite-rays {
+    0%   { opacity: 0; transform: scale(0.58) rotate(0deg); }
+    18%  { opacity: 0; transform: scale(0.62) rotate(0deg); }
+    34%  { opacity: 1; }
+    76%  { opacity: 0.75; }
+    100% { opacity: 0; transform: scale(1.28) rotate(10deg); }
+  }
+@keyframes gear-turn {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(90deg); }
+  }
+@keyframes gift-box {
+    0%, 100% { transform: scaleY(1); }
+    42% { transform: scaleY(0.96); }
+  }
+@keyframes gift-lid {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    42% { transform: translateY(-3px) rotate(-4deg); }
+    70% { transform: translateY(-1px) rotate(2deg); }
+  }
+@keyframes gift-particle {
+    0%, 18% { opacity: 0; transform: translate(0, 3px) scale(0.62) rotate(0deg); }
+    32% { opacity: 1; transform: translate(0, 0) scale(1) rotate(8deg); }
+    72% { opacity: 0.9; transform: translate(var(--tx), var(--ty)) scale(1.05) rotate(18deg); }
+    100% { opacity: 0; transform: translate(calc(var(--tx) * 1.2), calc(var(--ty) * 1.25)) scale(0.78) rotate(28deg); }
+  }
+@keyframes heart-flutter {
+    0%, 10%, 68%, 100% { transform: scale(1) rotate(0deg); }
+    16% { transform: scale(0.94) rotate(-1.5deg); }
+    23% { transform: scale(1.18) rotate(1.5deg); }
+    31% { transform: scale(0.98) rotate(0deg); }
+    42% { transform: scale(1.1) rotate(-0.8deg); }
+    54% { transform: scale(1.01) rotate(0.4deg); }
+  }
+@keyframes home-settle {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-2px); }
+    70% { transform: translateY(1px); }
+  }
+@keyframes hourglass-bottom {
+    0%, 100% { opacity: 0.68; transform: scaleX(0.72); }
+    60% { opacity: 1; transform: scaleX(1.08); }
+  }
+@keyframes hourglass-stream {
+    0%, 14% { opacity: 0; stroke-dashoffset: 1; }
+    30% { opacity: 1; }
+    68% { opacity: 1; stroke-dashoffset: 0; }
+    100% { opacity: 0; stroke-dashoffset: -1; }
+  }
+@keyframes hourglass-top {
+    0%, 100% { opacity: 0.95; transform: scaleY(1); }
+    54% { opacity: 0.5; transform: scaleY(0.64); }
+    78% { opacity: 0.9; transform: scaleY(0.86); }
+  }
+@keyframes ide-blink {
+    0%, 49% { opacity: 1; }
+    50%, 99% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+@keyframes lightning-flash {
+    0%, 100% { opacity: 0.92; transform: scale(1); }
+    42% { opacity: 1; transform: scale(1.08); }
+    72% { opacity: 0.78; transform: scale(0.98); }
+  }
+@keyframes lightning-pulse {
+    0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+    36% { transform: translateY(-1px) rotate(-3deg) scale(1.04); }
+    64% { transform: translateY(0.6px) rotate(2deg) scale(0.98); }
+  }
+@keyframes lock-dot {
+    0%, 100% { transform: scale(1); }
+    45% { transform: scale(1.35); }
+  }
+@keyframes lock-shackle {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    36% { transform: translateY(-2px) rotate(-9deg); }
+    72% { transform: translateY(0) rotate(0deg); }
+  }
+@keyframes music-float {
+    0% { opacity: 0; transform: translate(0, 3px) scale(0.82) rotate(-5deg); }
+    18% { opacity: 1; }
+    68% { opacity: 1; transform: translate(0.8px, -4px) scale(1) rotate(6deg); }
+    100% { opacity: 0; transform: translate(-0.5px, -7px) scale(0.86) rotate(-8deg); }
+  }
+@keyframes music-tilt {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    34% { transform: rotate(-5deg) translateY(-0.8px); }
+    68% { transform: rotate(4deg) translateY(0.5px); }
+  }
+@keyframes pencil-trace {
+    0%, 14% {
+      opacity: 0;
+      stroke-dashoffset: 1;
+    }
+    46% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    72% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 0;
+    }
+  }
+@keyframes pencil-write {
+    0%, 100% { transform: translate(-0.8px, -0.8px) rotate(-4deg); }
+    18% { transform: translate(1.4px, -2.4px) rotate(-1deg); }
+    36% { transform: translate(3.8px, -0.5px) rotate(3deg); }
+    56% { transform: translate(6.4px, -2.2px) rotate(1deg); }
+    76% { transform: translate(9px, -0.7px) rotate(4deg); }
+    88% { transform: translate(4.2px, -1.5px) rotate(-1deg); }
+  }
+@keyframes pin-drop {
+    0% { transform: translateY(-6px); opacity: 0; }
+    55% { transform: translateY(1px); opacity: 1; }
+    75% { transform: translateY(-1px); }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+@keyframes pin-ripple {
+    0% { opacity: 0; transform: scale(0.45); }
+    20% { opacity: 0.9; }
+    100% { opacity: 0; transform: scale(1.8); }
+  }
+@keyframes search-scan {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-4.2px, 0.4px) rotate(-10deg); }
+    18% { transform: translate(-1.1px, -0.2px) rotate(-2deg); }
+    30% { transform: translate(0.6px, -3.8px) rotate(7deg); }
+    39% { transform: translate(1.6px, -1px) rotate(2deg); }
+    52% { transform: translate(3px, 3.4px) rotate(9deg); }
+    62% { transform: translate(0.8px, 1px) rotate(2deg); }
+    78% { transform: translate(-0.7px, 0.2px) rotate(-1deg); }
+  }
+@keyframes search-sway {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(-1.4px) rotate(-7deg); }
+    55% { transform: translateX(1.4px) rotate(7deg); }
+    78% { transform: translateX(-0.5px) rotate(-3deg); }
+  }
+@keyframes typing-dot {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+    38% { transform: translateY(-2px) scale(1.18); opacity: 0.75; }
+  }
+@keyframes user-head {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-2px); }
+  }
+@keyframes user-shoulders {
+    0%, 100% { transform: scaleX(1); }
+    45% { transform: scaleX(1.08); }
+  }
+@keyframes wheel-pulse {
+    0%, 100% { transform: scale(1); }
+    42% { transform: scale(1.2); }
+  }
+</style>
+<p>其实是 Claude Code 在我 vibe coding 时，主动为我提出改造流程中的有用建议哈~ 👇</p>
+<img alt="Suggested task 卡片出现在会话右上角" src="assets/claude-code-suggested-task/01b-suggested-task-spotlight.png"/>
+<p>事情是这样的，当时我正在修改我的个人网站的文章发布流程，把公众号的文章也同时发布到个人网站。之前的版本下，这套流程给我的体感就是慢、且费 token。其实是因为我的网站是 React 写的，文章需要展示在首页列表和文章详情页这两个场景；文章在本地渲染成详情页之后，得再跑一个脚本把文章的标题、日期这些信息提取进首页数据，然后把整个网站重新打包一次，打包出来的文件推上去，网站才算更新；每发一篇文章，这套步骤都得重复一次。因此，每发布一篇文章花的 token，90% 都消耗在这些重复步骤上。</p>
+<p>在和 Claude 聊了多轮之后，修改方向就是把提取和打包搬到 GitHub Actions 服务器上自动跑，以后本地只负责改内容、推代码。从流程上看，我电脑这边原来要走渲染、提取、打包、提交代码四步，<strong>现在只剩渲染和提交两步</strong>。这样，发布流程的<strong>token 消耗可以降 80% 左右</strong>。</p>
+<p>这个改造当时是聚焦在主网站上，强相关的发布 skill 旧流程还没同步更新。这时候 Claude Code 及时的提示就非常有帮助，正如他的提示卡里说的：避免以后又在本地重复跑构建。这对于不太接触 CI 这类工程配置的我来说，如此及时的建议卡，简直就是小太阳级别的存在。</p>
+<p>这个功能叫 Suggested task（任务建议卡），是 Claude 在session 中<strong>主动提示用户有遗留问题或者需要处理的问题</strong>，出现在右上角，是一个很典型的 popover 提示引导样式。</p>
+<div class="section-head"><svg height="70" style="display:block;margin:40px 0 0 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="70" overflow="visible" style="overflow:visible" width="40" x="50%"><g transform="translate(-20 16)"><rect fill="rgba(217, 79, 46, 0.1)" height="40" rx="10" width="40" x="0" y="0"></rect><svg fill="none" height="19.2" overflow="visible" viewBox="0 0 24 24" width="19.2" x="10.4" xmlns="http://www.w3.org/2000/svg" y="10.4"><path d="M20.5 14.99L15.49 20.01" stroke="#D94F2E" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.0"></path><path d="M3.5 14.99H20.5" stroke="#D94F2E" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.0"></path><path d="M3.5 9.00999L8.51 3.98999" stroke="#D94F2E" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.0"></path><path d="M20.5 9.01001H3.5" stroke="#D94F2E" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.0"></path></svg></g></svg></svg><h2 style="color: #D94F2E;">方向反转<br/>AI 指派任务</h2></div>
+<p>通常用户与 AI 产品交互的方式，是人给 AI 派任务，这个建议卡是 AI 在干活途中反过来给人传递任务建议，而且传递的方式<strong>不是插话，而是一个很轻量的小提示卡片</strong>。</p>
+<p>这个建议卡的背后是 Claude 内部一个叫 spawn_task 的工具，触发条件是：干活途中注意到值得修、但塞进当前改动会让它膨胀或者跑题的问题，才出这个建议卡。比如死代码、过期文档、缺失的测试覆盖这一类，已确认的 TODO 和顺带发现的安全问题也算；我碰上的那次，就是"顺手发现的文档未及时更新问题"。</p>
+<img alt="Claude Code 官方文档里对任务建议卡的说明" src="assets/claude-code-suggested-task/03-official-docs-suggested-task.png"/>
+<div class="section-head"><svg height="70" style="display:block;margin:40px 0 0 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="70" overflow="visible" style="overflow:visible" width="40" x="50%"><g transform="translate(-20 16)"><rect fill="rgba(217, 79, 46, 0.1)" height="40" rx="10" width="40" x="0" y="0"></rect><svg fill="none" height="19.2" overflow="visible" viewBox="0 0 24 24" width="19.2" x="10.4" xmlns="http://www.w3.org/2000/svg" y="10.4"><path clip-rule="evenodd" d="M10.4606 1.25H13.5394C15.1427 1.24999 16.3997 1.24999 17.4039 1.34547C18.4274 1.44279 19.2655 1.64457 20.0044 2.09732C20.7781 2.57144 21.4286 3.22194 21.9027 3.99563C22.3554 4.73445 22.5572 5.57256 22.6545 6.59611C22.75 7.60029 22.75 8.85725 22.75 10.4606V11.5278C22.75 12.6691 22.75 13.564 22.7007 14.2868C22.6505 15.0223 22.5468 15.6344 22.3123 16.2004C21.7287 17.6093 20.6093 18.7287 19.2004 19.3123C18.3955 19.6457 17.4786 19.7197 16.2233 19.7413C15.7842 19.7489 15.5061 19.7545 15.2941 19.7779C15.096 19.7999 15.0192 19.832 14.9742 19.8582C14.9268 19.8857 14.8622 19.936 14.7501 20.0898C14.6287 20.2564 14.4916 20.4865 14.2742 20.8539L13.7321 21.7697C12.9585 23.0767 11.0415 23.0767 10.2679 21.7697L9.72579 20.8539C9.50835 20.4865 9.37122 20.2564 9.24985 20.0898C9.13772 19.936 9.07313 19.8857 9.02572 19.8582C8.98078 19.832 8.90399 19.7999 8.70588 19.7779C8.49387 19.7545 8.21575 19.7489 7.77666 19.7413C6.52138 19.7197 5.60454 19.6457 4.79957 19.3123C3.39066 18.7287 2.27128 17.6093 1.68769 16.2004C1.45323 15.6344 1.3495 15.0223 1.29932 14.2868C1.24999 13.564 1.25 12.6691 1.25 11.5278L1.25 10.4606C1.24999 8.85726 1.24999 7.60029 1.34547 6.59611C1.44279 5.57256 1.64457 4.73445 2.09732 3.99563C2.57144 3.22194 3.22194 2.57144 3.99563 2.09732C4.73445 1.64457 5.57256 1.44279 6.59611 1.34547C7.60029 1.24999 8.85726 1.24999 10.4606 1.25ZM6.73809 2.83873C5.82434 2.92561 5.24291 3.09223 4.77938 3.37628C4.20752 3.72672 3.72672 4.20752 3.37628 4.77938C3.09223 5.24291 2.92561 5.82434 2.83873 6.73809C2.75079 7.663 2.75 8.84876 2.75 10.5V11.5C2.75 12.6751 2.75041 13.5189 2.79584 14.1847C2.84081 14.8438 2.92737 15.2736 3.07351 15.6264C3.50486 16.6678 4.33223 17.4951 5.3736 17.9265C5.88923 18.1401 6.54706 18.2199 7.8025 18.2416L7.83432 18.2421C8.23232 18.249 8.58109 18.2549 8.87097 18.287C9.18246 18.3215 9.4871 18.3912 9.77986 18.5615C10.0702 18.7304 10.2795 18.9559 10.4621 19.2063C10.6307 19.4378 10.804 19.7306 11.0004 20.0623L11.5587 21.0057C11.7515 21.3313 12.2485 21.3313 12.4412 21.0057L12.9996 20.0623C13.1959 19.7306 13.3692 19.4378 13.5379 19.2063C13.7204 18.9559 13.9298 18.7304 14.2201 18.5615C14.5129 18.3912 14.8175 18.3215 15.129 18.287C15.4189 18.2549 15.7676 18.249 16.1656 18.2421L16.1975 18.2416C17.4529 18.2199 18.1108 18.1401 18.6264 17.9265C19.6678 17.4951 20.4951 16.6678 20.9265 15.6264C21.0726 15.2736 21.1592 14.8438 21.2042 14.1847C21.2496 13.5189 21.25 12.6751 21.25 11.5V10.5C21.25 8.84876 21.2492 7.663 21.1613 6.73809C21.0744 5.82434 20.9078 5.24291 20.6237 4.77938C20.2733 4.20752 19.7925 3.72672 19.2206 3.37628C18.7571 3.09223 18.1757 2.92561 17.2619 2.83873C16.337 2.75079 15.1512 2.75 13.5 2.75H10.5C8.84876 2.75 7.663 2.75079 6.73809 2.83873Z" fill="#D94F2E" fill-rule="evenodd"></path><path d="M9 11C9 11.5523 8.55228 12 8 12C7.44772 12 7 11.5523 7 11C7 10.4477 7.44772 10 8 10C8.55228 10 9 10.4477 9 11Z" fill="#D94F2E"></path><path d="M13 11C13 11.5523 12.5523 12 12 12C11.4477 12 11 11.5523 11 11C11 10.4477 11.4477 10 12 10C12.5523 10 13 10.4477 13 11Z" fill="#D94F2E"></path><path d="M17 11C17 11.5523 16.5523 12 16 12C15.4477 12 15 11.5523 15 11C15 10.4477 15.4477 10 16 10C16.5523 10 17 10.4477 17 11Z" fill="#D94F2E"></path></svg></g></svg></svg><h2 style="color: #D94F2E;">AI 介入<br/>不打断当前对话流</h2></div>
+<p>反过来，限制创建建议卡的条件也很明确：模糊的观察不行，低置信度的直觉不行，自己在当前会话里顺手就能改掉的小事也不行。什么信息要打扰用户，是决定是否使用建议卡的硬规则。对一个会主动找活干的 agent 来说，这条门槛就是一种防骚扰设计，不然卡片多起来，就跟推送轰炸一样非常打扰了。</p>
+<div class="section-head"><svg height="70" style="display:block;margin:40px 0 0 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="70" overflow="visible" style="overflow:visible" width="40" x="50%"><g transform="translate(-20 16)"><rect fill="rgba(217, 79, 46, 0.1)" height="40" rx="10" width="40" x="0" y="0"></rect><svg fill="none" height="19.2" overflow="visible" viewBox="0 0 24 24" width="19.2" x="10.4" xmlns="http://www.w3.org/2000/svg" y="10.4"><path clip-rule="evenodd" d="M11.9426 1.25H12.0574C14.3658 1.24999 16.1748 1.24998 17.5863 1.43975C19.031 1.63399 20.1711 2.03933 21.0659 2.93414C21.9607 3.82895 22.366 4.96897 22.5603 6.41371C22.75 7.82519 22.75 9.63423 22.75 11.9426V12.0574C22.75 14.3658 22.75 16.1748 22.5603 17.5863C22.366 19.031 21.9607 20.1711 21.0659 21.0659C20.1711 21.9607 19.031 22.366 17.5863 22.5603C16.1748 22.75 14.3658 22.75 12.0574 22.75H11.9426C9.63423 22.75 7.82519 22.75 6.41371 22.5603C4.96897 22.366 3.82895 21.9607 2.93414 21.0659C2.03933 20.1711 1.63399 19.031 1.43975 17.5863C1.24998 16.1748 1.24999 14.3658 1.25 12.0574V11.9426C1.24999 9.63423 1.24998 7.82519 1.43975 6.41371C1.63399 4.96897 2.03933 3.82895 2.93414 2.93414C3.82895 2.03933 4.96897 1.63399 6.41371 1.43975C7.82519 1.24998 9.63423 1.24999 11.9426 1.25ZM6.61358 2.92637C5.33517 3.09825 4.56445 3.42514 3.9948 3.9948C3.42514 4.56445 3.09825 5.33517 2.92637 6.61358C2.75159 7.91356 2.75 9.62177 2.75 12C2.75 14.3782 2.75159 16.0864 2.92637 17.3864C3.09825 18.6648 3.42514 19.4355 3.9948 20.0052C4.56445 20.5749 5.33517 20.9018 6.61358 21.0736C7.91356 21.2484 9.62177 21.25 12 21.25C14.3782 21.25 16.0864 21.2484 17.3864 21.0736C18.6648 20.9018 19.4355 20.5749 20.0052 20.0052C20.5749 19.4355 20.9018 18.6648 21.0736 17.3864C21.2484 16.0864 21.25 14.3782 21.25 12C21.25 9.62177 21.2484 7.91356 21.0736 6.61358C20.9018 5.33517 20.5749 4.56445 20.0052 3.9948C19.4355 3.42514 18.6648 3.09825 17.3864 2.92637C16.0864 2.75159 14.3782 2.75 12 2.75C9.62177 2.75 7.91356 2.75159 6.61358 2.92637Z" fill="#D94F2E" fill-rule="evenodd"></path><path clip-rule="evenodd" d="M8.03033 5.96967C8.32322 6.26256 8.32322 6.73744 8.03033 7.03033L7.81066 7.25H8C9.67947 7.25 11.1554 8.12162 12 9.43718C12.8446 8.12162 14.3205 7.25 16 7.25H16.1893L15.9697 7.03033C15.6768 6.73744 15.6768 6.26256 15.9697 5.96967C16.2626 5.67678 16.7374 5.67678 17.0303 5.96967L18.5303 7.46967C18.8232 7.76256 18.8232 8.23744 18.5303 8.53033L17.0303 10.0303C16.7374 10.3232 16.2626 10.3232 15.9697 10.0303C15.6768 9.73744 15.6768 9.26256 15.9697 8.96967L16.1893 8.75H16C14.2051 8.75 12.75 10.2051 12.75 12V18C12.75 18.4142 12.4142 18.75 12 18.75C11.5858 18.75 11.25 18.4142 11.25 18V12C11.25 10.2051 9.79493 8.75 8 8.75H7.81066L8.03033 8.96967C8.32322 9.26256 8.32322 9.73744 8.03033 10.0303C7.73744 10.3232 7.26256 10.3232 6.96967 10.0303L5.46967 8.53033C5.17678 8.23744 5.17678 7.76256 5.46967 7.46967L6.96967 5.96967C7.26256 5.67678 7.73744 5.67678 8.03033 5.96967Z" fill="#D94F2E" fill-rule="evenodd"></path></svg></g></svg></svg><h2 style="color: #D94F2E;">点一下就开出一个带 worktree 的新会话</h2></div>
+<p>点 "Start with worktree" 之后，任务会被拆到一个全新的独立会话里执行，当前会话完全不中断。新会话跑在一个独立的 git worktree 上，worktree 是同一个仓库的隔离工作副本，新任务的文件改动<strong>不会和当前会话的改动互相污染</strong>。比如同时处理多个建议卡的任务时，每个任务各自在自己的 worktree 里跑，互不冲突。</p>
+<p>Worktree 和 fork 的本质差别在于 worktree是项目里新开一个文件夹，不会干扰到其他文件夹内，而 fork 会影响到其他分支。</p>
+<img alt="" src="assets/claude-code-suggested-task/02-worktree-flow.png"/>
+<p>对用户来说，这些本来就是自己要做的的任务、新开启上下文，现在就是<strong>只需要点一下就新建一个隔离的 worktree，从产品层把操作成本降到了一键操作。</strong></p>
+<div class="section-head"><svg height="70" style="display:block;margin:40px 0 0 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="70" overflow="visible" style="overflow:visible" width="40" x="50%"><g transform="translate(-20 16)"><rect fill="rgba(217, 79, 46, 0.1)" height="40" rx="10" width="40" x="0" y="0"></rect><svg fill="none" height="19.2" overflow="visible" viewBox="0 0 24 24" width="19.2" x="10.4" xmlns="http://www.w3.org/2000/svg" y="10.4"><path clip-rule="evenodd" d="M7.2626 3.26045C7.38219 2.13044 8.33828 1.25 9.5 1.25H14.5C15.6617 1.25 16.6178 2.13044 16.7374 3.26045C17.5005 3.27599 18.1603 3.31546 18.7236 3.41895C19.4816 3.55818 20.1267 3.82342 20.6517 4.34835C21.2536 4.95027 21.5125 5.70814 21.6335 6.60825C21.75 7.47522 21.75 8.57754 21.75 9.94513V16.0549C21.75 17.4225 21.75 18.5248 21.6335 19.3918C21.5125 20.2919 21.2536 21.0497 20.6517 21.6517C20.0497 22.2536 19.2919 22.5125 18.3918 22.6335C17.5248 22.75 16.4225 22.75 15.0549 22.75H8.94513C7.57754 22.75 6.47522 22.75 5.60825 22.6335C4.70814 22.5125 3.95027 22.2536 3.34835 21.6517C2.74643 21.0497 2.48754 20.2919 2.36652 19.3918C2.24996 18.5248 2.24998 17.4225 2.25 16.0549V9.94513C2.24998 8.57754 2.24996 7.47522 2.36652 6.60825C2.48754 5.70814 2.74643 4.95027 3.34835 4.34835C3.87328 3.82342 4.51835 3.55818 5.27635 3.41895C5.83973 3.31546 6.49952 3.27599 7.2626 3.26045ZM8.75 4.00102C8.75 4.00156 8.75 4.0021 8.75 4.00263V4.5C8.75 4.91421 9.08579 5.25 9.5 5.25H14.5C14.9142 5.25 15.25 4.91421 15.25 4.5V4.00263C15.25 4.00209 15.25 4.00156 15.25 4.00103V3.5C15.25 3.08579 14.9142 2.75 14.5 2.75H9.5C9.08579 2.75 8.75 3.08579 8.75 3.5V4.00102ZM16.735 4.76087C16.6058 5.88062 15.6544 6.75 14.5 6.75H9.5C8.34559 6.75 7.39424 5.88062 7.26496 4.76087C6.54678 4.7762 5.99336 4.81234 5.54735 4.89426C4.98054 4.99838 4.65246 5.16556 4.40901 5.40901C4.13225 5.68577 3.9518 6.07435 3.85315 6.80812C3.75159 7.56347 3.75 8.56458 3.75 10V16C3.75 17.4354 3.75159 18.4365 3.85315 19.1919C3.9518 19.9257 4.13225 20.3142 4.40901 20.591C4.68577 20.8678 5.07435 21.0482 5.80812 21.1469C6.56347 21.2484 7.56458 21.25 9 21.25H15C16.4354 21.25 17.4365 21.2484 18.1919 21.1469C18.9257 21.0482 19.3142 20.8678 19.591 20.591C19.8678 20.3142 20.0482 19.9257 20.1469 19.1919C20.2484 18.4365 20.25 17.4354 20.25 16V10C20.25 8.56458 20.2484 7.56347 20.1469 6.80812C20.0482 6.07434 19.8678 5.68577 19.591 5.40901C19.3475 5.16556 19.0195 4.99838 18.4527 4.89426C18.0066 4.81234 17.4532 4.7762 16.735 4.76087ZM6.25 14.5C6.25 14.0858 6.58579 13.75 7 13.75H15C15.4142 13.75 15.75 14.0858 15.75 14.5C15.75 14.9142 15.4142 15.25 15 15.25H7C6.58579 15.25 6.25 14.9142 6.25 14.5ZM6.25 18C6.25 17.5858 6.58579 17.25 7 17.25H12.5C12.9142 17.25 13.25 17.5858 13.25 18C13.25 18.4142 12.9142 18.75 12.5 18.75H7C6.58579 18.75 6.25 18.4142 6.25 18Z" fill="#D94F2E" fill-rule="evenodd"></path></svg></g></svg></svg><h2 style="color: #D94F2E;">任务建议自带上下文</h2></div>
+<p>从这个提示卡片的结构分析，UI 上就是典型的 popover 结构，但是背后的 prompt 自包含：上文件路径和足够的上下文，让新会话脱离当前对话也能直接开工。也就是说这张卡不只是一句提醒，它是一份能独立执行的任务说明。</p>
+<p>配套还有一个 dismiss_task 工具，用来撤回建过的卡。比如那个问题已经在本会话里顺手修掉了，或者有了更合适的替代建议，Claude 可以自己把卡片撤掉。</p>
+<img alt="" src="assets/claude-code-suggested-task/04-card-anatomy.png"/>
+<div class="section-head"><svg height="70" style="display:block;margin:40px 0 0 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="70" overflow="visible" style="overflow:visible" width="40" x="50%"><g transform="translate(-20 16)"><rect fill="rgba(217, 79, 46, 0.1)" height="40" rx="10" width="40" x="0" y="0"></rect><svg fill="none" height="19.2" overflow="visible" viewBox="0 0 24 24" width="19.2" x="10.4" xmlns="http://www.w3.org/2000/svg" y="10.4"><path d="M18.8179 2.08629C19.0253 1.45564 19.129 1.14031 19.2844 1.0552C19.4187 0.9816 19.5813 0.9816 19.7156 1.0552C19.871 1.14031 19.9747 1.45564 20.1821 2.08629L20.4973 3.04489C20.5389 3.17115 20.5596 3.23427 20.5953 3.28664C20.6269 3.33302 20.667 3.37305 20.7134 3.40467C20.7657 3.44037 20.8289 3.46113 20.9551 3.50265L21.9137 3.81792C22.5444 4.02533 22.8597 4.12903 22.9448 4.28437C23.0184 4.4187 23.0184 4.5813 22.9448 4.71563C22.8597 4.87097 22.5444 4.97467 21.9137 5.18208L20.9551 5.49735C20.8289 5.53887 20.7657 5.55963 20.7134 5.59533C20.667 5.62695 20.6269 5.66698 20.5953 5.71336C20.5596 5.76573 20.5389 5.82885 20.4973 5.95511L20.1821 6.91371C19.9747 7.54436 19.871 7.85969 19.7156 7.9448C19.5813 8.0184 19.4187 8.0184 19.2844 7.9448C19.129 7.85969 19.0253 7.54436 18.8179 6.91371L18.5027 5.95511C18.4611 5.82885 18.4404 5.76573 18.4047 5.71336C18.3731 5.66698 18.333 5.62695 18.2866 5.59533C18.2343 5.55963 18.1711 5.53887 18.0449 5.49735L17.0863 5.18208C16.4556 4.97467 16.1403 4.87097 16.0552 4.71563C15.9816 4.5813 15.9816 4.4187 16.0552 4.28437C16.1403 4.12903 16.4556 4.02533 17.0863 3.81792L18.0449 3.50265C18.1711 3.46113 18.2343 3.44037 18.2866 3.40467C18.333 3.37305 18.3731 3.33302 18.4047 3.28664C18.4404 3.23427 18.4611 3.17115 18.5027 3.04489L18.8179 2.08629Z" fill="#D94F2E"></path> <path clip-rule="evenodd" d="M9.08515 3.4842C9.65508 3.17193 10.3449 3.17193 10.9149 3.4842C11.3659 3.73131 11.6146 4.22392 11.7946 4.64911C11.9901 5.11069 12.198 5.74283 12.4549 6.52401L13.2771 9.02398C13.3976 9.39037 13.4182 9.43092 13.4363 9.45748C13.4647 9.49923 13.5008 9.53527 13.5425 9.56373C13.5691 9.58183 13.6096 9.60243 13.976 9.72293L16.4759 10.5451C17.2571 10.802 17.8893 11.0099 18.3509 11.2054C18.7761 11.3854 19.2687 11.6341 19.5158 12.0851C19.8281 12.6551 19.8281 13.3449 19.5158 13.9149C19.2687 14.3659 18.7761 14.6146 18.3509 14.7946C17.8893 14.9901 17.2572 15.198 16.476 15.4549L13.976 16.2771C13.6096 16.3976 13.5691 16.4182 13.5425 16.4363C13.5008 16.4647 13.4647 16.5008 13.4363 16.5425C13.4182 16.5691 13.3976 16.6096 13.2771 16.976L12.4549 19.476C12.198 20.2571 11.9901 20.8893 11.7946 21.3509C11.6146 21.7761 11.3659 22.2687 10.9149 22.5158C10.3449 22.8281 9.65508 22.8281 9.08515 22.5158C8.63412 22.2687 8.38544 21.7761 8.20538 21.3509C8.00993 20.8893 7.80204 20.2572 7.54515 19.4761L6.72293 16.976C6.60243 16.6096 6.58183 16.5691 6.56373 16.5425C6.53527 16.5008 6.49923 16.4647 6.45748 16.4363C6.43092 16.4182 6.39037 16.3976 6.02398 16.2771L3.52404 15.4549C2.74287 15.198 2.11069 14.9901 1.64911 14.7946C1.22392 14.6146 0.731311 14.3659 0.484197 13.9149C0.171934 13.3449 0.171934 12.6551 0.484197 12.0851C0.731311 11.6341 1.22392 11.3854 1.64911 11.2054C2.11069 11.0099 2.74283 10.802 3.52401 10.5451L6.02398 9.72293C6.39037 9.60243 6.43092 9.58183 6.45748 9.56373C6.49923 9.53527 6.53527 9.49923 6.56373 9.45748C6.58183 9.43092 6.60243 9.39037 6.72293 9.02398L7.54511 6.52406C7.80202 5.74286 8.00992 5.1107 8.20538 4.64911C8.38544 4.22392 8.63412 3.73131 9.08515 3.4842ZM9.82073 4.79196C9.82034 4.79284 9.81872 4.79496 9.81589 4.79864C9.79592 4.82467 9.71576 4.92912 9.58664 5.23402C9.41848 5.63113 9.22965 6.20326 8.95853 7.02764L8.14785 9.49261L8.12768 9.55416C8.04188 9.81652 7.95663 10.0772 7.80314 10.3024C7.66901 10.4991 7.49915 10.669 7.30238 10.8031C7.07723 10.9566 6.81652 11.0419 6.55418 11.1277L6.49261 11.1478L4.02764 11.9585C3.20326 12.2297 2.63113 12.4185 2.23402 12.5866C1.92912 12.7158 1.82467 12.7959 1.79864 12.8159C1.79496 12.8187 1.79284 12.8203 1.79196 12.8207C1.73601 12.9337 1.73601 13.0663 1.79196 13.1793C1.79284 13.1797 1.79496 13.1813 1.79864 13.1841C1.82467 13.2041 1.92912 13.2842 2.23402 13.4134C2.63113 13.5815 3.20326 13.7703 4.02764 14.0415L6.49261 14.8522L6.55416 14.8723C6.81651 14.9581 7.07723 15.0434 7.30238 15.1969C7.49915 15.331 7.66901 15.5009 7.80314 15.6976C7.95663 15.9228 8.04188 16.1835 8.12768 16.4458L8.14785 16.5074L8.95853 18.9724C9.22965 19.7967 9.41848 20.3689 9.58664 20.766C9.71576 21.0709 9.79593 21.1753 9.8159 21.2014C9.81871 21.205 9.82035 21.2072 9.82073 21.208C9.93366 21.264 10.0663 21.264 10.1793 21.208C10.1795 21.2075 10.1802 21.2065 10.1814 21.2049C10.1821 21.204 10.183 21.2028 10.1841 21.2014C10.2041 21.1753 10.2842 21.0709 10.4134 20.766C10.5815 20.3689 10.7703 19.7967 11.0415 18.9724L11.8522 16.5074L11.8723 16.4458C11.9581 16.1835 12.0434 15.9228 12.1969 15.6976C12.331 15.5009 12.5009 15.331 12.6976 15.1969C12.9228 15.0434 13.1835 14.9581 13.4458 14.8723L13.5074 14.8522L15.9724 14.0415C16.7967 13.7703 17.3689 13.5815 17.766 13.4134C18.0709 13.2842 18.1753 13.2041 18.2014 13.1841C18.205 13.1813 18.2072 13.1797 18.208 13.1793C18.264 13.0663 18.264 12.9337 18.208 12.8207C18.2072 12.8203 18.2051 12.8187 18.2014 12.8159C18.1754 12.796 18.0709 12.7158 17.766 12.5866C17.3689 12.4185 16.7967 12.2297 15.9724 11.9585L13.5074 11.1478L13.4458 11.1277C13.1835 11.0419 12.9228 10.9566 12.6976 10.8031C12.5009 10.669 12.331 10.4991 12.1969 10.3024C12.0434 10.0772 11.9581 9.81651 11.8723 9.55416L11.8522 9.49261L11.0415 7.02764C10.7703 6.20326 10.5815 5.63113 10.4134 5.23402C10.2842 4.92912 10.2041 4.82467 10.1841 4.79864C10.1813 4.79496 10.1797 4.79284 10.1793 4.79196C10.0663 4.73601 9.93366 4.73601 9.82073 4.79196Z" fill="#D94F2E" fill-rule="evenodd"></path> <path d="M19.346 18.0394C19.235 18.1002 19.1609 18.3255 19.0128 18.7759L18.7876 19.4606C18.7579 19.5508 18.7431 19.5959 18.7176 19.6333C18.695 19.6664 18.6664 19.695 18.6333 19.7176C18.5959 19.7431 18.5508 19.7579 18.4606 19.7876L17.7759 20.0128C17.3255 20.1609 17.1002 20.235 17.0394 20.346C16.9869 20.4419 16.9869 20.5581 17.0394 20.654C17.1002 20.765 17.3255 20.8391 17.7759 20.9872L18.4606 21.2124C18.5508 21.2421 18.5959 21.2569 18.6333 21.2824C18.6664 21.305 18.695 21.3336 18.7176 21.3667C18.7431 21.4041 18.7579 21.4492 18.7876 21.5394L19.0128 22.2241C19.1609 22.6745 19.235 22.8998 19.346 22.9606C19.4419 23.0131 19.5581 23.0131 19.654 22.9606C19.765 22.8998 19.8391 22.6745 19.9872 22.2241L20.2124 21.5394C20.2421 21.4492 20.2569 21.4041 20.2824 21.3667C20.305 21.3336 20.3336 21.305 20.3667 21.2824C20.4041 21.2569 20.4492 21.2421 20.5394 21.2124L21.2241 20.9872C21.6745 20.8391 21.8998 20.765 21.9606 20.654C22.0131 20.5581 22.0131 20.4419 21.9606 20.346C21.8998 20.235 21.6745 20.1609 21.2241 20.0128L20.5394 19.7876C20.4492 19.7579 20.4041 19.7431 20.3667 19.7176C20.3336 19.695 20.305 19.6664 20.2824 19.6333C20.2569 19.5959 20.2421 19.5508 20.2124 19.4606L19.9872 18.7759C19.8391 18.3255 19.765 18.1002 19.654 18.0394C19.5581 17.9869 19.4419 17.9869 19.346 18.0394Z" fill="#D94F2E"></path></svg></g></svg></svg><h2 style="color: #D94F2E;">从接需求到主动找任务的转变</h2></div>
+<p>这个开启新会话的提示卡片，也可以用户主动请求 Claude 执行开启新会话，可以同时处理更多互不干扰的任务线。</p>
+<p>用了这么久的 AI 工具，大部分场景下都是把 AI 当成小助手，有需求了、有问题了，才交给 AI 小助手来干活，然后沿着主线任务去推理、去完成。而这种 AI 主动发现任务，是真真实实地感受到 <strong>AI 自主性</strong>了，往后会自己找活干的 agent 只会越来越多。</p>
+<p>对于用户来说说，这相当于时刻准备着一个指出披露的小伙伴，但又不会过分过打扰；尤其很多用户在实际使用中，常常会涉及到盲区，这是 AI 主动引导并且很及时，可以减少后面要花很多token 成本来来理解问题、解决问题。</p>
+<p>最后，我去 twitter 上搜这个功能，居然没什么讨论度，但貌似是之前的老功能又上线了，导致这个功能很少人知道。不过我觉得这次这种主动提示的形式，功能使用率应该会直线上升吧。</p>
+<svg height="15" style="display:block;margin:40px 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="15" width="50%" x="0" y="0"><g transform="translate(-49.5 0)"><rect fill="#D94F2E" height="1" opacity="0.35" width="100%" x="0" y="7"></rect></g></svg><svg height="15" width="50%" x="50%" y="0"><g transform="translate(49.5 0)"><rect fill="#D94F2E" height="1" opacity="0.35" width="100%" x="0" y="7"></rect></g></svg><svg height="15" overflow="visible" style="overflow:visible" x="50%" y="0"><g transform="translate(-49.5 0)"><g transform="translate(9 0)"><circle cx="8" cy="8" fill="#D94F2E" r="4.3"></circle></g><g transform="translate(42 0)"><polygon fill="#D94F2E" points="8,3.50 4.10,10.25 11.90,10.25"></polygon></g><g transform="translate(75 0)"><polygon fill="#D94F2E" points="8,3.20 9.18,6.38 12.57,6.52 9.90,8.62 10.82,11.88 8,10.00 5.18,11.88 6.10,8.62 3.44,6.52 6.82,6.38"></polygon></g></g></svg></svg>
+<p>本文机制说明参考 Claude Code 官方文档；会话经历与截图为本人实际使用记录。</p></div>
+<!-- 底部 -->
+<footer class="article-footer">
+<div class="same-collection"></div>
+</footer>
+</article>
+</div>
+<script src="../script.js?v=27"></script>
+</body>
+</html>

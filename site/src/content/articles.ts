@@ -41,6 +41,25 @@ export interface ArticleMeta {
 
 export const ARTICLES: ArticleMeta[] = [
   {
+    slug: 'claude-code-suggested-task',
+    file: 'article-claude-code-suggested-task.html',
+    title: '活儿干到一半，Claude Code 反过来给我派任务了',
+    date: '2026-08-09',
+    readTime: '5 分钟',
+    tags: ['主导权转移', '防骚扰设计'],
+    cat: 'product',
+    accent: '#D94F2E',
+    collection: '',
+    excerpt:
+      'Claude Code 干活途中注意到值得修但会跑题的问题，打包成一张任务建议卡停在会话角落。什么值得打扰用户被写成了工具规格里的硬规则，点一下就在独立 worktree 里开工。',
+    listCover: 'assets/claude-code-suggested-task/cover.png',
+    cardCover: 'assets/cards/claude-code-suggested-task.webp', // CI build-card-covers 生成
+    inBlogGrid: true,
+    blogTag: '主导权转移',
+    blogDelay: 0,
+    blogCover: { type: 'iframe', src: 'writing/assets/claude-code-suggested-task/cover.html' },
+  },
+  {
     slug: 'beyond-chat-prompt-to-controls',
     file: 'article-beyond-chat-prompt-to-controls.html',
     title: 'AI 产品设计 ｜ 把高频微调的 Prompt 转变为可复现的参数控件',
