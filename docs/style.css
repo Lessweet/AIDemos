@@ -1961,8 +1961,13 @@ a {
 /* 主题切换的 240ms 窗口内,把颜色类过渡统一压到 --theme-switch-dur(2026-07-28)。
    用 * + !important 是刻意的:主题切换会同时改动全站几乎每个元素的 color /
    background-color / border-color,逐条去追不现实;类由 nav-boot 加上、240ms 后摘掉,
-   作用范围被时间窗口限死,不影响常规 hover 手感。 */
+   作用范围被时间窗口限死,不影响常规 hover 手感。
+   body 自己的 ::before / ::after 必须单列一条:`body.xxx *::before` 只匹配**子元素**的
+   伪元素,body 本身的伪元素落在外面。阅读页那块满屏底色层正是 body::before,带着
+   2s 的切文章淡变 —— 漏掉这条,详情页切主题就比别的页慢一大截(2026-08-11 用户反馈)。 */
 body.theme-switching,
+body.theme-switching::before,
+body.theme-switching::after,
 body.theme-switching *,
 body.theme-switching *::before,
 body.theme-switching *::after {
@@ -1992,11 +1997,20 @@ body.theme-switching *::after {
     animation: none;          /* 默认的 cross-fade 关掉,只留 JS 写的 clip-path 圆 */
     mix-blend-mode: normal;   /* 默认 plus-lighter 会让两张快照叠亮成灰白 */
 }
-::view-transition-old(root) { z-index: 0; }   /* 旧主题在下,静止不动 */
-::view-transition-new(root) { z-index: 1; }   /* 新主题在上,被圆裁着扩开 */
+/* 转深色 = 「展开」:深色那张(新)在上,圆从按钮扩到铺满 */
+::view-transition-old(root) { z-index: 0; }   /* 浅色在下,静止不动 */
+::view-transition-new(root) { z-index: 1; }
+/* 转回浅色 = 「收回」:深色那张(此时是**旧**的)留在上面,圆从铺满缩回按钮,
+   浅色在底下等着露出来 —— 与展开互为逆动作,而不是再扩一次
+   (2026-08-11 用户定)。类挂在 <html> 上,由 nav-boot 在切换前加、结束后摘。 */
+html.theme-vt-collapse::view-transition-old(root) { z-index: 1; }
+html.theme-vt-collapse::view-transition-new(root) { z-index: 0; }
 /* 揭开期间页面自身的颜色过渡一律禁掉:圆里露出来的必须已是最终态,
-   否则边界会拖着一圈「正在变色」的中间态,圆就糊了。类由 nav-boot 加/摘。 */
+   否则边界会拖着一圈「正在变色」的中间态,圆就糊了。类由 nav-boot 加/摘。
+   body 自己的伪元素同样要单列(理由见上面 theme-switching 那条)。 */
 body.theme-vt,
+body.theme-vt::before,
+body.theme-vt::after,
 body.theme-vt *,
 body.theme-vt *::before,
 body.theme-vt *::after {

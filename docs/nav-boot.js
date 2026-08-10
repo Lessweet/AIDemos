@@ -147,10 +147,14 @@ function applySiteTheme() {
         setSiteTheme(sessionStorage.getItem('site-theme') === 'dark');
     } catch (e) { /* 隐私模式等取不到 storage 时静默,维持浅色 */ }
 }
-/* 切换动效:新主题从主题键那个圆扩开、铺满全屏(2026-08-11 用户要求)——
-   与手机端全屏菜单「从关闭键的圆长出来」同一套语汇。
-   走 View Transitions:浏览器给切换前后各拍一张全页快照,新版那张用 clip-path 圆
-   裁着放大 —— 顶栏、封面、图片、iframe 一起被揭开,不用手写遮罩、也不会漏掉某个元素。
+/* 切换动效:圆形揭开(2026-08-11 用户要求)—— 与手机端全屏菜单「从关闭键的圆
+   长出来」同一套语汇。浅色是默认态,深色是「盖上来的那一层」,所以两个方向互为逆动作:
+     浅 → 深:深色那张(新)在上,圆从主题键扩到铺满    = 展开
+     深 → 浅:深色那张(旧)仍在上,圆从铺满缩回主题键  = 收回
+   收回不是「浅色再扩一次」—— 那样两个方向都在往外长,读起来是两次盖上,
+   而不是盖上再揭走(2026-08-11 用户定)。
+   走 View Transitions:浏览器给切换前后各拍一张全页快照,拿其中一张用 clip-path 圆
+   裁 —— 顶栏、封面、图片、iframe 一起被揭开,不用手写遮罩、也不会漏掉某个元素。
    本函数是全站唯一的切换入口(首页 / Blog / Archive / 文章详情页共用一颗按钮),
    所以四个场景的切换观感天然一致,不要在别处再写第二套。
    不支持 View Transitions(旧版 Firefox 等)或用户开了「减少动态效果」时,退回瞬切。 */
@@ -178,21 +182,27 @@ function toggleSiteTheme() {
     var dur = (parseFloat(css.getPropertyValue('--theme-wipe-dur')) || 0.52) * 1000;
     var ease = css.getPropertyValue('--ease-in-out').trim() || 'cubic-bezier(0.65, 0, 0.35, 1)';
 
-    /* 揭开期间把页面自身的颜色过渡全禁掉(body.theme-vt):新版快照必须一上来就是
+    /* 两个方向裁的是不同那张快照:展开裁新的(深色),收回裁旧的(还是深色)。
+       .theme-vt-collapse 把「旧的」提到上面(z-index 见 style.css)。 */
+    var big = 'circle(' + end + 'px at ' + cx + 'px ' + cy + 'px)';
+    var dot = 'circle(0px at ' + cx + 'px ' + cy + 'px)';
+    var pseudo = dark ? '::view-transition-new(root)' : '::view-transition-old(root)';
+    var frames = dark ? [dot, big] : [big, dot];
+
+    /* 揭开期间把页面自身的颜色过渡全禁掉(body.theme-vt):快照必须一上来就是
        最终态,否则圆里露出来的是「还在慢慢变色」的中间态,圆的边界就糊成一团。
        setSiteTheme 里的 .theme-switching(压到 0.18s)在这条路径上不够 —— 要的是 0。 */
     document.body.classList.add('theme-vt');
-    var done = function () { document.body.classList.remove('theme-vt'); };
+    document.documentElement.classList.toggle('theme-vt-collapse', !dark);
+    var done = function () {
+        document.body.classList.remove('theme-vt');
+        document.documentElement.classList.remove('theme-vt-collapse');
+    };
     var vt = document.startViewTransition(function () { setSiteTheme(dark); });
     vt.ready.then(function () {
         document.documentElement.animate(
-            {
-                clipPath: [
-                    'circle(0px at ' + cx + 'px ' + cy + 'px)',
-                    'circle(' + end + 'px at ' + cx + 'px ' + cy + 'px)',
-                ],
-            },
-            { duration: dur, easing: ease, pseudoElement: '::view-transition-new(root)' },
+            { clipPath: frames },
+            { duration: dur, easing: ease, pseudoElement: pseudo },
         );
     }, done);   /* 快照失败(被打断等)就直接收尾,别把 theme-vt 留在身上 */
     vt.finished.then(done, done);
