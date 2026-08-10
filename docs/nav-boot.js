@@ -202,7 +202,12 @@ function toggleSiteTheme() {
     vt.ready.then(function () {
         document.documentElement.animate(
             { clipPath: frames },
-            { duration: dur, easing: ease, pseudoElement: pseudo },
+            /* fill:'forwards' 不能省:默认 fill:'none' 在动画跑完的那一刻把 clip-path
+               退回基础值(= 无裁剪),而收回这一路裁的是**深色那张**,它一回到无裁剪
+               就整屏盖回来,一直撑到 view transition 拆掉 —— 就是那一下闪
+               (2026-08-11 用户反馈)。展开那一路裁的是新主题,退回无裁剪正好等于终态,
+               所以同一个 bug 只在收回时看得见。 */
+            { duration: dur, easing: ease, fill: 'forwards', pseudoElement: pseudo },
         );
     }, done);   /* 快照失败(被打断等)就直接收尾,别把 theme-vt 留在身上 */
     vt.finished.then(done, done);
