@@ -15,6 +15,7 @@ export const ARTICLE_SHELL: Record<string, { title: string; accent: string; tint
   "figma-skills": { title: "设计师的新资产，是 Skills · VibeUX", accent: "#D4A017", tint: "sand" },
   "genie": { title: "Genie 给 AI 装了一具身体：光、物理和触感 · VibeUX", accent: "#06B6D4", tint: "mint" },
   "genui-no-style-to-write": { title: "跳过 Figma 直接用 GenUI 做设计，踩了一路坑，也跑通了上线 · VibeUX", accent: "#1C1B1B", tint: "gray" },
+  "long-chat-navigation-design": { title: "AI 产品设计｜长对话导航机制 · VibeUX", accent: "#5B6FE8", tint: "blue" },
   "remove-ai-taste-in-design": { title: "看不出 AI 味的 AI 设计方式 · VibeUX", accent: "#5A6CD8", tint: "blue" },
   "review-ai-output": { title: "设计师的新工作，审查 AI 产物 · VibeUX", accent: "#0E9E6E", tint: "mint" },
   "selection-as-context": { title: "AI 产品设计｜选中即上下文 · VibeUX", accent: "#4B5FE8", tint: "blue" },

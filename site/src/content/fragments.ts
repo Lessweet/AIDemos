@@ -14,6 +14,7 @@ import figma_shader_motion from './fragments/figma-shader-motion.reading.html?ra
 import figma_skills from './fragments/figma-skills.reading.html?raw';
 import genie from './fragments/genie.reading.html?raw';
 import genui_no_style_to_write from './fragments/genui-no-style-to-write.reading.html?raw';
+import long_chat_navigation_design from './fragments/long-chat-navigation-design.reading.html?raw';
 import remove_ai_taste_in_design from './fragments/remove-ai-taste-in-design.reading.html?raw';
 import review_ai_output from './fragments/review-ai-output.reading.html?raw';
 import selection_as_context from './fragments/selection-as-context.reading.html?raw';
@@ -36,6 +37,7 @@ export const FRAGMENTS: Record<string, string> = {
   "figma-skills": figma_skills,
   "genie": genie,
   "genui-no-style-to-write": genui_no_style_to_write,
+  "long-chat-navigation-design": long_chat_navigation_design,
   "remove-ai-taste-in-design": remove_ai_taste_in_design,
   "review-ai-output": review_ai_output,
   "selection-as-context": selection_as_context,

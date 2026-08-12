@@ -12,10 +12,10 @@
 <link href="writing.css?v=454" rel="stylesheet"/>
 <!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁(React 迁移后的原生 boot 层) -->
 <script src="../nav-boot.js?v=16"></script>
-<script crossorigin="" src="/assets/index-BOwIwFzp.js" type="module"></script>
-<script crossorigin="" src="/assets/article-content-ZDH31Rgz.js" type="module"></script>
-<script crossorigin="" src="/assets/ArticlePage-Di_3IPCo.js" type="module"></script>
-<script crossorigin="" src="/assets/main-B32gBxF3.js" type="module"></script>
+  <script type="module" crossorigin src="/assets/index-BOwIwFzp.js"></script>
+  <script type="module" crossorigin src="/assets/article-content-vJJkmooq.js"></script>
+  <script type="module" crossorigin src="/assets/ArticlePage-BrPxjq4w.js"></script>
+  <script type="module" crossorigin src="/assets/main-DbQnYx88.js"></script>
 </head>
 <!-- 复用首页 index.html 的胶囊顶栏:home-v2 控制顶栏内边距,design-page 提供胶囊样式;
      no-banner = 顶栏不叠在 banner 上(与 Blog / Archive 同款),深色主题下顶栏整组反白靠它 -->
@@ -44,6 +44,6 @@
             window.addEventListener('load', set);
         })();
     </script>
-<div class="reading-layout" data-slug="selection-as-context" id="app"></div>
+<div class="reading-layout" id="app" data-slug="selection-as-context"></div>
 </body>
 </html>
