@@ -41,6 +41,24 @@ export interface ArticleMeta {
 
 export const ARTICLES: ArticleMeta[] = [
   {
+    slug: 'long-chat-navigation-design',
+    file: 'article-long-chat-navigation-design.html',
+    title: 'AI 产品设计｜长对话导航机制',
+    date: '2026-08-11',
+    readTime: '7 分钟',
+    tags: ['导航考古', '非线性对话'],
+    cat: 'ui',
+    accent: '#5B6FE8',
+    collection: 'AI 产品设计',
+    excerpt:
+      '6 月底 OpenAI、Vercel、独立设计师几乎同时给长对话加导航。往回看，悬停预览和提问胶囊跟视频进度条用的是同一个交互结构；往前看，前沿方向已经在问对话本身为什么要是线性的。',
+    listCover: 'assets/long-chat-navigation-design/cover.png',
+    inBlogGrid: true,
+    blogTag: '导航考古',
+    blogDelay: 0,
+    blogCover: { type: 'iframe', src: 'writing/assets/long-chat-navigation-design/cover.html' },
+  },
+  {
     slug: 'claude-code-suggested-task',
     file: 'article-claude-code-suggested-task.html',
     title: '活儿干到一半，Claude Code 反过来给我派任务了',
