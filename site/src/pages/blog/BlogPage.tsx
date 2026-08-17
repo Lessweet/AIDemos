@@ -825,6 +825,36 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       done();
       return;
     }
+    /* byline 里不参与飞行的部分(阅读时长):飞行后段淡入。
+       两次校准(2026-08-17 用户):原本排在「全部落位之后」→ 太晚;
+       提前到 0.2× 起 → 又太早(标题还在半路它就亮了);定 0.45× ——
+       源标题刚淡尽、目标标题显形过半时起,收在落位前后,读起来是同一行的收束。
+       走 WAAPI 而不是 CSS:这些 span 被 guard 打了 transition:none !important。
+       landedTargets 排除飞行目标(日期/tag 自己会飞过来,不该再淡一次)。 */
+    const bylineDur = morphMsFor('title');
+    const landedTargets = new Set<HTMLElement>(pairs.map((pr) => pr.target));
+    const bylineFades: Animation[] = [];
+    host.querySelectorAll<HTMLElement>('.article-byline > span').forEach((el) => {
+      if (landedTargets.has(el)) return;
+      el.style.visibility = '';
+      bylineFades.push(
+        /* 与阅读页入场同一套语言:淡入 + 上移 22px(CSS 的 @keyframes article-rise
+           就是这两样,writing.css)。2026-08-17 一度只留 opacity,上移丢了 ——
+           用户:「上移移动入场的效果没了」。 */
+        el.animate(
+          [
+            { opacity: 0, transform: 'translateY(22px)' },
+            { opacity: 1, transform: 'translateY(0)' },
+          ],
+          {
+            duration: bylineDur * 0.45,
+            delay: bylineDur * 0.45,
+            easing: 'ease-out',
+            fill: 'both',
+          },
+        ),
+      );
+    });
     anims[anims.length - 1].onfinish = () => {
       /* 文字三件:落位即换脸 —— 文章侧显形、卡片那份就地藏起来。
          注意「藏」不是「解钉」:飞行件继续钉在原位、动画继续 fill 顶着,收起时
@@ -866,16 +896,10 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
         pairs.filter((pr) => pr.kind !== 'cover'),
       );
       flyingRef.current = null;
-      /* byline 里不参与飞行的部分(阅读时长)在飞行期间被压住,落位后淡入 ——
-         否则同一行里一半已就位、一半还在半路飞,读起来是两件事。
-         走 WAAPI 而不是 CSS:这些 span 被上面的 guard 打了 transition:none
-         !important(为了不让入场动画带偏日期),CSS 过渡在这里推不动。 */
       document.body.classList.remove('article-morphing');
-      const landed = new Set<HTMLElement>(hidden); // 飞行目标:已经飞到位,不该再淡入一次
-      host.querySelectorAll<HTMLElement>('.article-byline > span').forEach((el) => {
-        if (landed.has(el)) return;
-        el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' });
-      });
+      /* byline 的淡入在飞行中段就跑完了(见上方 bylineFades),这里只清 fill:'both'
+         的占用 —— 不清的话 opacity 被动画锁死,后续 CSS(主题切换等)推不动。 */
+      bylineFades.forEach((a) => a.cancel());
       done();
     };
     /* 交接没完成之前,四件的动画一条都不能 cancel —— 它们的终态全靠 fill 顶着,

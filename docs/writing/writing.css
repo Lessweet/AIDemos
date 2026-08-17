@@ -3543,9 +3543,11 @@ body.article-closing .article-byline > span {
     transition: none !important;
 }
 
-/* 飞行途中:byline 里没参与飞行的部分(阅读时长)先压住。同一行里一半已就位、
-   一半还在飞,读起来是两件事。落位后由 JS 用 WAAPI 淡入(CSS 过渡被上面那条
-   transition:none 挡住,推不动)。 */
+/* 飞行途中:byline 里没参与飞行的部分(阅读时长)默认压住 —— 同一行里一半已就位、
+   一半还在飞,读起来是两件事。JS 会在飞行中段用 WAAPI 给它们淡入
+   (2026-08-17 从「落位后才淡入」提前,用户:出现时机太晚),所以这条
+   不能带 !important,也要给带 WAAPI 动画的元素让路:WAAPI 优先级高于普通声明,
+   一旦动画挂上就由动画接管,动画 cancel 后这条又生效。 */
 body.article-morphing .article-byline > span:not(.article-flying-el) { opacity: 0; }
 /* 返回键同样等飞行落位再淡入。参考里 X 按钮也不是跟着卡片一起硬出现的 ——
    几何先到位,附属控件后跟,层次才拉得开。 */
