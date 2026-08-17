@@ -764,6 +764,55 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       }
       const to = readLanding(target);
       if (!to.width || !to.height) return;
+      if (kind === 'title') {
+        /* ── 标题:双元素共轨交叉溶解(2026-08-17,替代单元素字号形变)──
+           卡片标题和文章 h1 的断行模式/对齐方式经常不同(左对齐 A 断点 vs
+           居中 B 断点),单元素一边变字号一边变宽度,断点会在半路翻转、
+           落位又换对齐 —— 用户录屏「标题变化不流畅、没有一步到位」。
+           两端排版不同时形变在物理上就无法无缝,改成 container-transform 的
+           标准做法:卡片标题(A)保持自身排版只平移、前半程淡出;文章标题(B)
+           以最终排版从卡片位等比缩放飞入、后半程淡入 —— 全程零重排,
+           落点就是终态,没有任何交接瞬间。
+           B 的对位取两块的「中心上沿」:A 左对齐、B 居中,对中心比对左缘
+           在交叠期里视觉重合得多。缩放比用块高比(两端行数相同时 ≈ 字号比)。 */
+        const dur = morphMsFor(kind);
+        const shift = `translate(${to.left - from.left}px, ${to.top - from.top}px)`;
+        const group: Animation[] = [
+          el.animate([{ transform: 'translate(0px, 0px)' }, { transform: shift }], {
+            duration: dur,
+            easing: COVER_EASE,
+            fill: 'both',
+          }),
+          el.animate([{ opacity: 1 }, { opacity: 0 }], {
+            duration: dur * 0.45,
+            easing: 'ease-in',
+            fill: 'both',
+          }),
+        ];
+        const s = from.height / to.height;
+        const tx = from.left + from.width / 2 - (to.left + to.width / 2);
+        const ty = from.top - to.top;
+        target.style.visibility = '';
+        group.push(
+          target.animate(
+            [
+              { transform: `translate(${tx}px, ${ty}px) scale(${s})`, transformOrigin: '50% 0' },
+              { transform: 'translate(0px, 0px) scale(1)', transformOrigin: '50% 0' },
+            ],
+            { duration: dur, easing: COVER_EASE, fill: 'both' },
+          ),
+          target.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: dur * 0.7,
+            delay: dur * 0.2,
+            easing: 'ease-out',
+            fill: 'both',
+          }),
+        );
+        hidden.push(target); /* 只为落位后的 landed 集合(byline 淡入要跳过它) */
+        anims.push(...group);
+        pairs.push({ el, kind, target, anims: group, origin });
+        return;
+      }
       /* 文章侧先藏起来,避免与飞行中的源元素重影 */
       target.style.visibility = 'hidden';
       hidden.push(target);
@@ -795,9 +844,14 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
          而不是去追平某一条属性。 */
       pairs
         .filter((pr) => pr.kind !== 'cover')
-        .forEach(({ el, target }) => {
+        .forEach(({ el, target, kind }) => {
           target.style.visibility = '';
           el.style.visibility = 'hidden';
+          /* 标题走交叉溶解:文章那份已经淡入到位、卡片那份已淡出,两边的
+             opacity 由 fill:'both' 顶着。这里把源的 opacity 动画撤掉换成
+             visibility(与其它两件同构),文章那份则清掉 transform 动画,
+             回到纯 DOM 状态 —— 收起时的「原路飞回」照旧只认卡片那份。 */
+          if (kind === 'title') target.style.opacity = '';
         });
       /* 封面仍旧延后:它的实现五花八门(iframe/video/随机 time0),换实例必闪 ——
          理由见 handoffCover 里的长注释,等「滚动或收起」再换。

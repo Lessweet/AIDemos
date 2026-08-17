@@ -3301,10 +3301,13 @@ body.article-closing .card-wrapper.article-slot .article-flying-el { visibility:
    通配无妨:非飞行件仍被上面的 visibility:hidden 罩着。 */
 body.article-modal .card-wrapper.article-slot,
 body.article-closing .card-wrapper.article-slot,
-body.article-modal .card-wrapper.article-slot *:not(.w-excerpt),
-body.article-closing .card-wrapper.article-slot *:not(.w-excerpt) { opacity: 1 !important; }
+body.article-modal .card-wrapper.article-slot *:not(.w-excerpt):not(.w-title):not(.w-title *),
+body.article-closing .card-wrapper.article-slot *:not(.w-excerpt):not(.w-title):not(.w-title *) { opacity: 1 !important; }
 /* 摘要要从飞行中段就开始淡入(JS 用 WAAPI 推 opacity),!important 会压过 WAAPI,
-   所以把它从上面的通配里排除。它不是飞行件,不受入场态误伤的问题。 */
+   所以把它从上面的通配里排除。它不是飞行件,不受入场态误伤的问题。
+   标题(.w-title 及其分词 span)同理豁免:2026-08-17 起标题走「双元素交叉溶解」,
+   源标题要在飞行前半程 WAAPI 淡出,被 !important 压住就永远不透明,
+   两份标题整程重叠(用户录屏「标题变化不流畅」)。 */
 body.article-modal .design-content *:not(.article-flying-el),
 /* 收起时同样要冻:这时飞回去的是 feed 里那张卡片自己(它一路钉着没交接),
    一旦 article-modal 摘掉、wrapper 的入场 transform 复活,它又成了 fixed 的
