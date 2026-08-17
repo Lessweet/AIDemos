@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
+<head><script src="writing/assets/cover-shim.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Poster Stack</title>
 <style>
   /* 四张动态海报的堆叠轮播,motion 复刻 globe09 参考片:
      一摞海报慢速漂移,front 位每 2.6s 换一张,循环轮播。
-     底色中性灰 #E2E2E2,与宿主卡片同色,海报浮在展台上。 */
+     底透明(2026-08-17,原中性灰 #E2E2E2):iframe 透出宿主卡的主题底色
+     (--gray-100),浅深主题都无缝;海报截图同样抠通道(build-cover-posters
+     的 transparent 任务)。 */
   html, body {
     margin: 0;
     height: 100%;
-    /* 中性灰展台(参考片同款 #E2E2E2,无色偏),海报浮在灰面上 */
-    background: #E2E2E2;
+    background: transparent;
     overflow: hidden;
   }
   .stage { position: relative; width: 100%; height: 100%; }
@@ -90,7 +91,11 @@
     });
   };
   apply(true);
-  setInterval(() => { step = (step + 1) % SLOTS.length; apply(false); }, 2600);
+  /* 轮播是定时器驱动,cover-shim 的虚拟时钟管不到 —— 挂 COVER.started 后面,
+     冻结期(海报截图 / hover 交接前)停在 step 0,放行后才开始轮 */
+  (window.COVER ? COVER.started : Promise.resolve()).then(() => {
+    setInterval(() => { step = (step + 1) % SLOTS.length; apply(false); }, 2600);
+  });
 </script>
 </body>
 </html>

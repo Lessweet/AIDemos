@@ -4,6 +4,7 @@
  */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { blogCards, bySlug } from '../../content/articles';
+import { CoverIframe, CoverVideo } from '../../shared/covers';
 import ArticlePage from '../article/ArticlePage';
 import { ARTICLE_SHELL } from '../../content/articleShell';
 import { CatIcon } from '../../shared/catIcons';
@@ -119,7 +120,8 @@ function unpin(el: HTMLElement) {
     .replace(/margin:[^;]+;?/, '')
     .replace(/z-index:[^;]+;?/, '')
     .replace(/transform-origin:[^;]+;?/, '')
-    .replace(/transition:[^;]+;?/, '');
+    .replace(/transition:[^;]+;?/, '')
+    .replace(/white-space:[^;]+;?/, ''); /* 飞行锁行(flightAnims)的残留一并摘 */
 }
 
 /* 封面交接。列表和文章用的是同一张静态图,落位那一刻两边像素级一致,所以交接
@@ -291,6 +293,15 @@ function flightAnims(
     ];
   }
   const c = getComputedStyle(el);
+  /* 起点终点都是单行的文字,飞行中锁死不换行:字号走 TYPE_RUSH 先冲到位、
+     宽度还在半路,中途会临时折成两行再弹回一行(2026-08-17 用户录屏)。
+     两端行数不同(长标题本来就要换行)时不锁 —— 那是终态的一部分。
+     内联 white-space 由 unpin() 统一摘除。 */
+  const lh = parseFloat(c.lineHeight);
+  const srcLines = lh > 0 ? Math.max(1, Math.round(from.height / lh)) : 1;
+  const dstLh = parseFloat(to.lh);
+  const dstLines = dstLh > 0 ? Math.max(1, Math.round(to.height / dstLh)) : 1;
+  if (srcLines === 1 && dstLines === 1) el.style.whiteSpace = 'nowrap';
   return [
     // 位移:合成器动画,零重排
     el.animate([{ transform: 'translate(0px, 0px)' }, { transform: shift }], geom),
@@ -317,6 +328,71 @@ function flightAnims(
   ];
 }
 
+/* ── 卡片标题/简介的中文分词断行 ──
+   默认的 CJK 换行不识词,行尾会把「设计稿」劈成 设计/稿(2026-08-17 用户:
+   断句不对;text-wrap: pretty 更糟,为避末行孤词把断点挪进词中间)。
+   用 Intl.Segmenter 分词,词内包 nowrap span(词不可拆),词间照常可断 ——
+   跨 span 的相邻字符仍走浏览器标准断行规则,行首标点禁则不受影响。
+   不支持 Segmenter 的老浏览器直接渲染纯文本,回到默认断行。 */
+/* tsconfig 的 lib 还没收录 Intl.Segmenter 类型,局部垫片(运行时按存在性探测) */
+type ZhSegmenter = { segment: (t: string) => Iterable<{ segment: string }> };
+const zhSeg: ZhSegmenter | null =
+  typeof Intl !== 'undefined' && 'Segmenter' in Intl
+    ? new (Intl as unknown as { Segmenter: new (locale: string, opts: object) => ZhSegmenter }).Segmenter(
+        'zh-Hans',
+        { granularity: 'word' },
+      )
+    : null;
+const HAN = /\p{Script=Han}$/u;
+/* 闭合类标点(不许出现在行首)→ 并入前段;开启类(不许出现在行尾)→ 并入后段。
+   标点独立成 nowrap span 后浏览器的行首/行尾禁则会跨 span 失效,
+   实测出现过整行以「,」开头(2026-08-17),归并后从结构上杜绝。 */
+const CLOSERS = /^[,。、;:!?…—|)》」』%,.;:!?)\]]+$/u;
+const OPENERS = /^[(《「『([]+$/u;
+function SegText({ text }: { text: string }) {
+  if (!zhSeg) return <>{text}</>;
+  /* 单字后缀归并:词典切不出「设计稿/交付物」这类复合词(切成 设计+稿),
+     把单个汉字段并入以汉字结尾的前段 —— 行尾不再劈出孤字;
+     「的/给」这类单字虚词并给前词在排版上同样成立(行尾不孤立更好)。 */
+  const parts: string[] = [];
+  let pendingOpen = '';
+  for (const s of zhSeg.segment(text)) {
+    let p = s.segment;
+    const prev = parts[parts.length - 1];
+    if (pendingOpen) {
+      p = pendingOpen + p;
+      pendingOpen = '';
+    } else if (prev && CLOSERS.test(p)) {
+      /* 并入前一个非空白段;闭合标点前的空格一并丢弃 —— 源文案里偶有
+         「Motion ,」这种空格+逗号,不丢的话标点会随空格段甩到行首 */
+      let j = parts.length - 1;
+      while (j >= 0 && /^\s+$/.test(parts[j])) j--;
+      if (j >= 0) {
+        parts[j] += p;
+        parts.length = j + 1;
+        continue;
+      }
+    } else if (OPENERS.test(p)) {
+      pendingOpen = p;
+      continue;
+    }
+    if (prev && p.length === 1 && HAN.test(p) && HAN.test(prev)) parts[parts.length - 1] = prev + p;
+    else parts.push(p);
+  }
+  if (pendingOpen) parts.push(pendingOpen);
+  return (
+    <>
+      {parts.map((p, i) =>
+        /^\s+$/.test(p) ? p : (
+          <span key={i} style={{ whiteSpace: 'nowrap' }}>
+            {p}
+          </span>
+        ),
+      )}
+    </>
+  );
+}
+
 /* modalTitle(来自首页模态那条线):首页模态内嵌时由 HomePage 传入 ——
    标题随整块从索引行位置平移上来,本身就是那行字的延续,不再自己播逐字升起:
    'held' = 位移期间按住,'revealed' = 瞬时显形。
@@ -340,19 +416,12 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
   const blogScrollRef = useRef(0);
   /* 全部走大封面卡片:不再分「大封面区 + 列表区」两种样式(2026-07-27 用户要求统一)。 */
   const cards = blogCards();
-  /* 封面按端分型(2026-07-28 用户定):手机端静态图 —— 它和文章模态里的封面是
-     同一张,联动落位像素级一致、没有换实例的跳变,顺带整页不跑 shader;
-     桌面端保持动态封面(iframe/video)—— 桌面点卡片是普通跳转,没有模态联动,
-     不需要陪着降级。断点切换时重渲染换型。 */
-  const [isSmall, setIsSmall] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia(SMALL_MQ).matches,
-  );
-  useEffect(() => {
-    const mq = window.matchMedia(SMALL_MQ);
-    const update = () => setIsSmall(mq.matches);
-    mq.addEventListener('change', update);
-    return () => mq.removeEventListener('change', update);
-  }, []);
+  /* 封面不再按端分型(2026-08-17 用户定,推翻 2026-07-28 的「手机端静态图」):
+     两端都走动态封面,激活方式由 covers.tsx 按输入能力选 —— 桌面 hover、
+     触屏视口居中。默认态都是海报首帧,整页照样零 shader 起步。
+     手机端文章模态的联动:起飞的是卡片自己那份活封面(pin 成 fixed 后 transform
+     飞行,iframe 不重载不换实例);落位后仍靠既有的「滚动时才换成文章封面」
+     机制掩护换实例那一下(见 handoffCover 的注释)。 */
 
   /* 打开文章(仅手机端):记录封面起飞几何 → 换外壳 → 挂载阅读页 → 下一相做 FLIP。
      桌面端返回 false,调用方不拦截点击,照常跳转到独立文章页 —— 那边是「左列表 +
@@ -421,8 +490,18 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
        取 img 已解析的绝对地址,不要自己拼相对路径 —— pushState 之后文档 URL 变成
        /writing/article-x.html,相对基准跟着变,拼出来会是 writing/writing/...
        (2026-07-27 实测)。 */
-    const stillSrc = coverEl.querySelector<HTMLImageElement>('img');
-    const still = stillSrc?.currentSrc || stillSrc?.src;
+    /* 静态封面源:按注册表推导(iframe 封面 → @3x 高清海报;视频 → 抽帧海报;
+       无动态封面的 → cardCover)。不再抓卡片 DOM 里的 <img> —— 动态封面揭示后
+       海报 img 已被撤走,抓空的话 hero 在滚动交接后就是白板
+       (2026-08-17 用户录屏「封面内容突然消失」,点的正是居中已激活的卡)。
+       new URL 转绝对:pushState 到 /writing/ 后相对基准会变(2026-07-27 教训)。 */
+    const stillPath = meta.blogCover
+      ? `writing/assets/posters/${slug}${meta.blogCover.type === 'iframe' ? '@3x' : ''}.webp`
+      : (meta.cardCover ?? meta.listCover)
+        ? `writing/${meta.cardCover ?? meta.listCover}`
+        : null;
+    const domImg = coverEl.querySelector<HTMLImageElement>('img');
+    const still = stillPath ? new URL(stillPath, location.href).href : domImg?.currentSrc || domImg?.src;
     if (still) body.style.setProperty('--cover-still', `url("${still}")`);
     body.classList.add('article-morphing'); // 飞行期间:byline 里不飞的部分先不出现
     body.setAttribute('data-tint', shell.tint);
@@ -497,6 +576,9 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       articleHostRef.current = null;
       setHostReady(false);
       setArticle(null);
+      /* 模态开合期间封面的 IO 判定被按住(covers.tsx inPageTransition),
+         收完广播一次重判,把卡片封面的激活状态校回真值 */
+      window.dispatchEvent(new Event('covers:resync'));
     };
 
     const host = articleHostRef.current;
@@ -805,7 +887,7 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       <div className="design-content">
         <section className="category-section" id="writing-all">
           <div className="category-grid">
-            {cards.map((a) => (
+            {cards.map((a, cardIdx) => (
               <div
                 key={a.slug}
                 className="card-wrapper"
@@ -824,9 +906,8 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
                     openArticle(a.slug, e.currentTarget);
                   }}
                 >
-                  {/* 手机端 = 静态图(与文章模态同一张,联动零跳变);
-                      桌面端 = 动态封面,无 blogCover 的少数篇用静态图兜底 */}
-                  {isSmall || !a.blogCover ? (
+                  {/* 两端都是动态封面(2026-08-17);无 blogCover 的少数篇用静态图兜底 */}
+                  {!a.blogCover ? (
                     <img
                       src={`writing/${a.cardCover ?? a.listCover}`}
                       alt=""
@@ -839,32 +920,27 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
                       style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
                   ) : a.blogCover.type === 'video' ? (
-                    <video
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      poster={a.blogCover.poster}
+                    <CoverVideo
                       src={a.blogCover.src}
+                      poster={`writing/assets/posters/${a.slug}.webp`}
                       style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
                   ) : (
-                    <iframe
-                      loading="lazy"
+                    <CoverIframe
                       src={a.blogCover.src}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        border: 0,
-                        display: 'block',
-                        pointerEvents: 'none',
-                      }}
+                      poster={`writing/assets/posters/${a.slug}.webp`}
+                      posterSrcSet={`writing/assets/posters/${a.slug}.webp 2x, writing/assets/posters/${a.slug}@3x.webp 3x`}
+                      style={{ width: '100%', height: '100%' }}
+                      frameProps={{ style: { pointerEvents: 'none' } }}
+                      /* 前两张卡预载期就冻结挂载:首页模态展开时首卡即刻能动
+                         (2026-08-17 用户:第一张卡的动态出现太慢) */
+                      eager={cardIdx < 2}
                     />
                   )}
                 </a>
                 <div className="card-info writing-info">
-                  <h3 className="w-title">{a.title}</h3>
-                  <div className="w-excerpt">{a.excerpt}</div>
+                  <h3 className="w-title"><SegText text={a.title} /></h3>
+                  <div className="w-excerpt"><SegText text={a.excerpt} /></div>
                   <div className="w-meta">
                     {a.kind && <span className="a-kind">{a.kind}</span>}
                     <div className="w-tags">

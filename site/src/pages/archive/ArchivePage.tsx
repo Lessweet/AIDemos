@@ -10,6 +10,7 @@ import HeadingRise from '../../shared/HeadingRise';
 import PageTitle, { RISE_CHAR_STEP } from '../../shared/PageTitle';
 import PageCollapse from '../../shared/PageCollapse';
 import { PIXEL_PATHS } from './pixelIcons';
+import { CoverIframe, CoverVideo } from '../../shared/covers';
 import {
   useStickyMenu,
   useScrollProgress,
@@ -80,19 +81,26 @@ function VideoCard(props: {
         data-content-type={p.dynamicScale?.contentType}
       >
         <div className="card-visual">
+          {/* 2026-08-16 起视频不再 autoplay:poster 是 ffmpeg 抽的第 0 帧,
+              激活(桌面 hover / 触屏居中)才播放,见 covers.tsx。
+              cover-in 直接写死:海报即时可见,不必再等 useCoverFade 的载入淡入。 */}
           {p.iphone ? (
             <div className="iphone-frame">
               <div className="iphone-notch"></div>
               <div className="iphone-screen">
-                <video className="iphone-video" autoPlay loop muted playsInline>
-                  <source src={p.src} type="video/mp4" />
-                </video>
+                <CoverVideo
+                  className="iphone-video cover-in"
+                  src={p.src}
+                  poster={`posters/${p.src.replace(/\.mp4$/, '')}.webp`}
+                />
               </div>
             </div>
           ) : (
-            <video className="card-video" autoPlay loop muted playsInline>
-              <source src={p.src} type="video/mp4" />
-            </video>
+            <CoverVideo
+              className="card-video cover-in"
+              src={p.src}
+              poster={`posters/${p.src.replace(/\.mp4$/, '')}.webp`}
+            />
           )}
         </div>
       </article>
@@ -146,12 +154,9 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
           riseDelay={7 * RISE_CHAR_STEP}
         />
       </div>
-      {/* VIBEDESIGN banner:置于顶部做 hero,三套样式轮播。
-          与作品卡同构(card-wrapper + card-info):下方显示名称与时间(2026-07-22) */}
-      <div className="card-wrapper banner-card">
-        <iframe src="design-banner.html?v=28" className="design-banner-frame" title="VIBEDESIGN" scrolling="no"></iframe>
-        <CardInfo label="VIBEDESIGN" tag="Claude Code" date="2026-05-26" />
-      </div>
+      {/* VIBEDESIGN banner 于 2026-08-17 下架(用户定);demo 文件 design-banner.html
+          保留在仓库里,想恢复时把这张 banner-card 加回来即可。
+          所有 demo iframe 同 Blog 封面一套「海报首帧 → 激活才动」交接,见 covers.tsx */}
       <aside className="design-menu" aria-label="Design 分类">
         <a href="#ai-native-design" className="nav-cat"><PixelIcon d={PIXEL_PATHS.ICON_SKILL} />Icon Skill</a>
         <a href="#cat-aigc" className="nav-cat"><PixelIcon d={PIXEL_PATHS.AIGC} />AIGC</a>
@@ -172,7 +177,17 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
                 className="card foundation-card icon-cover"
                 onClick={(e) => openModal(e, 'icon-studio/outlined.html?modal=1&v=2')}
               >
-                <iframe src="icon-studio/preview-outlined.html?v=4" className="icon-preview-frame" title="Outlined Icon 预览" scrolling="no" tabIndex={-1}></iframe>
+                {/* 容器给白色实底:预览页是透明 embed,海报的背板也是白 ——
+                    不加的话 hover 撤海报瞬间会透出 <a> 卡的灰底,颜色跳变
+                    (2026-08-17 用户:hover 背景不要变色) */}
+                <CoverIframe
+                  src="icon-studio/preview-outlined.html?v=4"
+                  poster="posters/preview-outlined.webp"
+                  className="icon-preview-frame cover-in"
+                  style={{ background: '#fff' }}
+                  frameProps={{ title: 'Outlined Icon 预览', scrolling: 'no', tabIndex: -1 }}
+                  eager
+                />
               </a>
               <CardInfo label="Outlined Icon" date="2026-05-20" />
             </div>
@@ -184,7 +199,14 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
                 className="card foundation-card icon-cover"
                 onClick={(e) => openModal(e, 'icon-studio/pixel.html?modal=1&v=2')}
               >
-                <iframe src="icon-studio/preview-pixel.html?v=4" className="icon-preview-frame" title="Pixel Icon 预览" scrolling="no" tabIndex={-1}></iframe>
+                <CoverIframe
+                  src="icon-studio/preview-pixel.html?v=4"
+                  poster="posters/preview-pixel.webp"
+                  className="icon-preview-frame cover-in"
+                  style={{ background: '#fff' }}
+                  frameProps={{ title: 'Pixel Icon 预览', scrolling: 'no', tabIndex: -1 }}
+                  eager
+                />
               </a>
               <CardInfo label="Pixel Icon" date="2026-05-20" />
             </div>
@@ -197,11 +219,18 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
             <HeadingRise text="AIGC" icon={<HeadingIcon d={PIXEL_PATHS.AIGC} />} />
           </div>
           <div className="category-grid">
-            {/* AI Poster 轮播:四张动态海报叠成一摞,实现在 poster-stack.html;demo 底色中性灰 #E2E2E2,卡底同色无缝 */}
+            {/* AI Poster 轮播:四张动态海报叠成一摞,实现在 poster-stack.html;
+                demo 页面底透明、海报也抠了通道,露出 .card 的主题底色(--gray-100),
+                浅深主题都无缝(2026-08-17 用户:背景改主题色,替换原中性灰 #E2E2E2) */}
             <div className="card-wrapper" data-delay="50" data-group="co-creation" data-category="motion-posters">
-              <article className="card card-full-demo" style={{ background: '#E2E2E2' }}>
+              <article className="card card-full-demo">
                 <div className="card-iframe-container">
-                  <iframe src="poster-stack.html?v=4" className="card-iframe" frameBorder="0" title="AI Poster 轮播" scrolling="no" tabIndex={-1}></iframe>
+                  <CoverIframe
+                    src="poster-stack.html?v=4"
+                    poster="posters/poster-stack.webp"
+                    className="card-iframe cover-in"
+                    frameProps={{ title: 'AI Poster 轮播', scrolling: 'no', tabIndex: -1 }}
+                  />
                 </div>
               </article>
               <CardInfo label="AI Poster" tag="Jimeng AI" date="2026-05-06" likeId="10" />
@@ -219,7 +248,12 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
             <div className="card-wrapper" data-delay="250" data-group="co-creation" data-category="motion-posters">
               <article className="card card-full-demo">
                 <div className="card-iframe-container">
-                  <iframe src="ai-assistant-motion/index.html?v=2" className="card-iframe" frameBorder="0" allowFullScreen></iframe>
+                  <CoverIframe
+                    src="ai-assistant-motion/index.html?v=2"
+                    poster="posters/ai-assistant-motion.webp"
+                    className="card-iframe cover-in"
+                    frameProps={{ allowFullScreen: true }}
+                  />
                 </div>
               </article>
               <CardInfo label="AI Assistant Motion" tag="Claude Code" date="2026-03-16" likeId="9" />
@@ -241,7 +275,12 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
             <div className="card-wrapper" data-delay="50" data-group="native" data-category="visualux">
               <article className="card card-full-demo card-dynamic-scale" data-content-height="812">
                 <div className="card-iframe-container">
-                  <iframe src="multi-scene-character-demo/multi-scene-character-demo.html" className="card-iframe" frameBorder="0" allowFullScreen></iframe>
+                  <CoverIframe
+                    src="multi-scene-character-demo/multi-scene-character-demo.html"
+                    poster="posters/multi-scene-character-demo.webp"
+                    className="card-iframe cover-in"
+                    frameProps={{ allowFullScreen: true }}
+                  />
                 </div>
               </article>
               <CardInfo label="Eye Tracking" tag="Claude Code" date="2026-01-08" likeId="3" />
@@ -250,7 +289,12 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
             <div className="card-wrapper" data-delay="100" data-group="native" data-category="visualux">
               <article className="card card-full-demo card-dynamic-scale" data-content-height="812" data-target-ratio="1">
                 <div className="card-iframe-container">
-                  <iframe src="voice-particles/index.html" className="card-iframe" frameBorder="0" allowFullScreen></iframe>
+                  <CoverIframe
+                    src="voice-particles/index.html"
+                    poster="posters/voice-particles.webp"
+                    className="card-iframe cover-in"
+                    frameProps={{ allowFullScreen: true }}
+                  />
                 </div>
               </article>
               <CardInfo label="Voice Particles" tag="Gemini 3 Pro" date="2026-01-05" likeId="4" />
