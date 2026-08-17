@@ -539,44 +539,29 @@ export function useHideNavOnScrollMobile() {
    display:none 才会暂停文档,而这里只是滚出视口。同时活跃十几路,手机滚起来就卡
    (2026-07-28 用户录屏:滚动中大量停滞,LCP 25s)。
 
-   视频:进视口 play()、出视口 pause();不动 src,恢复时接着播不用重新缓冲。
+   视频不归这里管了(2026-08-16):封面视频改为海报默认静止,播放/暂停由
+   covers.tsx 的激活逻辑负责(桌面 hover / 触屏视口居中),这里再按视口 play()
+   会把没被激活的海报态视频强行播起来。
    iframe:出视口挂 .media-idle(CSS visibility:hidden),浏览器随即把它的 rAF
-   降频/暂停;进视口摘掉即恢复。不卸 src —— 卸了回来要整页重载,更慢更闪。 */
+   降频/暂停;进视口摘掉即恢复。不卸 src —— 卸了回来要整页重载,更慢更闪。
+   hover 挂载的封面 iframe 也受益:滚出视口的「活」封面被降频,回来即恢复。 */
 export function usePauseOffscreenMedia() {
   useEffect(() => {
     const onEntry = (e: IntersectionObserverEntry) => {
-      const el = e.target as HTMLElement;
-      if (el instanceof HTMLVideoElement) {
-        /* play() 返回 promise,被打断会抛 AbortError —— 快速滚动时很常见,吞掉 */
-        if (e.isIntersecting) void el.play().catch(() => {});
-        else if (!el.paused) el.pause();
-      } else {
-        el.classList.toggle('media-idle', !e.isIntersecting);
-      }
+      (e.target as HTMLElement).classList.toggle('media-idle', !e.isIntersecting);
     };
-    /* 视频用零边距:多一路解码就多一分卡,不需要预热(它本来就在缓冲里,
-       进视口 play() 立刻有画面)。留 200px 余量的话,视口外那两三个仍在解码
-       —— 实测「视口外仍在播 2 个」正是这么来的(2026-07-28)。 */
-    const ioTight = new IntersectionObserver((es) => es.forEach(onEntry), { rootMargin: '0px' });
     /* iframe 给一点提前量:它要重新起 rAF、跑首帧,贴边切换会看到一下空白 */
     const ioLoose = new IntersectionObserver((es) => es.forEach(onEntry), { rootMargin: '150px 0px' });
 
-    /* 挂载时扫一次不够 —— Archive 的卡片是按入场节奏渐进渲染的,useEffect 跑的
-       那一刻很多 <video> 还不在 DOM 里,从没被 observe 过,于是 autoplay 一路播到底
-       (2026-07-28 实测:从首页展开后 10 个视频全在播、且全在视口外,最长帧 779ms)。
+    /* 挂载时扫一次不够 —— Archive 的卡片是按入场节奏渐进渲染的,封面 iframe
+       又是 hover 才挂载,useEffect 跑的那一刻多半还不在 DOM 里。
        改成持续接管:新出现的媒体一律补 observe。已 observe 的重复调用是空操作。 */
     const seen = new WeakSet<Element>();
     const claim = (root: ParentNode) => {
-      root.querySelectorAll<HTMLElement>('video, iframe').forEach((el) => {
+      root.querySelectorAll<HTMLElement>('iframe').forEach((el) => {
         if (seen.has(el)) return;
         seen.add(el);
-        (el instanceof HTMLVideoElement ? ioTight : ioLoose).observe(el);
-        /* 补 observe 之前它可能已经在播了:IO 的首次回调只在下一帧到,先按当前
-           位置判一次,避免视口外的多播这一帧。 */
-        if (el instanceof HTMLVideoElement) {
-          const r = el.getBoundingClientRect();
-          if ((r.bottom <= 0 || r.top >= window.innerHeight) && !el.paused) el.pause();
-        }
+        ioLoose.observe(el);
       });
     };
     claim(document);
@@ -599,9 +584,7 @@ export function usePauseOffscreenMedia() {
       pending = true;
       requestAnimationFrame(() => {
         pending = false;
-        document.querySelectorAll<HTMLElement>('video, iframe').forEach((el) => {
-          (el instanceof HTMLVideoElement ? ioTight : ioLoose).observe(el);
-        });
+        document.querySelectorAll<HTMLElement>('iframe').forEach((el) => ioLoose.observe(el));
       });
     };
     /* 监听祖先 style/class 变化 —— 模态展开就是切这两样 */
@@ -612,10 +595,18 @@ export function usePauseOffscreenMedia() {
          正在变透明的模态被看见,与「整个过程中不要有闪动」直接冲突。
          过渡结束后布局还会再动,自然有新的 mutation 把这一轮补上,不会漏判。 */
       const cls = document.body.classList;
-      if (cls.contains('article-morphing') || cls.contains('article-closing')) return;
+      if (
+        cls.contains('article-morphing') ||
+        cls.contains('article-closing') ||
+        /* 首页模态开合的位移/恢复期同样不插手 —— 重观察引发的 media-idle 翻转
+           会在下移的合成层里触发重绘,砸在动画帧上(2026-08-17 用户录屏收起卡顿) */
+        cls.contains('home-modal-riding') ||
+        cls.contains('home-restoring')
+      )
+        return;
       /* 滤掉自己引起的:onEntry 给 iframe 切 .media-idle 本身就是一次 class 变化,
          不滤就是 recheck → onEntry → mutation → recheck 的自激。 */
-      if (records.every((r) => (r.target as HTMLElement).matches?.('video, iframe'))) return;
+      if (records.every((r) => (r.target as HTMLElement).matches?.('iframe'))) return;
       recheck();
     });
     displayMo.observe(document.body, {
@@ -629,9 +620,9 @@ export function usePauseOffscreenMedia() {
         rec.addedNodes.forEach((n) => {
           if (n.nodeType !== 1) return;
           const el = n as HTMLElement;
-          if (el.matches?.('video, iframe')) {
+          if (el.matches?.('iframe')) {
             seen.add(el);
-            (el instanceof HTMLVideoElement ? ioTight : ioLoose).observe(el);
+            ioLoose.observe(el);
           }
           claim(el);
         }),
@@ -642,7 +633,6 @@ export function usePauseOffscreenMedia() {
     return () => {
       mo.disconnect();
       displayMo.disconnect();
-      ioTight.disconnect();
       ioLoose.disconnect();
     };
   }, []);

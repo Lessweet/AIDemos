@@ -20,7 +20,8 @@
 
 1. **正文片段**:`site/src/content/fragments/<slug>.reading.html` — 整段 `.article-reading` 的 innerHTML(eyebrow / h1 / byline / 封面 / 正文含内联 `<style>` / 页脚合集)。也可以先按旧格式把整页 HTML 放进 `docs/writing/article-<slug>.html`,把 slug 加进 `site/scripts/extract-articles.mjs` 与 `vite.config.ts` 的清单后跑 `node site/scripts/extract-articles.mjs` 自动提取。
 2. **注册表**:`site/src/content/articles.ts` 加一条(标题/日期/分类/accent/tint/封面/blog 卡片字段)。blog 网格、阅读器左栏、合集页脚都由它推导。
-3. **构建**:`npm run build`,把 `site/` 与 `docs/` 的变更一起提交。**忘记 build 就 push = 线上是旧页面。**
+3. **封面海报**(配了 `blogCover` 的文章):新增动态封面(cover.html)时,`<head>` 顶部要引 `<script src="../cover-shim.js"></script>`(统一交接协议:冻结首帧 / cover-ready / 播放暂停,见 `docs/writing/assets/cover-shim.js` 头注释),然后本地跑 `node site/scripts/build-cover-posters.mjs` 生成首帧海报并一起提交。**这步只能本地跑**(要带界面的 Chrome + 真 GPU 渲染 shader,CI 的软渲染截出来的噪点对不上),CI 不会兜底,忘跑 = 新卡片 hover 前是裂图。封面里定时器驱动的序列(轮播等)要挂在 `COVER.started` 后面(参考 remove-ai-taste cover4 / poster-stack)。
+4. **构建**:`npm run build`,把 `site/` 与 `docs/` 的变更一起提交。**忘记 build 就 push = 线上是旧页面。**
 
 本地预览用 `npm run dev`(不能再 file:// 直开主站页面);`docs/writing/articles.json` 已不再被页面读取,仅作遗留兼容保留。
 

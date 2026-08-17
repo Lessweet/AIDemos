@@ -4,12 +4,20 @@
  * hero 逐字拆分与索引行 rise 拆字在 JSX 直渲(产物 DOM 与旧版内联 walker 一致,
  * 不做挂载后变异);显现时机仍由 html.hero-ready / CSS 闸门控制,与旧版一致。
  */
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { useScrollProgress, useHeaderAlwaysVisible } from '../../shared/hooks';
 import BlogPage from '../blog/BlogPage';
 import ArchivePage from '../archive/ArchivePage';
 import { INDEX_ARROW_PATH } from '../../shared/PageCollapse';
+
+/* 两个模态页的 props 是常量("revealed"),但 modal 每变一次相位(open/riding/
+   closing/null),HomePage 重渲染都会把这两棵几百节点的树整个重新协调一遍 ——
+   手机上一次要几百毫秒,正好卡在点击和收起编排之间(2026-08-17 用户录屏
+   「点了没反应,然后一格一格消失」,实测 tap 后 ~650ms 才加上 closing 类)。
+   memo 后相位切换零协调,开合的响应回到即点即动。 */
+const MemoBlogPage = memo(BlogPage);
+const MemoArchivePage = memo(ArchivePage);
 
 const HERO_STEP = 18;
 /* 镜像 style.css 的 --hero-speed:hero 逐字与署名的时长/延迟在 CSS 里都 ×它,而索引
@@ -102,9 +110,17 @@ const inActive = <T extends Element>(sel: string) =>
   document.querySelector<T>(`.${ACTIVE_CLASS} ${sel}`);
 const allInActive = <T extends Element>(sel: string) =>
   Array.from(document.querySelectorAll<T>(`.${ACTIVE_CLASS} ${sel}`));
-/* 恢复时 hero(含署名)的显形:整块一起淡入 1s(骨架前定稿;其后的 1.5s /
-   依次错峰 / 不淡入等尝试随 2026-07-27 完整回滚一并撤销)。 */
-const HOME_HERO_FADE_MS = 1000;
+/* 恢复时首页元素的显形,与标题落位对表(2026-08-17 用户:落位瞬间其他元素
+   淡入太快、太早,要「标题先落进行里,其余内容随后缓缓浮现」;同日二调推到
+   落位之后,三调又改回来 —— Archive 卡顿修掉后「落位前 240ms」的节奏是对的,
+   之前显得早只是被卡顿糊掉了):
+   · 其他元素在标题落位前 HOME_FADE_LEAD_MS 开始淡入,落位后继续补完;
+   · hero 拉长到 1.4s(原 1s),索引行 0.64s(原为恢复瞬间实打出现);
+   · 落点行(Blog/Archive 自己那行)除外 —— 标题就要落在它上面,必须先实打就位。
+   延迟按剩余行程实算,Blog / Archive 行程不同也各自对齐。 */
+const HOME_HERO_FADE_MS = 1400;
+const HOME_INDEX_FADE_MS = 640;
+const HOME_FADE_LEAD_MS = 240;
 /* morph 的时长/缓动从 token 读(--page-morph-dur / --ease),展开收起同一组:
    easeOutQuad —— 立即起步、末端滑行,但初速度只有 --ease-soft 的 40%
    (用户:不要缓起,但起步别那么猛)。
@@ -247,6 +263,10 @@ export default function HomePage() {
     body.classList.remove('home-landing');
     body.classList.add(page.bodyClass, 'home-modal', 'home-modal-riding');
     window.scrollTo(0, 0);
+    /* 展开同样罩布(covers.tsx):上移期间封面全部退回海报,iframe 合成层不参与
+       位移 —— 与收起同一套轻量化(2026-08-17 用户:展开也要和 Blog 一样丝滑)。
+       落位后的 covers:resync 摘罩,预热好的封面两帧内活过来。 */
+    window.dispatchEvent(new Event('covers:shed'));
     const titleMask = inActive<HTMLElement>('.page-title .heading-rise-mask');
     const from = morphFrom.current;
     const els = rideEls();
@@ -333,9 +353,17 @@ export default function HomePage() {
         },
       ),
     );
-    /* 位移期间按住视频:display:none 时它们是暂停的,恢复可见会同时重启解码
-       (Archive 有 10 个 autoplay video),正好压在动画帧上。落位后再放行。 */
+    /* 位移期间冻结模态里的全部媒体:正在播的封面 iframe 每帧都在跑 shader、
+       视频在解码,全压在动画帧上(2026-08-17 用户录屏「收起特别卡」的一环)。
+       不用恢复:展开落位后由 covers:resync 重判激活,收起则整个模态随后卸载。 */
     allInActive<HTMLVideoElement>('video').forEach((v) => v.pause());
+    allInActive<HTMLIFrameElement>('iframe').forEach((f) => {
+      try {
+        f.contentWindow?.postMessage({ type: 'cover-pause' }, '*');
+      } catch {
+        /* 拿不到 contentWindow(已卸载)就略过 */
+      }
+    });
     const collapseSvg = inActive<SVGSVGElement>('.page-collapse svg');
     if (collapseSvg) {
       anims.push(
@@ -364,12 +392,12 @@ export default function HomePage() {
   /* open:整块已就位(动画结束、transform 回到 none),解除滚动锁 */
   useLayoutEffect(() => {
     if (modal?.phase !== 'open') return;
-    /* 落位后再放视频:位移期间它们被按住,避免解码与动画抢主线程 */
-    allInActive<HTMLVideoElement>('video').forEach((v) => {
-      const p = v.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
-    });
+    /* 不再统一放行视频:封面改为海报默认静止(2026-08-16),播放归
+       covers.tsx 的激活逻辑管(桌面 hover / 触屏视口居中),这里强播会穿帮 */
     document.body.classList.remove('home-modal-riding');
+    /* 位移期间封面的 IO 判定被按住(见 covers.tsx inPageTransition),
+       落位后广播一次重判 —— 该预热的预热、居中的开播 */
+    window.dispatchEvent(new Event('covers:resync'));
     rideAnimsRef.current.forEach((a) => a.cancel());
     rideAnimsRef.current = [];
   }, [modal]);
@@ -455,6 +483,7 @@ export default function HomePage() {
     let rideStart = { x: 0, y: 0 };
     let rideEnd = { x: 0, y: 0 };
     let rideTiming = { duration: 0, easing: 'linear' };
+    const closeStart = performance.now();
     const restoreTimer = window.setTimeout(() => {
       /* ① 标题行切到屏幕坐标系接力剩余下移:换类后首页内容回到文档流,标题行的
          布局原点会被顶到 hero 之下,fill:forwards 的 transform 随之整体错位
@@ -498,10 +527,21 @@ export default function HomePage() {
             fill: 'both',
           },
         );
-        /* currentTime 含 delay 期,所以直接用已流逝的绝对时间 */
-        landAnim.currentTime = HOME_RESTORE_MS;
-        landAnim.onfinish = finishClose;
+        /* currentTime 含 delay 期。对表用「真实流逝时间」而不是写死 HOME_RESTORE_MS:
+           手机上主线程一卡,这个 setTimeout 会晚到几百毫秒,再按 320ms 拨表就等于
+           把标题拽回曲线的早段 —— 用户看到的正是「标题跳一下/回落动效缺失」
+           (2026-08-17 录屏)。按真实时间拨,主线程再卡,接力也接在当下该在的位置;
+           已经该到头了就直接收尾,不再补一段迟到的动画。 */
+        const elapsed = performance.now() - closeStart;
+        const total = FEED_LEAD_MS + rideTiming.duration;
         rideAnimsRef.current.push(landAnim);
+        if (elapsed >= total - 16) {
+          landAnim.currentTime = total;
+          finishClose();
+        } else {
+          landAnim.currentTime = elapsed;
+          landAnim.onfinish = finishClose;
+        }
       }
       const riseEls = Array.from(
         document.querySelectorAll<HTMLElement>('.home-index-row, .home-index-row .heading-rise-char'),
@@ -513,15 +553,44 @@ export default function HomePage() {
       void body.offsetWidth;
       riseEls.forEach((el) => (el.style.transition = ''));
       /* 滚动已在 closing 起步帧归零(带 transform 补偿),这里不再动滚动。
-         hero(含署名)整块淡入 HOME_HERO_FADE_MS;索引行短淡入(HOME_RESTORE_MS,
-         2026-07-27 用户要回)—— 快于 hero,落点行在下移的标题行到达前已基本实打。 */
+         显形与标题落位对表(常量注释见 HOME_HERO_FADE_MS):延迟 = 剩余行程 −
+         HOME_FADE_LEAD_MS,fill:backwards 让延迟期保持全透明。落点行不淡入。 */
       const easeSoft =
         getComputedStyle(document.documentElement).getPropertyValue('--ease-soft').trim() ||
         'cubic-bezier(0.22, 1, 0.36, 1)';
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const remaining = Math.max(
+        0,
+        FEED_LEAD_MS + rideTiming.duration - (performance.now() - closeStart),
+      );
+      const fadeDelay = reduce ? 0 : Math.max(0, remaining - HOME_FADE_LEAD_MS);
       document.querySelectorAll<HTMLElement>('.home-hero').forEach((el) => {
         el.animate([{ opacity: 0 }, { opacity: 1 }], {
-          duration: HOME_HERO_FADE_MS,
+          duration: reduce ? 1 : HOME_HERO_FADE_MS,
+          delay: fadeDelay,
           easing: easeSoft,
+          fill: 'backwards',
+        });
+      });
+      document.querySelectorAll<HTMLElement>('.home-index-row').forEach((el) => {
+        const label = el.querySelector('.hi-label')?.getAttribute('aria-label');
+        if (label === page.label) {
+          /* 落点行本体立即实打(标题要落进来才无缝),但它的分割线跟大部队
+             同班次淡入 —— 单独先亮一根线很跳(2026-08-17 用户截图圈出) */
+          const bc = getComputedStyle(el).borderTopColor;
+          el.animate([{ borderTopColor: 'transparent' }, { borderTopColor: bc }], {
+            duration: reduce ? 1 : HOME_INDEX_FADE_MS,
+            delay: fadeDelay,
+            easing: easeSoft,
+            fill: 'backwards',
+          });
+          return;
+        }
+        el.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: reduce ? 1 : HOME_INDEX_FADE_MS,
+          delay: fadeDelay,
+          easing: easeSoft,
+          fill: 'backwards',
         });
       });
     }, HOME_RESTORE_MS);
@@ -563,6 +632,11 @@ export default function HomePage() {
        可用区间,统一回 ease-out。 */
     const timing = morphTiming(Math.hypot(dx - curX, dy - startY));
     rideTiming = timing;
+    /* 收起前先让所有封面退回海报态(covers.tsx 卸掉 iframe):整块位移最贵的
+       就是 iframe 合成层,Archive 首屏有 3 个还嵌着视频,Blog 只有图片 ——
+       这正是「Archive 收起不如 Blog 丝滑」的差距(2026-08-17 用户)。React 的
+       卸载在本任务内提交、首帧动画前生效,且不改布局(海报与 iframe 同盒)。 */
+    window.dispatchEvent(new Event('covers:shed'));
     const anims = els.map((el) => {
       /* 逐元素读自己的当前偏移:展开的错峰(FEED_LEAD_MS)会让标题行与 feed 处在
          不同位置,统一用 els[0] 的值会让 feed 跳一下 */
@@ -576,9 +650,17 @@ export default function HomePage() {
         { ...timing, delay: isTitle ? FEED_LEAD_MS : 0, fill: 'both' },
       );
     });
-    /* 位移期间按住视频:display:none 时它们是暂停的,恢复可见会同时重启解码
-       (Archive 有 10 个 autoplay video),正好压在动画帧上。落位后再放行。 */
+    /* 位移期间冻结模态里的全部媒体:正在播的封面 iframe 每帧都在跑 shader、
+       视频在解码,全压在动画帧上(2026-08-17 用户录屏「收起特别卡」的一环)。
+       不用恢复:展开落位后由 covers:resync 重判激活,收起则整个模态随后卸载。 */
     allInActive<HTMLVideoElement>('video').forEach((v) => v.pause());
+    allInActive<HTMLIFrameElement>('iframe').forEach((f) => {
+      try {
+        f.contentWindow?.postMessage({ type: 'cover-pause' }, '*');
+      } catch {
+        /* 拿不到 contentWindow(已卸载)就略过 */
+      }
+    });
     const collapseSvg = inActive<SVGSVGElement>('.page-collapse svg');
     if (collapseSvg) {
       /* 与展开对称:旋转压到位移时长的 ARROW_SPIN_RATIO,不拖 ease-out 的角度长尾 */
@@ -609,6 +691,7 @@ export default function HomePage() {
   useEffect(() => {
     if (modal === null) {
       document.body.classList.remove('home-restoring', 'home-modal-riding');
+      window.dispatchEvent(new Event('covers:resync'));
     }
   }, [modal]);
 
@@ -805,13 +888,13 @@ export default function HomePage() {
             className={modal?.target === 'blog' ? ACTIVE_CLASS : undefined}
             style={{ display: modal?.target === 'blog' ? 'contents' : 'none' }}
           >
-            <BlogPage modalTitle="revealed" />
+            <MemoBlogPage modalTitle="revealed" />
           </div>
           <div
             className={modal?.target === 'archive' ? ACTIVE_CLASS : undefined}
             style={{ display: modal?.target === 'archive' ? 'contents' : 'none' }}
           >
-            <ArchivePage modalTitle="revealed" />
+            <MemoArchivePage modalTitle="revealed" />
           </div>
         </>
       )}

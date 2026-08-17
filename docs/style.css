@@ -321,6 +321,16 @@ body.theme-dark {
        自带的 transition: color var(--hover-color-dur),只写 opacity 会把 hover 变灰/恢复变成瞬切 */
     transition: opacity var(--tf-dur) ease calc(var(--tf-i, 0) * var(--tf-step)), color var(--hover-color-dur) ease;
 }
+/* Archive 首屏三个 iframe 卡(VIBEDESIGN banner + 两张 icon 预览):
+   淡入再晚 300ms、再慢 300ms(2026-08-17 用户定)—— eager 预热后它们展开
+   就位即活,按默认节奏淡入显得抢;推迟放缓,压着周围内容入场的尾巴缓缓显形。
+   只动 opacity 的时长/延迟,color 一项保持原样(hover 变色不能跟着慢)。 */
+body.works-page .card-wrapper.visible > .design-banner-frame,
+body.works-page .card-wrapper.visible > .card.icon-cover {
+    transition:
+        opacity calc(var(--tf-dur) + 0.3s) ease calc(var(--tf-i, 0) * var(--tf-step) + 0.3s),
+        color var(--hover-color-dur) ease;
+}
 /* 组序:封面 = 0(不写),其余依次 +1 */
 .card-wrapper .writing-info .w-title,
 .card-wrapper .bl-text .bl-title,
@@ -328,6 +338,7 @@ body.theme-dark {
 .card-wrapper .writing-info .w-excerpt,
 .card-wrapper .bl-text .bl-excerpt,
 .card-wrapper .card-info .card-meta { --tf-i: 2; }
+/* 简介恢复展示(2026-08-17 再调),角标行回到第 3 拍 */
 .card-wrapper .writing-info .w-meta,
 .card-wrapper .bl-text .bl-date { --tf-i: 3; }
 @media (prefers-reduced-motion: reduce) {

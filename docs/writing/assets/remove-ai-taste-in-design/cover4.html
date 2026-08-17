@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+<html><head><script src="../cover-shim.js"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
 *{margin:0;padding:0;box-sizing:border-box;}
 .wrap{position:fixed;inset:0;overflow:hidden;background:#e8ecc8;}
 #sh{position:absolute;inset:0;width:100%;height:100%;display:block;}
@@ -41,7 +41,9 @@ fit();addEventListener('resize',fit);})();
 <script>
 // 三卡各自轮播：停留 DWELL、交叉淡入 .7s，相位各错开 1.1s，避免同时切换
 var FREEZE=null;
-if(FREEZE==null)(function(){
+/* 轮播是定时器驱动,shim 的虚拟时钟管不到它 —— 挂在 COVER.started 后面,
+   冻结期(海报截图 / hover 交接前)不偷跑,放行后才从第一张开始轮 */
+if(FREEZE==null)(window.COVER?COVER.started:Promise.resolve()).then(function(){
   var DWELL=500,STAGGER=170;
   document.querySelectorAll('.card').forEach(function(card,ci){
     var imgs=card.querySelectorAll('img');if(imgs.length<2)return;
@@ -51,7 +53,7 @@ if(FREEZE==null)(function(){
       imgs[cur].style.opacity=0;imgs[next].style.opacity=1;cur=next;
     },DWELL);},STAGGER*ci);
   });
-})();
+});
 </script>
 <script>
 // ===== heatmap 背景（同 cover3：PAL2 微软黄蓝，design-gallery 实验七移植）=====
