@@ -6440,7 +6440,7 @@ Nelson 把设计师的任务概括成一句话：<strong>别再把 AI 当文字�
 </footer>
 `,y=`
 <h1 class="article-h1">AI 产品设计｜长对话导航机制</h1>
-<div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-tag">导航考古</span></div><span>2026-08-11</span><span>阅读约 7 分钟</span></div>
+<div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-kind">解读</span><span class="a-tag">对话回溯</span></div><span>2026-08-11</span><span>阅读约 7 分钟</span></div>
 <div class="article-cover"><iframe loading="lazy" src="assets/long-chat-navigation-design/cover.html"></iframe></div>
 <div class="article-body"><style>
 /* article-template 样式 inline 到网站，仅作用于 .article-body 内 */
