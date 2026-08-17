@@ -317,6 +317,17 @@ export default function ArticlePage({
     <>
       {/* ① 文章列表(master–detail 左栏);嵌入模式不渲染 —— 那份清单就是 Blog 页本身 */}
       {!embedded && <ReaderList items={readerList()} currentFile={fileOf(slug)} />}
+      {/* 关闭键:独立文章页在「没有左列表」的宽度下(<1000px,CSS 里控制显隐)给一个
+          出口 —— 有左列表时列表本身就是返回路径,不需要它(2026-08-17 用户:
+          文章页没有左列表时,右上角应该是关闭)。复用模态那套 .article-modal-back
+          圆钮样式;这里是真跳转回 Blog,不是关模态。 */}
+      {!embedded && (
+        <a className="article-modal-back article-back-standalone" href="../blog.html" aria-label="返回 Blog">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6 L18 18 M18 6 L6 18" />
+          </svg>
+        </a>
+      )}
       {/* ③ 浮动目录(按 slug 重建) */}
       <aside aria-label="目录" className="article-toc" ref={(el) => (tocAsideRef.current = el)}>
         <div className="article-toc-title">目录</div>

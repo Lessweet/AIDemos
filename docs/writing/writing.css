@@ -3484,6 +3484,13 @@ body.article-modal .header .nav-collapse { display: none !important; }
     color: #181818;
 }
 body.theme-dark .article-modal-back { background: #1A1A1A; }
+/* 独立文章页的关闭键(ArticlePage 渲染的 .article-back-standalone):
+   只在「无左列表」的窄宽度出现 —— ≥1000px 有 master–detail 左列表,
+   列表本身就是返回路径(2026-08-17 用户定)。 */
+.article-back-standalone { display: none; }
+@media (max-width: 999px) {
+    body.reading-page .article-back-standalone { display: flex; }
+}
 .article-modal-back svg {
     display: block;
     width: 18px;    /* 与汉堡横线同宽:圆底内的光学尺寸对齐 */

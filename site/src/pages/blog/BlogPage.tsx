@@ -838,12 +838,13 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
       if (landedTargets.has(el)) return;
       el.style.visibility = '';
       bylineFades.push(
-        /* 与阅读页入场同一套语言:淡入 + 上移 22px(CSS 的 @keyframes article-rise
+        /* 与阅读页入场同一套语言:淡入 + 上移(CSS 的 @keyframes article-rise
            就是这两样,writing.css)。2026-08-17 一度只留 opacity,上移丢了 ——
-           用户:「上移移动入场的效果没了」。 */
+           用户:「上移移动入场的效果没了」;随后又定「位移距离缩短一半」→ 11px
+           (入场那套是 22px;这一件在飞行途中显形,行程短一半才不抢戏)。 */
         el.animate(
           [
-            { opacity: 0, transform: 'translateY(22px)' },
+            { opacity: 0, transform: 'translateY(11px)' },
             { opacity: 1, transform: 'translateY(0)' },
           ],
           {
