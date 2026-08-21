@@ -2,7 +2,7 @@
   "articles": [
     {
       "slug": "beyond-chat-output-display",
-      "title": "AI 产品设计｜把流式输出做成可核验的组件",
+      "title": "AI 产品设计｜流式逐字输出把生成过程当成了阅读过程",
       "date": "2026-08-17",
       "read_time": "7 分钟",
       "tags": [

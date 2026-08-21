@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>AI 产品设计｜把流式输出做成可核验的组件 · VibeUX</title>
+<title>AI 产品设计｜流式逐字输出把生成过程当成了阅读过程 · VibeUX</title>
 <link href="../favicon.png?v=12" rel="icon" type="image/png"/>
 <link href="../favicon.png?v=12" rel="shortcut icon"/>
 <link href="../apple-touch-icon.png?v=12" rel="apple-touch-icon"/>
@@ -47,7 +47,7 @@
 </aside>
 <!-- 正文 -->
 <article class="article-reading">
-<h1 class="article-h1">AI 产品设计｜把流式输出做成可核验的组件</h1>
+<h1 class="article-h1">AI 产品设计｜流式逐字输出把生成过程当成了阅读过程</h1>
 <div class="article-byline"><div class="article-eyebrow article-eyebrow-top"><span class="a-kind">解读</span><span class="a-tag">AI 界面模式</span></div><span>2026-08-17</span><span>阅读约 7 分钟</span></div>
 <div class="article-cover"><iframe loading="lazy" src="assets/beyond-chat-output-display/cover.html"></iframe></div>
 <div class="article-body"><style>
@@ -482,16 +482,19 @@
   }
 </style>
 <p>从 2022 年底 ChatGPT 发布算起，大部分对话式 AI 产品的输出一直是同一种呈现方式：不管问的是分析、总结还是方案，回来的都是一段从上往下流的文字，从第一个字跑到最后一个字，等跑完才知道答案到底是三条摘要还是多屏长文。</p>
-<p>三年多里模型换了一代又一代，这个呈现方式几乎没动过。</p>
-<p>直到 2025 年下半年，前沿的几家 AI 产品开始换方式。2025 年 11 月 Gemini 3 发布时带了一个叫 dynamic view 的实验，模型现场写代码，给一个提问生成一个定制的可交互界面当答案；再早一个月，ChatGPT 上线 Apps SDK，Booking、Canva 这类应用的可交互界面开始渲染在对话里。</p>
-<img alt="前沿案例：Gemini 3 dynamic view 现场生成画廊界面，ChatGPT Apps SDK 在对话里渲染 Booking 酒店卡片" src="assets/beyond-chat-output-display/00-frontier-wild.png"/>
-<p>AI 产品逐步面向大众化时，为了让不同层次的用户都能，AI 输出的扁平字符流的默认做法，正在被重新设计。如果答案不是从第一个字流到最后一个字呢？</p>
-<div class="section-head"><svg height="70" style="display:block;margin:40px 0 0 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="70" overflow="visible" style="overflow:visible" width="40" x="50%"><g transform="translate(-20 16)"><rect fill="rgba(61, 85, 230, 0.1)" height="40" rx="10" width="40" x="0" y="0"></rect><svg fill="none" height="19.2" overflow="visible" viewBox="0 0 24 24" width="19.2" x="10.4" xmlns="http://www.w3.org/2000/svg" y="10.4"><path d="M19.9 13.5H4.1C2.6 13.5 2 14.14 2 15.73V19.77C2 21.36 2.6 22 4.1 22H19.9C21.4 22 22 21.36 22 19.77V15.73C22 14.14 21.4 13.5 19.9 13.5Z" stroke="#3D55E6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path><path d="M19.9 2H4.1C2.6 2 2 2.64 2 4.23V8.27C2 9.86 2.6 10.5 4.1 10.5H19.9C21.4 10.5 22 9.86 22 8.27V4.23C22 2.64 21.4 2 19.9 2Z" stroke="#3D55E6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path></svg></g></svg></svg><h2 style="color: #3D55E6;">先出结构再填内容</h2></div>
-<p>长答案的流式输出，用户在不知道答案是三条要点还是三屏长文的情况下干等。输出骨架的做法是在正文到达之前先把结构声明出来，章节数、格式、预期长度先渲染好，内容再逐步填进各个占位符，用户一秒内就能判断将要收到什么规模的回答。比如一个研究分析的请求，骨架先显示五个章节标题和每章的预期长度，每个占位符标注将要填进什么类型的内容。用户在一个字的正文出现之前就可以跳读、展开折叠章节，甚至拒绝这个结构让模型重来。</p>
+<p>三年多里模型换了一代又一代，这个呈现方式几乎没动过。直到 2025 年，前沿的几家 AI 产品开始加入多模态展示方式。</p>
+<p>2025 年 5 月 Perplexity 上线 Labs，一个 prompt 跑约 10 分钟的自主工作，产出报告、表格和带图表的仪表盘；10 月 ChatGPT 上线 Apps SDK，Booking、Canva 这类应用的可交互界面开始渲染在对话里；一个月后 Gemini 3 发布了一个叫 dynamic view 的实验，是模型即时生成代码的生成式 UI，给一个提问生成一个定制的可交互界面当答案。</p>
+<img alt="前沿案例：Perplexity Labs 产出仪表盘，ChatGPT Apps SDK 渲染酒店卡片，Gemini 3 dynamic view 现场生成画廊界面" src="assets/beyond-chat-output-display/00-frontier-wild.png"/>
+<p>AI 产品逐步面向大众化时，为了让不同类型的用户都能流畅的内容获取与消费，最初的扁平字符流的默认做法，正在被重新设计。</p>
+<p>对于 AI 产品设计来说，在输出侧的核心考虑是：如果答案不是从第一个字流到最后一个字呢？</p>
+<div class="section-head"><svg height="70" style="display:block;margin:40px 0 0 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="70" overflow="visible" style="overflow:visible" width="40" x="50%"><g transform="translate(-20 16)"><rect fill="rgba(61, 85, 230, 0.1)" height="40" rx="10" width="40" x="0" y="0"></rect><svg fill="none" height="19.2" overflow="visible" viewBox="0 0 24 24" width="19.2" x="10.4" xmlns="http://www.w3.org/2000/svg" y="10.4"><path d="M19.9 13.5H4.1C2.6 13.5 2 14.14 2 15.73V19.77C2 21.36 2.6 22 4.1 22H19.9C21.4 22 22 21.36 22 19.77V15.73C22 14.14 21.4 13.5 19.9 13.5Z" stroke="#3D55E6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path><path d="M19.9 2H4.1C2.6 2 2 2.64 2 4.23V8.27C2 9.86 2.6 10.5 4.1 10.5H19.9C21.4 10.5 22 9.86 22 8.27V4.23C22 2.64 21.4 2 19.9 2Z" stroke="#3D55E6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0"></path></svg></g></svg></svg><h2 style="color: #3D55E6;">先出结构再填内容<br/>给足用户预期</h2></div>
+<p>对于长答案的流式输出，用户在不知道答案是三条要点还是三屏长文的情况下干等。输出骨架的做法是在正文到达之前先把结构声明出来，章节数、格式、预期长度先渲染好，内容再逐步填进各个占位符，用户一秒内就能判断将要收到什么规模的回答。</p>
+<p>这个设计形式其实都眼熟，就是 App 加载时的骨架屏，先出灰色占位条再填内容，区别在于普通骨架屏的灰条只表示有内容在加载，这里的占位块升级成了带标题的目录，有几个章节、每章大概多长，在灰条阶段就已经大概清楚了。</p>
+<p>比如一个研究分析的请求，骨架先显示五个章节标题和每章的预期长度，每个占位符标注将要填进什么类型的内容。用户在一个字的正文出现之前就可以跳读、展开折叠章节，甚至拒绝这个结构让模型重来。</p>
 <img alt="输出骨架原型：左边线性流式等到结尾才知道形状，右边先出章节骨架再逐个填充" src="assets/beyond-chat-output-display/01-output-skeleton-demo.png"/>
 <p>ChatGPT 的 Deep Research 在执行前先给一张可编辑的研究计划卡，用户可以审阅和修改大纲再让它开始写。Google 的 Gemini Deep Research 在 2026 年 4 月随 3.1 Pro 把这张计划卡做成了主交互，结构在任何内容到达前就被展示和塑形。Claude Artifacts 的做法比较隐式，长结构化文档中 Claude 常先起草标题和章节再填充，但 Anthropic 没有把这个行为做成品牌功能。</p>
+<img alt="输出骨架的已上线案例：ChatGPT Deep Research 和 Gemini Deep Research 的可编辑研究计划卡" src="assets/beyond-chat-output-display/02-output-skeleton-wild.png"/>
 <p>三家做法的分化挺能说明问题：OpenAI 和 Google 把骨架当成了可编辑的契约，Anthropic 把它当成了模型的自发行为，用户对结构的控制权差了一个层级。</p>
-<img alt="输出骨架的已上线案例：ChatGPT Deep Research 计划卡、Gemini Deep Research、Claude Artifacts" src="assets/beyond-chat-output-display/02-output-skeleton-wild.png"/>
 <p>风险在于骨架过度承诺，列出来的章节比模型能写好的多，承诺了五节精细分析最后只填了三节注水内容。输出很短或者完全自由发挥的时候，结构预览本身比内容还重，反而碍事。</p>
 <div class="section-head"><svg height="70" style="display:block;margin:40px 0 0 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="70" overflow="visible" style="overflow:visible" width="40" x="50%"><g transform="translate(-20 16)"><rect fill="rgba(61, 85, 230, 0.1)" height="40" rx="10" width="40" x="0" y="0"></rect><svg fill="none" height="19.2" overflow="visible" viewBox="0 0 24 24" width="19.2" x="10.4" xmlns="http://www.w3.org/2000/svg" y="10.4"><path d="M2 1.25C2.41421 1.25 2.75 1.58579 2.75 2V18.5C2.75 20.0188 3.98122 21.25 5.5 21.25H22C22.4142 21.25 22.75 21.5858 22.75 22C22.75 22.4142 22.4142 22.75 22 22.75H5.5C3.15279 22.75 1.25 20.8472 1.25 18.5V2C1.25 1.58579 1.58579 1.25 2 1.25Z" fill="#3D55E6"></path> <path d="M7.25001 17L7.25 13C7.25 12.5858 7.58579 12.25 8 12.25C8.41421 12.25 8.75 12.5858 8.75 13L8.75001 17C8.75001 17.4142 8.41422 17.75 8.00001 17.75C7.58579 17.75 7.25001 17.4142 7.25001 17Z" fill="#3D55E6"></path> <path d="M11.25 7L11.25 17C11.25 17.4142 11.5858 17.75 12 17.75C12.4142 17.75 12.75 17.4142 12.75 17L12.75 7C12.75 6.58579 12.4142 6.25 12 6.25C11.5858 6.25 11.25 6.58579 11.25 7Z" fill="#3D55E6"></path> <path d="M15.25 17L15.25 11C15.25 10.5858 15.5858 10.25 16 10.25C16.4142 10.25 16.75 10.5858 16.75 11L16.75 17C16.75 17.4142 16.4142 17.75 16 17.75C15.5858 17.75 15.25 17.4142 15.25 17Z" fill="#3D55E6"></path> <path d="M19.25 17C19.25 17.4142 19.5858 17.75 20 17.75C20.4142 17.75 20.75 17.4142 20.75 17V4C20.75 3.58579 20.4142 3.25 20 3.25C19.5858 3.25 19.25 3.58579 19.25 4V17Z" fill="#3D55E6"></path></svg></g></svg></svg><h2 style="color: #3D55E6;">把答案变成交互组件</h2></div>
 <p>分析类的提问被用散文回答，数据模型就藏在文字后面了，没法核验，没法排序，没法筛选，每一个后续操作都得用新 Prompt 重新问。</p>
@@ -512,10 +515,10 @@
 <p>这三个模式解决的都是同一个问题：流式逐字输出，是把模型的生成过程直接当成了用户的阅读过程，生成和阅读不该被当成同一个过程。</p>
 <p>1996 年 Ben Shneiderman 在《The Eyes Have It》里给信息可视化定了一条到今天还在引用的原则：<strong>先看总览，再缩放和过滤，最后按需看细节。</strong></p>
 <svg height="15" style="display:block;margin:40px 0;overflow:visible" width="100%" xmlns="http://www.w3.org/2000/svg"><svg height="15" width="50%" x="0" y="0"><g transform="translate(-49.5 0)"><rect fill="#3D55E6" height="1" opacity="0.35" width="100%" x="0" y="7"></rect></g></svg><svg height="15" width="50%" x="50%" y="0"><g transform="translate(49.5 0)"><rect fill="#3D55E6" height="1" opacity="0.35" width="100%" x="0" y="7"></rect></g></svg><svg height="15" overflow="visible" style="overflow:visible" x="50%" y="0"><g transform="translate(-49.5 0)"><g transform="translate(9 0)"><circle cx="8" cy="8" fill="#3D55E6" r="4.3"></circle></g><g transform="translate(42 0)"><polygon fill="#3D55E6" points="8,3.50 4.10,10.25 11.90,10.25"></polygon></g><g transform="translate(75 0)"><polygon fill="#3D55E6" points="8,3.20 9.18,6.38 12.57,6.52 9.90,8.62 10.82,11.88 8,10.00 5.18,11.88 6.10,8.62 3.44,6.52 6.82,6.38"></polygon></g></g></svg></svg>
-<p>本文三个模式的内容、原型描述与产品案例来自 Beyond Chat 站点的 Output Skeleton、Generative UI、Semantic Zoom 三个模式页；开头的前沿案例图取自 Google Gemini 3 发布页的 dynamic view 演示视频截帧和 OpenAI Apps in ChatGPT 发布页的官方图片。</p></div>
+<p>本文三个模式的内容、原型描述与产品案例来自 Beyond Chat 站点的 Output Skeleton、Generative UI、Semantic Zoom 三个模式页；开头的前沿案例图取自 Perplexity Labs 发布页、OpenAI Apps in ChatGPT 发布页的官方图片和 Google Gemini 3 发布页的 dynamic view 演示视频截帧；输出骨架的案例图取自 OpenAI 在 X 发布的 Deep Research 更新演示视频截帧和 Google Workspace 更新公告的官方图片。</p></div>
 <!-- 底部 -->
 <footer class="article-footer">
-<div class="same-collection"><div class="sc-title">合集 · AI 产品设计</div><a href="article-beyond-chat-prompt-to-controls.html"><span class="sc-num">01</span><span>AI 产品设计 ｜ 把高频微调的 Prompt 转变为可复现的参数控件</span></a><a href="article-beyond-chat-edit-in-place.html"><span class="sc-num">02</span><span>AI 产品设计｜修改在内容上而不是聊天框里</span></a><a href="article-long-chat-navigation-design.html"><span class="sc-num">03</span><span>AI 产品设计｜长对话导航机制</span></a><a href="article-beyond-chat-output-display.html"><span class="sc-num">04</span><span>AI 产品设计｜把流式输出做成可核验的组件</span></a></div>
+<div class="same-collection"><div class="sc-title">合集 · AI 产品设计</div><a href="article-beyond-chat-prompt-to-controls.html"><span class="sc-num">01</span><span>AI 产品设计 ｜ 把高频微调的 Prompt 转变为可复现的参数控件</span></a><a href="article-beyond-chat-edit-in-place.html"><span class="sc-num">02</span><span>AI 产品设计｜修改在内容上而不是聊天框里</span></a><a href="article-long-chat-navigation-design.html"><span class="sc-num">03</span><span>AI 产品设计｜长对话导航机制</span></a><a href="article-beyond-chat-output-display.html"><span class="sc-num">04</span><span>AI 产品设计｜流式逐字输出把生成过程当成了阅读过程</span></a></div>
 </footer>
 </article>
 </div>
