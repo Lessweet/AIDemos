@@ -1,6 +1,20 @@
 {
   "articles": [
     {
+      "slug": "beyond-chat-output-display",
+      "title": "AI 产品设计｜把流式输出做成可核验的组件",
+      "date": "2026-08-17",
+      "read_time": "7 分钟",
+      "tags": [
+        "AI 界面模式"
+      ],
+      "cat": "ui",
+      "accent": "#3D55E6",
+      "collection": "AI 产品设计",
+      "excerpt": "读 Beyond Chat 模式库的第三篇。输出骨架、生成式界面、语义缩放，三个模式把答案从一段流出来的字变成先有形状、可以操作、深度可调的对象。",
+      "cover": "assets/beyond-chat-output-display/cover.png"
+    },
+    {
       "slug": "long-chat-navigation-design",
       "title": "AI 产品设计｜长对话导航机制",
       "date": "2026-08-11",

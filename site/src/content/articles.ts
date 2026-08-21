@@ -41,6 +41,26 @@ export interface ArticleMeta {
 
 export const ARTICLES: ArticleMeta[] = [
   {
+    slug: 'beyond-chat-output-display',
+    file: 'article-beyond-chat-output-display.html',
+    title: 'AI 产品设计｜把流式输出做成可核验的组件',
+    date: '2026-08-17',
+    readTime: '7 分钟',
+    tags: ['AI 界面模式'],
+    cat: 'ui',
+    accent: '#3D55E6',
+    kind: '解读', // 读 Beyond Chat 模式库
+    collection: 'AI 产品设计',
+    excerpt:
+      '读 Beyond Chat 模式库的第三篇。输出骨架、生成式界面、语义缩放，三个模式把答案从一段流出来的字变成先有形状、可以操作、深度可调的对象。',
+    listCover: 'assets/beyond-chat-output-display/cover.png',
+    cardCover: 'assets/cards/beyond-chat-output-display.webp', // CI build-card-covers 生成
+    inBlogGrid: true,
+    blogTag: 'AI 界面模式',
+    blogDelay: 0,
+    blogCover: { type: 'iframe', src: 'writing/assets/beyond-chat-output-display/cover.html' },
+  },
+  {
     slug: 'long-chat-navigation-design',
     file: 'article-long-chat-navigation-design.html',
     title: 'AI 产品设计｜长对话导航机制',
