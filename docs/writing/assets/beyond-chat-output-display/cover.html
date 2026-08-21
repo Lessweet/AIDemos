@@ -102,7 +102,7 @@ body.static *{animation:none!important;}
 <!-- 场景：流式文字 → 三种输出形态，before/after 双窗对照（20260817-1 BeyondChat 输出展示三模式）
      结构参考 20260807 CodeConnect 封面（用户点名）：左右两个独立窗口 + 中间悬浮箭头 + 整组放大近满幅。
      左窗 Chat = 逐字流出的答案（末行打字中 + 闪烁光标块）；
-     右窗 UI = 同一个答案的三个形态卡：骨架大纲 / 统计卡带 Delta + 柱状图 / 三档深度滑块
+     右窗 UI = 同一个答案的三个形态卡（标题栏 icon = reicon Hierarchy3，点线母题：一个节点分出多路）：骨架大纲 / 统计卡带 Delta + 柱状图 / 三档深度滑块
      （对应文中输出骨架、生成式界面、语义缩放三个模式）；中间右向箭头 = 转变方向。
      材质统一零件库配方：容器 .glass，内容白色半透明骨架条，强调色块一律毛玻璃。 -->
 <style>
@@ -182,7 +182,7 @@ body.static *{animation:none!important;}
   <!-- 右：UI 窗口（三个形态卡：骨架大纲 / 统计卡+柱状图 / 深度滑块） -->
   <div class="glass od-win" style="width:300px;height:302px;">
     <div class="od-tb">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>
+      <svg width="25" height="25" viewBox="0 0 24 24" fill="none" style="flex:none;"><path d="M5 8C6.65685 8 8 6.65685 8 5C8 3.34315 6.65685 2 5 2C3.34315 2 2 3.34315 2 5C2 6.65685 3.34315 8 5 8Z" stroke="#FFFFFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 15C20.6569 15 22 13.6569 22 12C22 10.3431 20.6569 9 19 9C17.3431 9 16 10.3431 16 12C16 13.6569 17.3431 15 19 15Z" stroke="#FFFFFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 22C6.65685 22 8 20.6569 8 19C8 17.3431 6.65685 16 5 16C3.34315 16 2 17.3431 2 19C2 20.6569 3.34315 22 5 22Z" stroke="#FFFFFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 12H9C6.8 12 5 11 5 8V16" stroke="#FFFFFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span class="od-title" style="margin-left:3px;">UI</span>
     </div>
     <div class="od-body" style="padding:14px 15px;">
