@@ -26,6 +26,8 @@
 /docs/writing/assets/voices/
 /docs/writing/article-codex-voice-delegation.html
 /docs/writing/assets/codex-voice-delegation/
+/docs/writing/article-beyond-chat-output-display.html
+/docs/writing/assets/beyond-chat-output-display/
 
 # React 迁移(Vite)工具链
 node_modules/
