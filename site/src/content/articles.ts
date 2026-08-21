@@ -54,11 +54,10 @@ export const ARTICLES: ArticleMeta[] = [
     excerpt:
       '读 Beyond Chat 模式库的第三篇。输出骨架、生成式界面、语义缩放，三个模式把答案从一段流出来的字变成先有形状、可以操作、深度可调的对象。',
     listCover: 'assets/beyond-chat-output-display/cover.png',
-    cardCover: 'assets/cards/beyond-chat-output-display.webp', // CI build-card-covers 生成
-    inBlogGrid: true,
+    inBlogGrid: false,
+    draft: true, // 2026-08-21 用户定只发公众号:站上完全不存在(docs 页面 + 资源进 .gitignore)
     blogTag: 'AI 界面模式',
     blogDelay: 0,
-    blogCover: { type: 'iframe', src: 'writing/assets/beyond-chat-output-display/cover.html' },
   },
   {
     slug: 'long-chat-navigation-design',

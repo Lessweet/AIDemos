@@ -12,7 +12,8 @@
       "accent": "#3D55E6",
       "collection": "AI 产品设计",
       "excerpt": "三年多里模型换了一代又一代，AI 的输出还是一段从头流到尾的文字。输出骨架先声明结构，生成式界面把答案变成能点的组件，语义缩放让人自己调深浅，三个模式都在把生成和阅读拆开。",
-      "cover": "assets/beyond-chat-output-display/cover.png"
+      "cover": "assets/beyond-chat-output-display/cover.png",
+      "draft": true
     },
     {
       "slug": "long-chat-navigation-design",
