@@ -143,7 +143,8 @@ body.static *{animation:none!important;}
 .track .knob{position:absolute;left:52%;top:50%;width:20px;height:20px;border-radius:50%;background:#FFFFFF;transform:translate(-50%,-50%);}
 </style>
 
-<div class="row" style="gap:30px;align-items:center;position:relative;">
+<!-- padding-bottom = 光标下探出窗口的量（363-302）：光标 absolute 不撑高 row，不补这段缩放和居中都会漏算它、底部贴边被裁（用户定 2026-08-21） -->
+<div class="row" style="gap:30px;align-items:center;position:relative;padding-bottom:61px;">
 
   <!-- 左：Chat 窗口（流式答案，末行打字中） -->
   <div class="glass od-win" style="width:348px;height:302px;">
@@ -164,10 +165,10 @@ body.static *{animation:none!important;}
     </div>
   </div>
 
-  <!-- 本篇覆盖外壳安全区（沿用 CodeConnect 封面 2026-08-08 口径：整组放大到约 850 宽，接近满幅）。
+  <!-- 本篇覆盖外壳安全区（沿用 CodeConnect 封面 2026-08-08 口径：整组放大到约 850 宽；高度按 360 钳住（含光标的内容盒），上下各留 50px，比安全区下限 380 再宽松一档）。
        外壳 fitGroup 只缩不放且钳在 560，这里在它跑完之后重算 scale 盖掉；只对本篇生效，不动共享外壳。 -->
   <script>
-  (function(){var W=850,H=430;function big(){var g=document.querySelector('.group');if(!g)return;
+  (function(){var W=850,H=360;function big(){var g=document.querySelector('.group');if(!g)return;
     g.style.transform='none';var sx=(window.innerWidth||1080)/1080;var r=g.getBoundingClientRect();
     var s=Math.min(W/(r.width/sx),H/(r.height/sx));g.style.transform='scale('+s.toFixed(4)+')';}
   [0,60,300].forEach(function(t){setTimeout(big,t)});
