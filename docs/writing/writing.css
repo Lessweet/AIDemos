@@ -3033,6 +3033,10 @@ html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + var(--hero-b
     /* 介绍段的「手绘红」:NetEase 圆环 + UI 设计师下划线共用。
        2026-08-22 三调:#E60012 → #DB0200 都嫌暗,定 #FF3B30(亮、年轻) */
     --hero-red: #FF3B30;
+    /* 整段缩到 90%(2026-08-22 试验分支):zoom 连 px 定死的图形(头像/红环/球/
+       say-hi 笔画)一起等比缩,且参与布局回流 —— transform:scale 只缩绘制不缩占位,
+       字号单调则带不动那批 px 图形。不满意撤这一行即回原尺寸。 */
+    zoom: 0.8;
     max-width: 36em;
     font-size: var(--fs-h2);   /* 2026-08-22 用户两次加档:16→18→24,scale 的 h2 级 */
     line-height: 2.1;
