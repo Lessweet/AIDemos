@@ -131,11 +131,11 @@ function setSiteTheme(dark) {
        (方向反了)。 */
     document.body.classList.toggle('menu-dark', !dark);
     /* html 背景必须跟 body 同色:内容不满一屏 / 橡皮筋滚动时露出的是 html 底,
-       只翻 body 会在页面底部留一条异色(浅色 #f2f2f2 = --site-bg,深色 #0a0a0a = --page-bg)。
+       只翻 body 会在页面底部留一条异色(浅色 #FDFDFC = --site-bg,深色 #0a0a0a = --page-bg)。
        2026-07-27 底色加深时这里一度漏改(仍写旧 #f9f9f9):主题切换重绘的一两帧里
        html 与 body 两层颜色对不上,边缘闪异色 —— 改 --site-bg 必须同步这里。
        用内联样式写 —— 首页 loading 的 cleanup 也是内联写这里,保持同一优先级。 */
-    document.documentElement.style.background = dark ? '#0a0a0a' : '#f2f2f2';
+    document.documentElement.style.background = dark ? '#0a0a0a' : '#FDFDFC';
 }
 function applySiteTheme() {
     /* 2026-07-22 改为会话级记忆:每次新会话强制浅色,切换只在当前会话内保持。

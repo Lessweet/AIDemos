@@ -5,8 +5,11 @@
  * 不做挂载后变异);显现时机仍由 html.hero-ready / CSS 闸门控制,与旧版一致。
  */
 import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { CSSProperties, MouseEvent, ReactNode } from 'react';
+import type { CSSProperties, MouseEvent } from 'react';
 import { useScrollProgress, useHeaderAlwaysVisible } from '../../shared/hooks';
+import { createSilkPill } from '../../shared/silk-pill/silkPillEngine';
+import NeteaseWordmark from './NeteaseWordmark';
+import TongrongName from './TongrongName';
 import BlogPage from '../blog/BlogPage';
 import ArchivePage from '../archive/ArchivePage';
 import { INDEX_ARROW_PATH } from '../../shared/PageCollapse';
@@ -19,36 +22,46 @@ import { INDEX_ARROW_PATH } from '../../shared/PageCollapse';
 const MemoBlogPage = memo(BlogPage);
 const MemoArchivePage = memo(ArchivePage);
 
-const HERO_STEP = 18;
-/* 镜像 style.css 的 --hero-speed:hero 逐字与署名的时长/延迟在 CSS 里都 ×它,而索引
-   --row-d 不经 CSS 缩放。下方按署名的「真实」出现时刻算列表起始,故要乘它 ——
+/* 镜像 style.css 的 --hero-speed:hero 介绍段的时长/延迟在 CSS 里都 ×它,而索引
+   --row-d 不经 CSS 缩放。下方按介绍段的「真实」出现时刻算列表起始,故要乘它 ——
    改 style.css 的 --hero-speed 时,这里同步。 */
 const HERO_SPEED = 1.4;
+/* 镜像 style.css 的 --hero-char-dur(648ms):介绍段每行走一条 hero-soft-blur-in,
+   索引行起点 = 末行真实收尾 ×--hero-speed 再 +200ms 呼吸 —— 改 CSS token 时同步。 */
+const HERO_CHAR_DUR = 648;
+/* 介绍段入场节拍(soft-blur-in spec):行内逐字从左到右连续错峰,行与行之间在
+   连续节拍上再加一口停顿 —— 上一行末字起步后,下一行首字隔 LINE_STEP 才跟上,
+   读出「一行扫完、下一行接着扫」。--d 在 CSS 里 ×--hero-speed(1.4)。
+   CHAR_STEP 取 15ms = spec usage_notes 给 <24px 正文的档(大标题才用 25)。 */
+const INTRO_CHAR_STEP = 15;
+const INTRO_LINE_STEP = 120;
 
-/* hero 逐字拆分(移植入口内联 walker):词包 .hero-word(nowrap 防词中折行),
-   空格单元加 .hero-sp;counter 跨行连续,--d = i*18ms */
-function splitHero(text: string, c: { i: number }): ReactNode[] {
-  const out: ReactNode[] = [];
-  const ch = (char: string, key: string) => (
-    <span
-      key={key}
-      className={/\s/.test(char) ? 'hero-ch hero-sp' : 'hero-ch'}
-      style={{ '--d': `${c.i++ * HERO_STEP}ms` } as CSSProperties}
-    >
-      {char}
-    </span>
-  );
-  (text.match(/\s+|\S+/g) || []).forEach((tok, t) => {
-    if (/\s/.test(tok)) {
-      tok.split('').forEach((s, k) => out.push(ch(s, `s${t}-${k}`)));
+/* Blog 前的丝绸圆球(design-gallery shader.html 的 Silk Pill「Obsidian · 曜石黑」
+   配色,引擎搬入 shared/silk-pill 并带平滑变速补丁;2026-08-22 由玻璃星系球换来):
+   默认低速涌动 = BASE;hover 瞬间提到 FAST,再在 RECOVER_S 秒内指数滑回(机制保留)。 */
+const ORB_SPEED_BASE = 0.4;
+const ORB_SPEED_FAST = 2.6;
+const ORB_RECOVER_S = 5;
+/* 曜石黑三色:谷底近墨 → 冷灰光帘 → 银白亮芯(gallery 预设原值) */
+const ORB_COLORS = ['#0a0b0f', '#3b4049', '#d6dae2'];
+
+/* 介绍段拆分:行是折行结果、随视口变,没法在 JSX 里预知 —— 拆成最小折行单元
+   (CJK 单字 / 拉丁词,句读并进前一单元防行首标点),挂载后按几何分行、逐行下发 --d。
+   单元复用 .hero-ch(inline-block + pre + soft-blur 入场),空格保留在单元内。 */
+function splitIntro(text: string): string[] {
+  const raw = text.match(/[A-Za-z0-9]+|\s+|./g) || [];
+  const out: string[] = [];
+  let pending = '';
+  for (const t of raw) {
+    if (out.length && (/^\s+$/.test(t) || /[。，、；：！？）》」』…]/.test(t))) {
+      out[out.length - 1] += t;
+    } else if (/^\s+$/.test(t)) {
+      pending += t; /* 行首空白攒着并进下一个实词 */
     } else {
-      out.push(
-        <span key={`w${t}`} className="hero-word">
-          {tok.split('').map((s, k) => ch(s, `c${k}`))}
-        </span>,
-      );
+      out.push(pending + t);
+      pending = '';
     }
-  });
+  }
   return out;
 }
 
@@ -758,6 +771,90 @@ export default function HomePage() {
     return () => cancelAnimationFrame(r1);
   }, []);
 
+  /* 介绍段逐行 + 行内从左到右入场:挂载后(hero-ready 闸门开启前)按几何把单元
+     分行 —— 行的判定 = 单元左缘比前一个更靠左(左对齐排版里只有换行会回退左缘),
+     比 offsetTop 稳:行内头像/圆底比文字高,顶缘不共线。
+     --d = 全段连续字位×CHAR_STEP + 行号×LINE_STEP:行内逐字左→右,换行处多停一口。
+     末单元延迟存进 state,索引行起点跟着实测节拍推迟。 */
+  const introRef = useRef<HTMLParagraphElement>(null);
+  /* 丝绸圆球(Obsidian):WebGL 引擎挂进 .hero-intro-orb。WebGL 不可用 / 用户要求
+     减弱动效时不建球,span 自带的 CSS 弥散渐变兜底还在。曜石黑深浅主题通用,不跟底色。 */
+  const orbRef = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const host = orbRef.current;
+    if (!host || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const orb = createSilkPill(host, {
+      width: 28,   /* 2026-08-22 用户:32 缩一档,保持 4 的倍数;CSS .hero-intro-orb 同步 */
+      height: 28,
+      seed: 'Obsidian',
+      colors: ORB_COLORS,
+      silk: { radius: 1, speed: ORB_SPEED_BASE }, /* radius 1 = 全圆;其余用 gallery 默认 */
+    });
+    if (!orb) return;
+    host.classList.add('orb-live');
+    /* hover 冲击:入峰无过渡(瞬间加快),随后 τ = RECOVER/3 的指数衰减滑回 ——
+       5s 末残余 e⁻³ ≈ 5%,落回默认几乎无感。重复 hover 从峰值重来。
+       speed 能这样跳变靠的是引擎副本的积分时钟补丁,见 silkPillEngine.js 文件头。 */
+    let raf = 0;
+    const onEnter = () => {
+      /* Blog 词的回滚类先摘掉:hover 期间由 :hover 规则驱动上浮 */
+      unit.classList.remove('hero-blog-rolling');
+      cancelAnimationFrame(raf);
+      const t0 = performance.now();
+      const step = (now: number) => {
+        const t = (now - t0) / 1000;
+        if (t >= ORB_RECOVER_S) {
+          orb.set({ silk: { speed: ORB_SPEED_BASE } });
+          return;
+        }
+        const k = Math.exp(-t / (ORB_RECOVER_S / 3));
+        orb.set({ silk: { speed: ORB_SPEED_BASE + (ORB_SPEED_FAST - ORB_SPEED_BASE) * k } });
+        raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    };
+    /* 移出:Blog 词滚一圈回原位(:hover 一撤 CSS 规则就没了,与顶栏 nav-rolling 同法) */
+    const onLeave = () => unit.classList.add('hero-blog-rolling');
+    const unit = host.closest('.hero-intro-unit') ?? host;
+    unit.addEventListener('mouseenter', onEnter);
+    unit.addEventListener('mouseleave', onLeave);
+    return () => {
+      cancelAnimationFrame(raf);
+      unit.removeEventListener('mouseenter', onEnter);
+      unit.removeEventListener('mouseleave', onLeave);
+      orb.destroy();
+      host.classList.remove('orb-live');
+    };
+  }, []);
+  /* 兜底初值:桌面实测 59 单元 3 行的末字延迟,量完立刻被真实值覆盖 */
+  const [introLastD, setIntroLastD] = useState(58 * INTRO_CHAR_STEP + 2 * INTRO_LINE_STEP);
+  useLayoutEffect(() => {
+    const p = introRef.current;
+    if (!p) return;
+    let line = 0;
+    let prevLeft = -Infinity;
+    let last = 0;
+    Array.from(p.children).forEach((el, i) => {
+      const { left } = el.getBoundingClientRect();
+      if (left < prevLeft - 1) line++;
+      prevLeft = left;
+      last = i * INTRO_CHAR_STEP + line * INTRO_LINE_STEP;
+      (el as HTMLElement).style.setProperty('--d', `${last}ms`);
+    });
+    setIntroLastD(last);
+  }, []);
+
+  /* 列表起步 = 介绍段扫到约 1/3 处(2026-08-22 用户:等整段扫完再出太晚)——
+     视觉上仍是自上而下(列表在页面底部、rise 又慢),但不再干等文字收尾。
+     真实毫秒;索引 --row-d 不经 CSS 缩放,故此处自行 ×HERO_SPEED。 */
+  const BASE = Math.round((introLastD * HERO_SPEED) / 3 + 200);
+  /* 入场彻底结束 → 挂 entrance-done 换快速档。列表提前起步后,收尾可能是
+     「列表最后一行升完」也可能是「介绍段末字化开完」(手机行多时后者更晚),取大者。 */
+  const entranceEnd = Math.max(
+    BASE + 2 * ROW_STEP + 8 * CHAR_STEP + 1260 + 200,
+    Math.round((introLastD + HERO_CHAR_DUR) * HERO_SPEED) + 200,
+  );
+
   /* 入场收尾 2200ms 后给 html 挂 entrance-done(过渡换快速档);
      闸门 = html.hero-ready(loader 收尾/跳过时由入口脚本添加) */
   useEffect(() => {
@@ -787,44 +884,99 @@ export default function HomePage() {
       timers.forEach((t) => clearTimeout(t));
       mo?.disconnect();
     };
-  }, []);
-
-  /* hero 拆字:counter 跨两行与 accent 连续。署名延迟 = 总字数*18 + 40 —— +40 是 hero 末字
-     到署名的极小间隔(约 1 步),让署名接着逐字节拍立刻跟上、不留停顿(2026-07-26 用户要求)。 */
-  const c = { i: 0 };
-  const line1 = splitHero('From AI-Assisted', c);
-  const line2a = splitHero('to ', c);
-  const line2b = splitHero('AI-Native Design.', c);
-  const bylineDelay = c.i * HERO_STEP + 40;
-  /* 入场先后 = 视觉自上而下:hero → 署名 → 列表。署名走 hero-soft-blur 且 CSS ×--hero-speed,
-     末元素(Role)真实起步 = (bylineDelay+180)×HERO_SPEED;列表在其后 +200ms 起步
-     (真实毫秒;索引 --row-d 不再被 CSS 缩放)。 */
-  const BASE = Math.round((bylineDelay + 180) * HERO_SPEED + 200);
-  /* 入场彻底结束(最后一行最后一字升完 + 余量)→ 用于挂 entrance-done 换快速档 */
-  const entranceEnd = BASE + 2 * ROW_STEP + 8 * CHAR_STEP + 1260 + 200;
+    /* BASE 依赖介绍段实测行数(layout effect 里 setState),行数落定后重挂计时 ——
+       都发生在 hero-ready 闸门开启前,重挂无感 */
+  }, [BASE, entranceEnd]);
 
   return (
     <>
-      {/* 首页 hero:黑底居中排版(纯 HTML/CSS,不走 iframe) */}
+      {/* 首页 hero:自我介绍段(2026-08-22 换下「From AI-Assisted…」大字 + 署名行,
+          用户定稿):正常字号、整段灰底,重点词(姓名)黑;三个行内图形 ——
+          头像圆(原署名头像内嵌进文字)、NetEase 红点、指向下方 Blog 行的圆底下箭头。 */}
       <header className="home-hero">
-        <h1 className="hero-headline">
-          <span className="hero-line">{line1}</span>
-          <span className="hero-line">
-            {line2a}
-            <span className="accent">{line2b}</span>
-          </span>
-        </h1>
-        <div className="hero-byline" style={{ '--d': `${bylineDelay}ms` } as CSSProperties}>
-          <span aria-label="Tongrong 头像" className="hero-avatar" role="img">
-            <img alt="" src="writing/assets/tongrong-avatar.svg?v=2" />
-          </span>
-          <span className="hero-meta">
-            <span className="hero-by">
-              By <b>Tongrong</b>
+        {/* 图形与它标注的词包进 .hero-intro-unit(nowrap):否则行尾可能在
+            inline-block 图形和后面的词之间折开,红点/箭头被单独甩在行尾。
+            文字经 splitIntro 拆成折行单元(.hero-ch),空格并入前词、标点并入前字,
+            全部间距都在单元字符串里 —— JSX 元素之间不放裸文本。 */}
+        <p className="hero-intro" ref={introRef}>
+          {/* 开场白(2026-08-22):「UI 设计师」与后文重复已删,换成打招呼 ——
+              与头像 say-hi 笔画呼应;头衔只留「曾在 NetEase 担任 UI 设计师」那处 */}
+          {splitIntro('Hi，我是 ').map((t, i) => (
+            <span key={`a${i}`} className="hero-ch">{t}</span>
+          ))}
+          <span className="hero-ch hero-intro-unit hero-name-unit">
+            <span aria-label="同容 头像" className="hero-intro-avatar" role="img">
+              <img alt="" src="writing/assets/tongrong-avatar.svg?v=2" />
             </span>
-            <span className="hero-role">UI Designer</span>
+            {/* 头像两侧手绘装饰(2026-08-22 用户:默认常显,不只 hover):
+                右上三道 say-hi 小笔画(左上小星试过一版,2026-08-22 用户砍掉)。
+                hover 头像时两侧逐条重新描画一遍,配合摆动 —— 兄弟节点,:hover ~ 选中 */}
+            <span aria-hidden="true" className="hero-hi hero-hi-right">
+              <svg viewBox="0 0 24 24">
+                <path pathLength={1} d="M4.5 15 C5.5 12.5, 6 10.5, 6.2 8" />
+                <path pathLength={1} d="M10.5 13 C11.8 10.5, 13.4 8.8, 15.5 7.4" />
+                <path pathLength={1} d="M14.5 18.5 C16.5 17.4, 18.6 16.9, 20.8 16.9" />
+              </svg>
+            </span>
+            {/* 手写名 SVG(用户原始矢量,见 TongrongName.tsx):包在 <b> 里吃重点词颜色 */}
+            <b className="hero-name">
+              <TongrongName />
+            </b>
+            。
           </span>
-        </div>
+          {splitIntro('做界面、图标系统和动效。曾在 ').map((t, i) => (
+            <span key={`b${i}`} className="hero-ch">{t}</span>
+          ))}
+          {/* 单元带尾空格(nowrap 粘在词后):后续段不再以空格开头,免得折行后行首悬空格 */}
+          <span className="hero-ch hero-intro-unit">
+            <span aria-hidden="true" className="hero-intro-dot" />
+            {/* 字标 SVG(描线复刻,见 NeteaseWordmark.tsx):包在 <b> 里吃重点词颜色 */}
+            <b className="hero-netease">
+              <NeteaseWordmark />
+            </b>{' '}
+          </span>
+          {splitIntro('担任 ').map((t, i) => (
+            <span key={`c0${i}`} className="hero-ch">{t}</span>
+          ))}
+          {/* 「UI 设计师」独立成单元:底下垫手绘红色下划线(2026-08-22 用户手绘样式);
+              逗号并进单元防行首标点,但不吃下划线 */}
+          <span className="hero-ch hero-intro-unit">
+            <span className="hero-role-mark">
+              UI 设计师
+              {/* 双笔画手绘下划线(2026-08-22 用户:要两条的笔画感):主笔全宽扫过,
+                  第二笔更短、垫在中段下方 —— 快速回锋的双线。两条都是变宽实心笔触
+                  (上下缘不同相位抖动 = 粗细一直在变);preserveAspectRatio none 随词宽拉伸 */}
+              <svg aria-hidden="true" className="hero-role-line" viewBox="0 0 200 24" preserveAspectRatio="none">
+                <path d="M4 7.5 C 30 5.8, 60 8, 90 6.6 C 120 5.4, 155 7.2, 194 5.2 C 197 5, 198 6, 197.5 7.2 C 197 8.6, 194 9.4, 190 9.8 C 158 12, 124 10, 92 11.4 C 62 12.6, 32 11, 7 12.6 C 4.6 12.7, 3.4 11.6, 3.5 10 C 3.6 8.8, 3.8 7.9, 4 7.5 Z" />
+                <path d="M22 15.5 C 50 13.8, 85 15.6, 118 14 C 128 13.5, 136 14.2, 138 15 C 139.5 15.9, 137 16.9, 132 17.3 C 100 19.4, 66 17.4, 35 19 C 28 19.3, 23.5 18.6, 23 17.4 C 22.6 16.6, 22.4 15.9, 22 15.5 Z" />
+              </svg>
+            </span>
+            ，
+          </span>
+          {splitIntro('现在我一边设计一边自己实现。把看到的、想到的，写成文章，都在 ').map(
+            (t, i) => (
+              <span key={`c${i}`} className="hero-ch">{t}</span>
+            ),
+          )}
+          <span className="hero-ch hero-intro-unit hero-blog-unit">
+            {/* 丝绸圆球 Obsidian(WebGL,orb effect 挂载;CSS 弥散渐变作 WebGL 不可用兜底) */}
+            <span aria-hidden="true" className="hero-intro-orb" ref={orbRef} />
+            {/* hover 翻转:逐字 mask+roll、22ms 错峰,与顶栏同节奏(2026-08-22 用户定逐字;
+                代价是 Playwrite 连笔在字间断开,已确认接受) */}
+            <b className="hero-blog-word">
+              {'Blog'.split('').map((ch, i) => (
+                <span key={i} className="hero-blog-mask">
+                  <span className="hero-blog-roll" style={{ '--i': i } as CSSProperties}>
+                    {ch}
+                  </span>
+                </span>
+              ))}
+            </b>{' '}
+          </span>
+          {splitIntro('里。').map((t, i) => (
+            <span key={`d${i}`} className="hero-ch">{t}</span>
+          ))}
+        </p>
       </header>
       {/* 首页索引:Blog / Archive / Contact 三行大字导航 */}
       <nav className="home-index" aria-label="站内入口">

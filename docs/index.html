@@ -10,10 +10,10 @@
 <link href="apple-touch-icon.png?v=15" rel="apple-touch-icon"/>
 <!-- loading 遮罩样式放在 head 最前:首帧直接画灰底,避免外部 CSS 阻塞期间的白屏闪烁 -->
 <style>
-        /* 首帧底色 = 页面背景 --site-bg(#f2f2f2,2026-07-27 由 #f9f9f9 加深一档):
+        /* 首帧底色 = 页面背景 --site-bg(#FDFDFC,2026-08-22 用户定近白暖灰):
            四处(这里 / loader 底 / 主题切换 / cleanup 兜底)必须同值,否则 loading
            上滑离场时底部会漏出一条异色(之前的淡米色残留就是 #F7F7F4 ≠ 页面底) */
-        html { background: #f2f2f2; }
+        html { background: #FDFDFC; }
         /* 进度数字用 DIN 细体:开源 D-DIN(SIL OFL)base64 内嵌 ——
            零网络请求、file:// 本地预览不受 CORS 限制,首帧即 DIN 字形 */
         @font-face {
@@ -23,7 +23,7 @@
         }
         #page-loader {
             position: fixed; inset: 0; z-index: 9999;
-            background: #f2f2f2;   /* = --site-bg,与页面底同值(见上方首帧底色注释) */
+            background: #FDFDFC;   /* = --site-bg,与页面底同值(见上方首帧底色注释) */
             overflow: hidden;
         }
         /* 离场(Sui 式揭幕,2026-07-26):灰底转透明 —— 切换瞬间视口整个被黑面盖着,
@@ -151,10 +151,15 @@
 <!-- Kaushan Script:hero 强调词暂时改回无衬线,字体加载先注释掉,恢复手写体时一并放开
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&amp;display=swap" rel="stylesheet"/> -->
+<!-- 介绍段「Blog」的专属字体(2026-08-22 用户定):Playwrite DE LA 优雅书写体
+     (原 Guides 版带四条辅导线,用户要求去掉)。「同容」已改用用户提供的手写 SVG,
+     不再需要中文字体。text= 只抓 4 个字形;display=swap 先用回退栈,到货即换。 -->
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Playwrite+DE+LA&amp;text=Blog&amp;display=swap" rel="stylesheet"/>
 <link href="writing/writing.css?v=455" rel="stylesheet"/>
 <!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁 -->
 <script src="nav-boot.js?v=16"></script>
-  <script type="module" crossorigin src="/assets/index-SXRlWMwQ.js"></script>
+  <script type="module" crossorigin src="/assets/index-DxgdkqPX.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/index-BOwIwFzp.js">
   <link rel="modulepreload" crossorigin href="/assets/hooks-ud6lg5D7.js">
   <link rel="modulepreload" crossorigin href="/assets/article-content-D5c3D4nu.js">
@@ -195,7 +200,7 @@
                 if (sessionStorage.getItem('seen-loading')) {
                     var early = document.getElementById('page-loader');
                     if (early) early.remove();
-                    docEl.style.background = document.body.classList.contains('theme-dark') ? '#0a0a0a' : '#f2f2f2';
+                    docEl.style.background = document.body.classList.contains('theme-dark') ? '#0a0a0a' : '#FDFDFC';
                     /* 放闸前先让初始态(隐藏)真正绘制一帧 —— 双 rAF 跨过首次绘制。
                        hero-ready 若在首绘前就挂上,索引行的 transition 没有状态变化,
                        会直接以最终态渲染、入场动画被跳过;hero 逐字与索引行都要照常播。 */
@@ -335,7 +340,7 @@
                 docEl.classList.remove('is-loading');
                 docEl.style.background = document.body.classList.contains('theme-dark')
                     ? '#0a0a0a'    /* 深色主题:兜底 = --page-bg */
-                    : '#f2f2f2';   /* 浅色主题:兜底 = --site-bg,防离场残色 */
+                    : '#FDFDFC';   /* 浅色主题:兜底 = --site-bg,防离场残色 */
             }
             /* 放闸:hero 大字开始逐字入场,索引行按各自 --row-d(620ms 起)跟在后面。
                时机 = 黑雾掀过大字区的那一刻 —— 见 HERO_GATE_MS。 */
@@ -347,12 +352,14 @@
             var HERO_GATE_MS = 650;
             /* 最短展示时长:加载再快(缓存/本地),进度也要平滑扫到 100 再上滑,
                保证每次访问都有完整的 loading 过程且不生硬。
-               3000 → 5000(2026-07-28 用户定)。
-               留意:此刻它其实是「固定时长」而非「最短」—— 同一天撤掉了三条等资源
-               的闸(全部媒体 load / window.load / 8s 兜底,见 finish 那里的注释),
+               5000 → 1800(2026-08-22 用户:线上首次加载停在幕布上太久。5000 是
+               2026-07-28 配合大字 hero 定的;首页已换成纯文本介绍段,没有重资源
+               可等,幕布只剩仪式感 —— 收到「进度扫完即揭幕」的最短节奏)。
+               留意:此刻它其实是「固定时长」而非「最短」—— 2026-07-28 撤掉了三条
+               等资源的闸(全部媒体 load / window.load / 8s 兜底,见 finish 注释),
                没有任何东西能让揭幕延后或提前。要恢复成真正的下限,得把闸加回来,
                且只等 img、不等 iframe/video(那 19 个重家伙才是当初拖到 8s 的元凶)。 */
-            var MIN_MS = 5000;
+            var MIN_MS = 1800;
             /* 只防死等:某个资源卡死、load/error 都不触发时,不至于把人困在幕布后面。
                给得比 MIN_MS 宽裕得多 —— 正常网络走不到这里,真走到了说明确实有东西
                挂了,那时候放人进去也比继续等着强。 */
