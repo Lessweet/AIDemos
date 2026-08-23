@@ -5,7 +5,6 @@
  */
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import LikeButton from '../../shared/LikeButton';
 import HeadingRise from '../../shared/HeadingRise';
 import PageTitle, { RISE_CHAR_STEP } from '../../shared/PageTitle';
 import PageCollapse from '../../shared/PageCollapse';
@@ -43,12 +42,12 @@ const HeadingIcon = ({ d }: { d: string }) => (
 );
 
 /* 卡片文字信息区:DOM 与原手写结构逐类名一致,8 处重复收敛为一个组件 */
-function CardInfo(props: { label: string; tag?: string; date: string; likeId?: string }) {
+function CardInfo(props: { label: string; tag?: string; date: string }) {
   return (
     <div className="card-info">
       <div className="card-title-row">
         <h3 className="card-label">{props.label}</h3>
-        {props.likeId && <LikeButton id={props.likeId} />}
+
       </div>
       <div className="card-meta">
         {props.tag && <span className="card-tag">{props.tag}</span>}
@@ -66,7 +65,6 @@ function VideoCard(props: {
   cardClass: string;
   src: string;
   label: string;
-  likeId: string;
   tag: string;
   date: string;
   iphone?: boolean;
@@ -104,7 +102,7 @@ function VideoCard(props: {
           )}
         </div>
       </article>
-      <CardInfo label={p.label} tag={p.tag} date={p.date} likeId={p.likeId} />
+      <CardInfo label={p.label} tag={p.tag} date={p.date} />
     </div>
   );
 }
@@ -233,7 +231,7 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
                   />
                 </div>
               </article>
-              <CardInfo label="AI Poster" tag="Jimeng AI" date="2026-05-06" likeId="10" />
+              <CardInfo label="AI Poster" tag="Jimeng AI" date="2026-05-06" />
             </div>
           </div>
         </section>
@@ -256,12 +254,12 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
                   />
                 </div>
               </article>
-              <CardInfo label="AI Assistant Motion" tag="Claude Code" date="2026-03-16" likeId="9" />
+              <CardInfo label="AI Assistant Motion" tag="Claude Code" date="2026-03-16" />
             </div>
-            <VideoCard delay={300} group="co-creation" category="motion-posters" cardClass="card card-tall card-video-full card-gray-outline" src="voicer_compressed.mp4" label="Voicer" likeId="14" tag="Adobe After Effects" date="2025-06-14" />
-            <VideoCard delay={350} group="co-creation" category="motion-posters" cardClass="card card-tall card-video-full card-gray-outline" src="voicer_card_compressed.mp4" label="Voicer Card" likeId="17" tag="Adobe After Effects" date="2025-06-14" />
-            <VideoCard delay={400} group="co-creation" category="motion-posters" cardClass="card card-tall card-video-full card-gray-outline" src="voicer_search_bar_compressed.mp4" label="Voicer Search Bar" likeId="15" tag="Adobe After Effects" date="2025-06-14" />
-            <VideoCard delay={450} group="co-creation" category="motion-posters" cardClass="card card-tall card-video-full card-gray-outline" src="voicer_loading_compressed.mp4" label="Voicer Loading" likeId="16" tag="Adobe After Effects" date="2025-06-14" />
+            <VideoCard delay={300} group="co-creation" category="motion-posters" cardClass="card card-tall card-video-full card-gray-outline" src="voicer_compressed.mp4" label="Voicer" tag="Adobe After Effects" date="2025-06-14" />
+            <VideoCard delay={350} group="co-creation" category="motion-posters" cardClass="card card-tall card-video-full card-gray-outline" src="voicer_card_compressed.mp4" label="Voicer Card" tag="Adobe After Effects" date="2025-06-14" />
+            <VideoCard delay={400} group="co-creation" category="motion-posters" cardClass="card card-tall card-video-full card-gray-outline" src="voicer_search_bar_compressed.mp4" label="Voicer Search Bar" tag="Adobe After Effects" date="2025-06-14" />
+            <VideoCard delay={450} group="co-creation" category="motion-posters" cardClass="card card-tall card-video-full card-gray-outline" src="voicer_loading_compressed.mp4" label="Voicer Loading" tag="Adobe After Effects" date="2025-06-14" />
           </div>
         </section>
 
@@ -283,7 +281,7 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
                   />
                 </div>
               </article>
-              <CardInfo label="Eye Tracking" tag="Claude Code" date="2026-01-08" likeId="3" />
+              <CardInfo label="Eye Tracking" tag="Claude Code" date="2026-01-08" />
             </div>
             {/* Voice Particles */}
             <div className="card-wrapper" data-delay="100" data-group="native" data-category="visualux">
@@ -297,14 +295,14 @@ export default function ArchivePage({ modalTitle }: { modalTitle?: 'held' | 'rev
                   />
                 </div>
               </article>
-              <CardInfo label="Voice Particles" tag="Gemini 3 Pro" date="2026-01-05" likeId="4" />
+              <CardInfo label="Voice Particles" tag="Gemini 3 Pro" date="2026-01-05" />
             </div>
-            <VideoCard delay={150} group="native" category="visualux" cardClass="card card-tall card-video-full" src="Metal_compressed.mp4" label="3D Rotation Effect" likeId="1" tag="Claude Code" date="2026-01-15" />
-            <VideoCard delay={200} group="native" category="visualux" cardClass="card card-tall card-video-full" src="3DCardGlass_compressed.mp4" label="3D Rotation Effect" likeId="2" tag="Claude Code" date="2026-01-10" />
-            <VideoCard delay={250} group="native" category="visualux" cardClass="card card-tall card-dynamic-scale" src="3DSphere-particle_compressed.mp4" label="3D Sphere" likeId="5" tag="Claude Code" date="2026-01-03" iphone dynamicScale={{ contentHeight: 844, contentType: 'iphone' }} />
-            <VideoCard delay={300} group="native" category="visualux" cardClass="card card-tall card-scaled-up" src="3DBallsIPhone_compressed.mp4" label="Glass Balls" likeId="6" tag="Claude Code" date="2025-12-28" />
-            <VideoCard delay={350} group="native" category="visualux" cardClass="card card-tall card-video-full card-video-scaled-down" src="3DSphere_compressed.mp4" label="Gesture Interaction" likeId="7" tag="Claude Code" date="2025-12-20" />
-            <VideoCard delay={400} group="native" category="visualux" cardClass="card card-tall card-video-full card-video-scaled-down" src="3DCards_compressed.mp4" label="Gyroscope" likeId="8" tag="Claude Code" date="2025-12-15" />
+            <VideoCard delay={150} group="native" category="visualux" cardClass="card card-tall card-video-full" src="Metal_compressed.mp4" label="3D Rotation Effect" tag="Claude Code" date="2026-01-15" />
+            <VideoCard delay={200} group="native" category="visualux" cardClass="card card-tall card-video-full" src="3DCardGlass_compressed.mp4" label="3D Rotation Effect" tag="Claude Code" date="2026-01-10" />
+            <VideoCard delay={250} group="native" category="visualux" cardClass="card card-tall card-dynamic-scale" src="3DSphere-particle_compressed.mp4" label="3D Sphere" tag="Claude Code" date="2026-01-03" iphone dynamicScale={{ contentHeight: 844, contentType: 'iphone' }} />
+            <VideoCard delay={300} group="native" category="visualux" cardClass="card card-tall card-scaled-up" src="3DBallsIPhone_compressed.mp4" label="Glass Balls" tag="Claude Code" date="2025-12-28" />
+            <VideoCard delay={350} group="native" category="visualux" cardClass="card card-tall card-video-full card-video-scaled-down" src="3DSphere_compressed.mp4" label="Gesture Interaction" tag="Claude Code" date="2025-12-20" />
+            <VideoCard delay={400} group="native" category="visualux" cardClass="card card-tall card-video-full card-video-scaled-down" src="3DCards_compressed.mp4" label="Gyroscope" tag="Claude Code" date="2025-12-15" />
           </div>
         </section>
       </div>

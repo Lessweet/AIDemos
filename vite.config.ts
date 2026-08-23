@@ -91,9 +91,12 @@ export default defineConfig({
     rollupOptions: {
       input: entries,
       output: {
-        /* 全部文章片段 + 注册表进同一共享 chunk:阅读器内切换文章零网络请求 */
+        /* 全部文章正文片段进同一共享 chunk:阅读器内切换文章零网络请求。
+           只圈 fragments(约 670KB)—— 注册表 articles.ts / articleShell.ts 是几 KB 的
+           元数据,曾跟着一起进这个 chunk,结果 Blog / 首页只为读卡片元数据就要等整个
+           正文包下完才首绘,冷缓存下长时间白屏(2026-08-23 用户线上实测)。 */
         manualChunks(id) {
-          if (id.includes('/src/content/')) return 'article-content';
+          if (id.includes('/src/content/fragments')) return 'article-content';
         },
       },
     },

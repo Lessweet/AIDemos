@@ -42,13 +42,13 @@
             height: 210vh;
             height: 210svh;
             transform: translateX(-100%);
-            background: #0a0a0a;
+            background: #1c1c1e;
             transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             will-change: transform;
         }
         /* 扫满 100% 的时刻换羽化底(fog):宽视口下羽化弧会掠进视口下方两角,直切黑↔雾
            两角会突然发灰。所以 fog 分两步:①雾层 ::after 瞬时置为不透明 —— 此刻它压在
-           还不透明的实黑底上、同为 #0a0a0a,切换不可见;②实黑底色单独 0.5s 淡出,
+           还不透明的实黑底上、同为 #1c1c1e,切换不可见;②实黑底色单独 0.5s 淡出,
            角上从纯黑柔和过渡到雾的羽化灰。两层不能同时交叉淡变:各 50% 时叠加只有
            约 75% 不透明,整屏会透底闪白。0.5s < HOLD_MS 550ms:溶解在上移起步前走完,
            .done 覆盖 transition 时不会跳变;同样趁这段停顿把大图层(含 ::after)
@@ -56,7 +56,7 @@
         #page-loader .pl-fill::after {
             content: '';
             position: absolute; inset: 0;
-            background: radial-gradient(circle farthest-side at 50% 0, #0a0a0a 70%, rgba(10, 10, 10, 0));
+            background: radial-gradient(circle farthest-side at 50% 0, #1c1c1e 70%, rgba(28, 28, 30, 0));
             opacity: 0;
         }
         #page-loader.fog .pl-fill {
@@ -147,7 +147,7 @@
             transition: none !important;
         }
     </style>
-<link href="style.css?v=149" rel="stylesheet"/>
+<link href="style.css?v=150" rel="stylesheet"/>
 <!-- Kaushan Script:hero 强调词暂时改回无衬线,字体加载先注释掉,恢复手写体时一并放开
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&amp;display=swap" rel="stylesheet"/> -->
@@ -156,9 +156,9 @@
      不再需要中文字体。text= 只抓 4 个字形;display=swap 先用回退栈,到货即换。 -->
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Playwrite+DE+LA&amp;text=Blog&amp;display=swap" rel="stylesheet"/>
-<link href="writing/writing.css?v=455" rel="stylesheet"/>
+<link href="writing/writing.css?v=456" rel="stylesheet"/>
 <!-- 提前加载,使顶部导航能在首次绘制前同步注入,避免空 header 闪烁 -->
-<script src="nav-boot.js?v=16"></script>
+<script src="nav-boot.js?v=17"></script>
 </head>
 <!-- 复用 design-page 的 pillar 布局(左侧二级导航 + 右侧分模块),Writing 与 Design 页对称 -->
 <!-- home-landing:仅首页 —— 一屏白底 landing(writing.css);blog.html 不带。
@@ -193,7 +193,7 @@
                 if (sessionStorage.getItem('seen-loading')) {
                     var early = document.getElementById('page-loader');
                     if (early) early.remove();
-                    docEl.style.background = document.body.classList.contains('theme-dark') ? '#0a0a0a' : '#FDFDFC';
+                    docEl.style.background = document.body.classList.contains('theme-dark') ? '#1c1c1e' : '#FDFDFC';
                     /* 放闸前先让初始态(隐藏)真正绘制一帧 —— 双 rAF 跨过首次绘制。
                        hero-ready 若在首绘前就挂上,索引行的 transition 没有状态变化,
                        会直接以最终态渲染、入场动画被跳过;hero 逐字与索引行都要照常播。 */
@@ -332,7 +332,7 @@
             function cleanup() {
                 docEl.classList.remove('is-loading');
                 docEl.style.background = document.body.classList.contains('theme-dark')
-                    ? '#0a0a0a'    /* 深色主题:兜底 = --page-bg */
+                    ? '#1c1c1e'    /* 深色主题:兜底 = --page-bg */
                     : '#FDFDFC';   /* 浅色主题:兜底 = --site-bg,防离场残色 */
             }
             /* 放闸:hero 大字开始逐字入场,索引行按各自 --row-d(620ms 起)跟在后面。
@@ -433,14 +433,28 @@
                 /* 规则(2026-07-28 用户定):最短 5 秒 + 等资源加载完 + 进度走势就是
                    资源加载的进度。三条一起,所以这里重新按真实加载来驱动:
 
-                   · 进度 = loaded / total,不再有凭空往上爬的 trickle(那是模拟值,
-                     与「进度走势就是资源加载的进度」直接冲突)。
+                   · 进度主驱动 = loaded / total。2026-08-23 修正:又加回一条缓慢爬行
+                     的模拟值兜底(见下方 trickle)—— 纯真实驱动在冷加载时,资源事件
+                     之间进度完全静止,用户读作「卡死」;爬行与真实进度取大、94 封顶,
+                     走势仍以真实加载为主。
                    · finish() 只在全部资源 load 完时调用 —— MIN_MS 是下限不是定值,
                      资源慢就等更久,由 finish 内部的 remaining 兜住下限那一头。
                    · FAILSAFE_MS 只防死等:某个资源卡死/永不触发 load 时不至于把人
                      困在幕布后面。给得比 MIN_MS 宽裕得多,正常网络不会碰到它 ——
                      先前那版 8s 太紧,首页 19 个媒体元素(10 视频 + 9 iframe,每个
                      iframe 还是独立文档)稍慢就撞上,用户实测「延迟很久」。 */
+                /* 缓慢爬行兜底(2026-08-23 用户:资源事件之间进度一动不动,像卡死;
+                   对 07-28「进度走势=真实加载」的修正)。真实进度仍是主驱动 ——
+                   render 内部与 pct 取大,爬行只保证「一直在很慢地走」:
+                   越高越慢(6%/s → 0.5%/s),94 封顶,绝不抢在真实进度前扫满。
+                   起步段还叠着 render 的 MIN_MS 余弦上限,首秒依然是缓起。 */
+                var sim = 0;
+                var trickle = setInterval(function () {
+                    if (finished) { clearInterval(trickle); return; }
+                    sim += sim < 20 ? 0.9 : sim < 50 ? 0.45 : sim < 80 ? 0.2 : 0.08;
+                    if (sim > 94) sim = 94;
+                    render(sim);
+                }, 150);
                 var els = [].slice.call(document.querySelectorAll('iframe, img, video'));
                 total = els.length;
                 function mark() {

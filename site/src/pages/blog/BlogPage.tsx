@@ -3,9 +3,9 @@
  * 筛选逻辑 = writing.js initWritingFilter 的状态化移植(卡片日期倒序、hidden 显隐)。
  */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type { ComponentType } from 'react';
 import { blogCards, bySlug } from '../../content/articles';
 import { CoverIframe, CoverVideo } from '../../shared/covers';
-import ArticlePage from '../article/ArticlePage';
 import { ARTICLE_SHELL } from '../../content/articleShell';
 import { CatIcon } from '../../shared/catIcons';
 import PageTitle, { RISE_CHAR_STEP } from '../../shared/PageTitle';
@@ -271,7 +271,9 @@ function readLanding(el: HTMLElement): Landing {
 
    封面是 iframe/video,只能用 transform scale(重排它太贵);文字则真动 font-size,
    一路真实重排,落位与目标逐像素吻合。颜色也在这里插值 —— 卡片上的 tag 和日期
-   是 #969696,文章里是 #1a1a1a,不插值就是交接瞬间硬切一下。 */
+   是 meta 灰(gray-500 #8e8e93),文章里是墨色(gray-900 #1c1c1e),
+   不插值就是交接瞬间硬切一下。两端色值都是运行时从 computed style 读的,
+   改 token 这里自动跟。 */
 function flightAnims(
   el: HTMLElement,
   from: DOMRect,
@@ -400,6 +402,24 @@ function SegText({ text }: { text: string }) {
 export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'revealed' }) {
   const [filter, setFilter] = useState<Filter>('all');
   const [article, setArticle] = useState<ArticleState>(null);
+  /* ArticlePage(连带 670KB 的全文 fragments chunk)改为挂载后动态加载:它只服务
+     手机端的文章模态,静态 import 会把整个正文包压进 blog.html / index.html 的首绘
+     关键路径 —— 冷缓存打开 Blog(或从文章页跳回来)就是长时间白屏的根因
+     (2026-08-23 用户线上实测)。挂载后立刻预取,正常点卡片时模块早已就绪;
+     万一在就绪前点卡片(冷缓存头一两秒),openArticle 不拦截,走普通跳转兜底。 */
+  const [ArticleComp, setArticleComp] = useState<ComponentType<{
+    initialSlug: string;
+    embedHost?: HTMLElement | null;
+  }> | null>(null);
+  useEffect(() => {
+    let alive = true;
+    import('../article/ArticlePage').then((m) => {
+      if (alive) setArticleComp(() => m.default);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
   const articleHostRef = useRef<HTMLDivElement | null>(null);
   const [hostReady, setHostReady] = useState(false);
   /* 飞行中的源元素(卡片自己的封面/标题/标签)。
@@ -981,6 +1001,7 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
                   href={`writing/${a.file}`}
                   onClick={(e) => {
                     if (!window.matchMedia(SMALL_MQ).matches) return; // 桌面:照常跳转
+                    if (!ArticleComp) return; // 正文模块未就绪(冷缓存刚打开就点):普通跳转兜底
                     e.preventDefault();
                     openArticle(a.slug, e.currentTarget);
                   }}
@@ -1060,7 +1081,9 @@ export default function BlogPage({ modalTitle }: { modalTitle?: 'held' | 'reveal
             }
           }}
         >
-          {hostReady && <ArticlePage initialSlug={article.slug} embedHost={articleHostRef.current} />}
+          {hostReady && ArticleComp && (
+            <ArticleComp initialSlug={article.slug} embedHost={articleHostRef.current} />
+          )}
         </div>
       )}
     </>
