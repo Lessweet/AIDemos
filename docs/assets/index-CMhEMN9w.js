@@ -1,4 +1,4 @@
-import{j as r,r as g,c as je}from"./index-BOwIwFzp.js";import{u as Pe,a as ke,I as Ne}from"./hooks-ud6lg5D7.js";import{B as Oe}from"./BlogPage-BANNk7PI.js";import{A as Be}from"./ArchivePage-Dqpesdyr.js";import"./article-content-D5c3D4nu.js";import"./ArticlePage-Dg2qXxCh.js";const Fe=`
+import{j as r,r as g,c as je}from"./index-BOwIwFzp.js";import{u as Pe,a as ke,I as Ne}from"./hooks-ud6lg5D7.js";import{B as Oe}from"./BlogPage-BqHnwZio.js";import{A as Be}from"./ArchivePage-zA0z8X4H.js";import"./articleShell-DikW44qV.js";const Fe=`
 attribute vec2 aPos;
 attribute vec2 aUV;
 varying vec2 vUV;

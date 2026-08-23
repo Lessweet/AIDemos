@@ -256,7 +256,7 @@ body.design-page:not(.reading-page) .hero-intro .hero-blog-word { font-weight: 4
 .article-item .a-date {
     font-family: var(--font-mono);
     font-size: var(--fs-caption);   /* 14px */
-    color: #969696;
+    color: #8e8e93;
 }
 
 .article-item .a-tags {
@@ -380,26 +380,13 @@ body.works-page #app.app-ready { opacity: 1; }
    阅读页
    ======================================== */
 
-/* ---------- 每篇文章专属底色 ----------
-   规则:同 S/L、只变 H,一套色卡。整套刻意「浅浅一层」——低饱和 + 高亮度,
-   色相清晰可辨的柔和粉彩档。S≈40 / L≈95。想更浅提 L(高 L 时记得补 S 防色度塌),想更浓压 L。
-   底色分两类:① 纯色(下面 6 色 + 中性灰)② 渐变(再下面,opt-in,适合部分文章)。
-   每篇 <body> 设 data-tint 取一种;不写则由 JS 按 slug 自动分配纯色(见 writing.js)。 */
-.reading-page[data-tint="violet"] { --page-tint: hsl(258, 40%, 95%); }  /* AI / 未来感 */
-.reading-page[data-tint="blue"]   { --page-tint: hsl(210, 48%, 95%); }  /* 冷静 / 科技 */
-.reading-page[data-tint="mint"]   { --page-tint: hsl(156, 38%, 95%); }  /* 清爽 / 产品 */
-.reading-page[data-tint="peach"]  { --page-tint: hsl(20,  50%, 95%); }  /* 温暖 / 人文 */
-.reading-page[data-tint="rose"]   { --page-tint: hsl(344, 48%, 95%); }  /* 柔和 / 视觉 */
-.reading-page[data-tint="sand"]   { --page-tint: hsl(40,  50%, 95%); }  /* 纸感 / 阅读 */
-.reading-page[data-tint="gray"]   { --page-tint: #F0F0F3; }             /* 中性灰 */
-
-/* 渐变档:渐变是合法 background 值,直接塞进 --page-tint 即可。双色相过渡,
-   225° = 从右上角到左下角(第一个色在右上,第二个色在左下)。
-   与纯色同档:S≈40 / L≈95,两端只差色相。 */
-.reading-page[data-tint="aurora"] { --page-tint: linear-gradient(225deg, hsl(272,46%,95%), hsl(200,50%,95%)); }  /* 极光 紫→蓝(色相差 72°) */
-.reading-page[data-tint="sunset"] { --page-tint: linear-gradient(225deg, hsl(30,52%,95%),  hsl(335,48%,95%)); }  /* 暮色 橙→玫(55°) */
-.reading-page[data-tint="spring"] { --page-tint: linear-gradient(225deg, hsl(150,40%,95%), hsl(212,50%,95%)); }  /* 初春 绿→蓝(62°) */
-.reading-page[data-tint="dawn"]   { --page-tint: linear-gradient(225deg, hsl(48,55%,95%),  hsl(12,52%,95%)); }   /* 破晓 黄→珊瑚(36°) */
+/* ---------- 每篇文章专属底色:已取消(2026-08-23 用户定)----------
+   原来每篇 <body data-tint> 命中一组粉彩纯色/渐变(S≈40/L≈95 的 violet/blue/mint/
+   peach/rose/sand/gray + aurora 等四个渐变档),详情页底色随文章走。现在整组规则
+   删除:data-tint 属性还在 HTML / ARTICLE_SHELL / JS 里写(留作元数据,不再有视觉),
+   --page-tint 不会被任何规则设置,下方 ::before / .header 一律落到
+   var(--site-bg, #FDFDFC) —— 与首页/Blog/Archive 同底,Blog ↔ 文章切换零变色。
+   要恢复主题配色,从 git 历史找回这组 [data-tint] 规则即可。 */
 
 /* 整页只有「一块」渐变:钉在视口、铺满全屏的固定底层(::before),顶栏和正文都浮在它之上,
    谁都不画自己的渐变,从根上消除「顶栏一块、正文一块对不齐」的接缝。
@@ -410,14 +397,14 @@ body.writing-page.design-page.reading-page::before {
     position: fixed;
     inset: 0;
     z-index: -1;                 /* 沉到所有内容之下,但在 html 画布之上 */
-    background: var(--page-tint, #F3F3F6);
+    background: var(--page-tint, var(--site-bg, #FDFDFC));
     transition: background-color 2s var(--ease);   /* 切文章时底色淡变,不闪切 */
 }
 /* 顶栏:常驻、内容会从它下面滚过,所以必须不透明遮住内容;但它画的是「同一块渐变的顶部切片」——
    背景按整屏尺寸铺、原点对齐视口左上(顶栏 fixed 在 0,0),于是和 ::before 底层严丝合缝。
    纯色时 size/position 无副作用。 */
 body.writing-page.design-page.reading-page .header {
-    background: var(--page-tint, #F3F3F6);
+    background: var(--page-tint, var(--site-bg, #FDFDFC));
     background-size: 100vw 100vh;
     background-position: left top;
     background-repeat: no-repeat;
@@ -433,7 +420,7 @@ body.writing-page.design-page.reading-page .header {
    选择器带满 .writing-page.design-page.reading-page 是为了压过上面纯色规则的特异度。
    ============================================================ */
 body.writing-page.design-page.reading-page[data-bg="cover"]::before {
-    background: var(--fluid-bg, var(--page-tint, #F3F3F6));
+    background: var(--fluid-bg, var(--page-tint, var(--site-bg, #FDFDFC)));
     transition: none;
 }
 /* 顶栏:磨砂白浮在柔和渐变上 */
@@ -448,7 +435,7 @@ body.writing-page.design-page.reading-page[data-bg="cover"] .header {
 body.reading-page .article-cover,
 body.reading-page .article-body code { background: var(--white); }
 
-/* 文章详情页:所有次级灰字统一改黑(= 正文同色 #1a1a1a)。
+/* 文章详情页:所有次级灰字统一改黑(= 正文同色 #1c1c1e)。
    仅作用于 body.reading-page,不影响列表页卡片;高于各原始 .xxx 选择器的特异度,稳定覆盖
    (含 genie/figma 正文内 inline <style> 的 .img-caption #aaa)。 */
 body.reading-page .article-byline,
@@ -457,16 +444,15 @@ body.reading-page .article-body blockquote,
 body.reading-page .article-eyebrow .a-tag::after,
 body.reading-page .article-toc-title,
 body.reading-page .article-toc a,
-body.reading-page .reader-cat:not(.active),
 body.reading-page .reader-date,
 body.reading-page .pn-label,
 body.reading-page .same-collection .sc-title,
 body.reading-page .same-collection a,
 body.reading-page .same-collection .sc-num,
 body.reading-page .follow-card .ft-desc,
-body.reading-page .back-link { color: #1a1a1a; }
+body.reading-page .back-link { color: #1c1c1e; }
 /* 引用左边线也由浅灰提到黑,作为文字强调的一部分 */
-body.reading-page .article-body blockquote { border-left-color: #1a1a1a; }
+body.reading-page .article-body blockquote { border-left-color: #1c1c1e; }
 
 /* 文章详情页:单栏居中阅读(已移除三栏 列表/目录 布局) */
 .reading-layout {
@@ -521,8 +507,6 @@ body.reading-page .article-body blockquote { border-left-color: #1a1a1a; }
         padding-top: 64px;
         padding-left: 0;   /* 去掉左内边距:列表项背景直接贴左线 */
     }
-    /* 列表项背景贴线,但内容(缩略图/标题)与筛选 tab 仍与项内左内边距(10px)对齐 */
-    .reading-layout .reader-cats { padding-left: 10px; }
 
     /* 三条竖分割线:整屏高度、position:fixed —— 通到视口最底部,页面滚动时不下滑。
        横向位置由 JS 量出的列边变量精确对齐(避开 100vw 滚动条误差);复用 --ink-08。
@@ -563,35 +547,11 @@ body.reading-page .article-body blockquote { border-left-color: #1a1a1a; }
     display: flex;
     flex-direction: column;
 }
-.reader-cats {
-    display: flex;
-    gap: 24px;               /* 下划线 tab 之间留呼吸(对齐首页二级分类间距,侧栏窄故收到 24) */
-    flex-wrap: nowrap;       /* 筛选栏控制在一行 */
-    margin-bottom: 32px;     /* tab 下留白 = 上方留白(列表 padding-top 64)的一半 */
-    overflow-x: auto;        /* 仅 tab 区横向滑动 */
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;             /* Firefox 隐藏滚动条 */
-    /* 默认只右侧淡出(左侧不淡);左侧淡出由 JS 在向左滑出后动态加上(见 writing.js initReaderCatsFade) */
-    -webkit-mask-image: linear-gradient(to right, #000, #000 calc(100% - 28px), transparent);
-    mask-image: linear-gradient(to right, #000, #000 calc(100% - 28px), transparent);
-}
-.reader-cats::-webkit-scrollbar { display: none; }   /* WebKit 隐藏滚动条 */
-
-/* 阅读页左栏的内容筛选 tab(全部 / UI 视觉 / 产品体验):暂时不展示。想恢复删掉这两条即可。
-   这里不复用首页那个 .menu-hidden 开关 —— 阅读页的 tab 是 writing.js 注入的、每篇文章都有,
-   走 class 就得给 11 篇文章 + template.html 全加一遍,漏一个新文章就冒出来。用页面级规则更稳。
-   筛选默认是「全部」且只在点击时才隐藏条目,所以藏掉 tab 后左栏文章仍然全显示。 */
-body.reading-page .reader-cats { display: none; }
-/* tab 没了之后,上面 @media(min-width:1000px) 里那条 padding-top:64px(原意是让左栏顶部与右栏正文齐平)
-   就成了一段纯空白 —— 一并去掉,让文章列表直接顶到左栏顶部。
-   特异性 (0,3,1) 压过 .reading-layout .reader-list (0,2,0);恢复 tab 时把这条也删掉。 */
+/* (阅读页左栏分类 tab .reader-cats/.reader-cat 已删,2026-08-23 用户定:
+   此前就被 display:none 藏死,是渲染着的死 UI,组件与样式一并移除。) */
+/* 原 tab 时代 @media(min-width:1000px) 给左栏的 padding-top:64px(与右栏正文齐平)
+   在无 tab 后是纯空白 —— 这条覆盖让列表直接顶到左栏顶部,保持既有观感。 */
 body.reading-page .reading-layout .reader-list { padding-top: 0; }
-/* 分类 tab 直接复用首页二级分类(.design-menu .nav-cat)的下划线选中样式,不另造样式:
-   下方 .design-menu .nav-cat 规则组已并入 .reader-cat(字号/颜色/选中下划线全共用)。
-   这里只留侧栏专属:不收缩横滑 + 图标压到侧栏尺寸。 */
-.reader-cat { flex: 0 0 auto; white-space: nowrap; }   /* 不收缩,溢出则横滑 */
-.reader-cat .menu-icon { display: inline-flex; flex: 0 0 auto; }
-.reader-cat .menu-icon svg { width: 18px; height: 18px; }   /* 侧栏窄,图标压到 18px;fill 跟随文字色由共用规则给 */
 
 .reader-items { display: flex; flex-direction: column; gap: 0; }
 .reader-item {
@@ -634,7 +594,7 @@ body.reading-page .reading-layout .reader-list { padding-top: 0; }
     transition: color 0.252s ease;
 }
 .reader-item:not(.active):hover .reader-title { color: var(--gray-700); }
-.reader-date { font-family: var(--font-mono); font-size: var(--fs-caption); color: rgba(150, 150, 150, 0.5); }   /* #969696 透明度降 50% */
+.reader-date { font-family: var(--font-mono); font-size: var(--fs-caption); color: rgba(142, 142, 147, 0.5); }   /* #8e8e93 透明度降 50% */
 
 /* 切换中:正文淡一下,给「正在加载」一点反馈 */
 .reading-layout.reader-loading .article-reading { opacity: 0.5; transition: opacity 0.21s ease; }
@@ -758,7 +718,7 @@ body.reading-page .article-eyebrow .a-tag,
     padding: 4px 8px;
     font-size: var(--fs-caption);   /* 14px */
     font-weight: 400;
-    color: #1a1a1a;
+    color: #1c1c1e;
     line-height: 1.2;
     transition: color var(--hover-color-dur) ease, background-color var(--hover-color-dur) ease;
 }
@@ -782,9 +742,9 @@ body.reading-page .article-eyebrow .a-tag,
     font-size: 12px;                /* 章的徽标尺寸;存在感由边框承担,字重 400 */
     font-weight: 400;
     /* 固定灰,不吃文章主题色(用户定 2026-08-09,替代短暂的 accent 彩色版):
-       颜色对齐所在行的角标 —— 详情页 byline 是 #969696(基础值),
+       颜色对齐所在行的角标 —— 详情页 byline 是 #8e8e93(基础值),
        卡片 meta 行用下面的覆盖对齐 gray-600。 */
-    color: #969696;
+    color: #8e8e93;
     line-height: 1.2;
     transition: color var(--hover-color-dur) ease, border-color var(--hover-color-dur) ease;   /* hover 淡化与同排角标同步 */
 }
@@ -792,7 +752,7 @@ body.theme-dark .a-kind { border-color: rgba(255, 255, 255, 0.2); }   /* 暗色�
 /* 卡片 meta 行:章与同排角标(态度 tag / 日期)同色 = gray-600(角标统一色) */
 .home-v2 .writing-info .w-meta .a-kind { color: var(--gray-600); }
 body.theme-dark .writing-info .w-meta .a-kind { color: rgba(255, 255, 255, 0.6); }   /* = 暗色角标同值 */
-/* 详情页 byline:章继承 byline 行的实际文字色(阅读页整行由「浅黑」大选择器定为 #1a1a1a),
+/* 详情页 byline:章继承 byline 行的实际文字色(阅读页整行由「浅黑」大选择器定为 #1c1c1e),
    与右侧态度 tag 的 color:inherit 同款处理 —— byline 换色时章自动跟随,不再各写一份色值 */
 body.reading-page .article-byline .article-eyebrow .a-kind { color: inherit; }
 
@@ -807,7 +767,7 @@ body.reading-page .article-eyebrow-top .a-tag {
     border: 0;
     border-radius: 0;
     padding: 0;
-    color: #1a1a1a;
+    color: #1c1c1e;
     font-weight: 700;
     font-size: var(--fs-caption);
     line-height: 1.2;
@@ -826,7 +786,7 @@ body.reading-page .article-eyebrow-top .a-tag {
 .article-byline {
     font-family: var(--font-mono);
     font-size: var(--fs-caption);   /* 14px */
-    color: #969696;
+    color: #8e8e93;
     display: flex;
     align-items: center;
     gap: 20px;   /* 日期 / 阅读时长 横向间距 ×2 */
@@ -874,7 +834,7 @@ body.reading-page .article-byline .article-eyebrow {
     justify-content: flex-start;
     gap: 20px;   /* 与 byline 项间距一致:解读章→标签 的间距 = 标签→日期 的 20px(用户定 2026-08-09) */
 }
-/* eyebrow 标签与日期/阅读时长同款:剥掉胶囊底,继承 byline 的等宽灰字(#969696、14px)。
+/* eyebrow 标签与日期/阅读时长同款:剥掉胶囊底,继承 byline 的等宽灰字(#8e8e93、14px)。
    多带一个 .article-byline 提高优先级,盖过共用 chip 块与手机端 padding 覆盖。 */
 body.reading-page .article-byline .article-eyebrow .a-tag {
     background: none;
@@ -924,7 +884,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
 .article-body {
     font-size: var(--fs-body);   /* 18px,阅读正文比 UI 正文大一档 */
     line-height: 1.8;
-    color: #2b2b2e;
+    color: #2c2c2e;
 }
 
 .article-body > *:first-child { margin-top: 28px; }
@@ -1315,7 +1275,7 @@ body.reading-page .article-byline .article-eyebrow .a-tag {
     margin-top: 5px;
     font-family: var(--font-mono);
     font-size: 11px;
-    color: #969696;
+    color: #8e8e93;
 }
 
 .nav-cats { display: flex; align-items: center; gap: 22px; }
@@ -1472,14 +1432,14 @@ body .home-nav .nav-cats .nav-cat.active {
         display: block;
         width: 18px;                         /* 22 → 18:圆底内与太阳光学尺寸平衡(2026-07-22) */
         height: var(--icon-stroke, 1.5px);   /* icon 规范:描边 1.5px(style.css token) */
-        background: #737373;                 /* 与太阳按钮同一不透明等效色(2026-07-22) */
+        background: #636366;                 /* 与太阳按钮同一不透明等效色(2026-07-22) */
         border-radius: 0;                    /* icon 规范:方头直角,不用圆头 */
         transition: transform 0.35s var(--ease), opacity var(--ui-dur) var(--ease), background-color var(--hover-color-dur) ease;   /* hover 同上 */
     }
     /* X 态(两线交叉):切不透明等效色,避免半透明重叠叠亮 */
-    .home-v2 .header.home-nav.nav-open .nav-toggle span { background: #737373; }
+    .home-v2 .header.home-nav.nav-open .nav-toggle span { background: #636366; }
     /* hover 与太阳按钮一致:提为实色 */
-    .home-v2 .header.home-nav .nav-toggle:hover span { background: #181818; }
+    .home-v2 .header.home-nav .nav-toggle:hover span { background: #1C1C1E; }
     /* 汉堡改两条线(2026-07-21):中线常隐(markup 仍是三条,兼容旧结构),
        开合动画由上下两条完成 —— 各向中心移半个间距(4px)后旋转成叉 */
     .home-v2 .header.home-nav .nav-toggle span:nth-child(2) { display: none; }
@@ -1511,7 +1471,7 @@ body .home-nav .nav-cats .nav-cat.active {
         /* 面板自己铺色,并由自己的 clip-path 揭示 —— 背景与内容一起被圆裁开。
            先前把底色拆到 ::before、只裁背景层,结果三项菜单没被裁到:圆外的浅色区域
            也画着 Blog/Archive/Contact,文字先浮在还没揭开的页面上(2026-07-28 实测)。 */
-        background: var(--site-bg, #f9f9f9);
+        background: var(--site-bg, #FDFDFC);
         z-index: 0;                     /* 低于 logo(1)与汉堡 X(2),其余区域铺满全屏 */
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
@@ -1571,7 +1531,7 @@ body .home-nav .nav-cats .nav-cat.active {
         font-size: var(--index-label-size) !important;   /* 与首页索引行同一 token;!important 压掉桌面 clamp/fs-body 档 */
         line-height: 1.15;
         font-weight: var(--fw-normal, 400) !important;
-        color: #181818;   /* 与首页索引行同值(2026-07-26 要求全屏菜单与首页一致) */
+        color: #1C1C1E;   /* 与首页索引行同值(2026-07-26 要求全屏菜单与首页一致) */
         -webkit-tap-highlight-color: transparent;  /* 去掉点击瞬间的蓝色高亮 */
         -webkit-user-select: none;                  /* iOS Safari 需带前缀 */
         user-select: none;                          /* 去掉点击/长按出现的蓝色选区 */
@@ -1618,10 +1578,10 @@ body .home-nav .nav-cats .nav-cat.active {
     }
     /* 全屏菜单不做当前页高亮(2026-07-22 用户要求):active 与其余项同色 ——
        桌面顶栏的 active 规则(0,5,1 / 0,6,1)会打进面板,这里用更满的选择器压掉。
-       色值取 #181818,与首页索引行同值(2026-07-26 要求全屏菜单与首页一致)。
+       色值取 #1C1C1E,与首页索引行同值(2026-07-26 要求全屏菜单与首页一致)。
        原来还有一条 .active:hover { color: --gray-500 } —— 它的 (0,7,0) 压过下面
        hover 反色的 (0,6,0),会让选中项 hover 时是灰字贴黑底,故删除。 */
-    .home-v2 .header.home-nav .nav-collapse .nav-cats .nav-cat.active { color: #181818; }
+    .home-v2 .header.home-nav .nav-collapse .nav-cats .nav-cat.active { color: #1C1C1E; }
     /* (原「hover 变灰 --gray-500」已删:它与上面的反色规则选择器完全相同、又写在后面,
        留着会把纸色字压回灰色。) */
     /* 行内的直角箭头(writing.js 注入,桌面端由下方规则隐藏):同 icon 规范 */
@@ -1656,8 +1616,8 @@ body .home-nav .nav-cats .nav-cat.active {
        排除文章详情页(reading-page):其顶栏沿用桌面端的不透明 page-tint 背景,
        上滑时遮住正文、不透出后面内容。 */
     /* 顶栏带实底(2026-07-22:滑出/滑回动画要有背景,不再透明)——深浅主题各自取页面底色 */
-    body.home-v2:not(.reading-page):not(.theme-dark) .header.home-nav { background: var(--site-bg, #f9f9f9) !important; }
-    body.home-v2:not(.reading-page).theme-dark .header.home-nav { background: var(--page-bg, #0a0a0a) !important; }
+    body.home-v2:not(.reading-page):not(.theme-dark) .header.home-nav { background: var(--site-bg, #FDFDFC) !important; }
+    body.home-v2:not(.reading-page).theme-dark .header.home-nav { background: var(--page-bg, #1c1c1e) !important; }
 }
 
 /* 模态展开时锁定页面滚动(任意断点生效) */
@@ -1691,42 +1651,8 @@ body.home-v2 .header-placeholder { height: 76px; }
     --hover-scale: 1;
 }
 .writing-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
-/* 「即将发布」角标:悬浮在封面左上角,给未公开的草稿文章标状态 */
-.writing-card .card-badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 2;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 11px;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1;
-    letter-spacing: 0.02em;
-    color: #fff;
-    background: rgba(26, 26, 26, 0.72);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-    border-radius: 999px;
-    pointer-events: none;
-}
-.writing-card .card-badge::before {
-    content: "";
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #ffd34d;
-    animation: card-badge-pulse 1.8s ease-in-out infinite;
-}
-@keyframes card-badge-pulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-    .writing-card .card-badge::before { animation: none; }
-}
+/* (「即将发布」角标 .card-badge 已删,2026-08-23:旧静态 blog 时代给草稿文章标状态用,
+   React 版没有任何组件渲染它,连同 #ffd34d 黄点与 card-badge-pulse 动画一并移除。) */
 /* 封面内元素:hover 放大。参数取全站唯一规则(--hover-zoom / -in / -out,见 style.css :root)。
    封面可能是 img / video / iframe(HTML 封面)三种载体,选择器要全覆盖。 */
 .writing-card img,
@@ -1882,7 +1808,7 @@ body.home-v2 .header-placeholder { height: 76px; }
 .foundation-card.icon-cover {
     display: block;
     overflow: hidden;
-    background: #FDFBF6;
+    background: #FDFDFC;
 }
 .icon-preview-frame {
     width: 100%;
@@ -1919,7 +1845,7 @@ body.home-v2 .header-placeholder { height: 76px; }
     position: relative;
     width: min(1120px, 94vw);
     height: 94vh;
-    background: #FDFBF6;
+    background: #FDFDFC;
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
@@ -1934,7 +1860,7 @@ body.home-v2 .header-placeholder { height: 76px; }
     height: 100%;
     border: 0;
     display: block;
-    background: #FDFBF6;
+    background: #FDFDFC;
 }
 .icon-modal-close {
     position: absolute;
@@ -1946,7 +1872,7 @@ body.home-v2 .header-placeholder { height: 76px; }
     border: none;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.92);
-    color: #181818;
+    color: #1C1C1E;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1979,8 +1905,8 @@ body.writing-page { background: #ffffff; }
 .writing-page .header { background: #ffffff; }
 
 /* 文章正文页(writing-page + design-page):整页背景改为浅灰,顶栏同色 */
-body.writing-page.design-page { background: #F3F3F6; }
-body.writing-page.design-page .header { background: #F3F3F6; }
+body.writing-page.design-page { background: #F2F2F7; }
+body.writing-page.design-page .header { background: #F2F2F7; }
 
 /* 所有文字 → Helvetica(像素 banner 保持等宽,否则字形会错位) */
 body.home-v2, body.home-v2 *,
@@ -2147,10 +2073,11 @@ body.reading-page .header.home-nav::after {
 }
 .design-menu::-webkit-scrollbar { display: none; }   /* WebKit 隐藏滚动条 */
 
-/* 分类项:下划线选中态的 tab(单行不换行不收缩)。详情页左栏 .reader-cat 并入,共用同一套样式 */
+/* 分类项:下划线选中态的 tab(单行不换行不收缩)。
+   (.reader-cat 已随阅读页分类 tab 删除,2026-08-23;此组只剩 design-menu ——
+   它也被 body.menu-hidden 全站藏着,属休眠功能,规则保留等开关。) */
 .design-menu .nav-cat,
-.design-menu button.nav-cat,
-.reader-cat {
+.design-menu button.nav-cat {
     flex: 0 0 auto;
     white-space: nowrap;
     display: flex;
@@ -2171,21 +2098,18 @@ body.reading-page .header.home-nav::after {
    覆盖两页两种标签(archive.html 用 a、index.html 用 button);顶栏 Blog/Skills 是 .nav-cats 内的
    .nav-cat,不受影响,也不改共用的 --cat-tab-size token。 */
 .design-menu a.nav-cat,
-.design-menu button.nav-cat,
-.reader-cat { font-size: var(--fs-p); }   /* 二级 tab 18px(桌面/手机统一) */
+.design-menu button.nav-cat { font-size: var(--fs-p); }   /* 二级 tab 18px(桌面/手机统一) */
 
-.design-menu .nav-cat:hover,
-.reader-cat:hover { color: var(--gray-900); }
-.design-menu .nav-cat.active,
-.reader-cat.active {
+.design-menu .nav-cat:hover { color: var(--gray-900); }
+.design-menu .nav-cat.active {
     color: var(--gray-900);
     font-weight: 600;
-    /* 选中下划线:品牌渐变 token(border 不支持渐变,用 border-image)
-       border-image 会忽略 border-radius,但本就是直角下划线,无影响 */
-    border-image: var(--brand-grad) 1;
+    /* 选中下划线原是品牌渐变 border-image(--brand-grad)。2026-08-23 token 随
+       阅读页分类 tab 一并删除,此处退回单色下划线 —— 菜单本身也在休眠(menu-hidden),
+       哪天恢复展示再决定要不要重做渐变。 */
+    border-bottom-color: var(--gray-900);
 }
-.design-menu .nav-cat.active .menu-icon svg,
-.reader-cat.active .menu-icon svg { fill: currentColor; }
+.design-menu .nav-cat.active .menu-icon svg { fill: currentColor; }
 
 .menu-icon {
     display: inline-flex;
@@ -2291,10 +2215,10 @@ body.reading-page .header.home-nav::after {
    放在 :root 而不是 .theme-dark 上 —— 手机端黑菜单(.menu-dark)可能挂在白底页上,
    取不到定义在 .theme-dark 上的值。改深色底只动这一行。 */
 :root {
-    --page-bg: var(--black-fullscreen);   /* #0a0a0a,全屏式背景黑统一走 style.css 的 token */
+    --page-bg: var(--black-fullscreen);   /* #1c1c1e,全屏式背景黑统一走 style.css 的 token */
     /* 卡片默认底色:比页面底色亮一档,给卡片一个边界(作品填满卡面时看不到它)。
        只作兜底 —— 内容自带底色的卡(浅灰 mockup、icon 卡)在下方各自覆盖。 */
-    --card-bg: #1A1A1A;
+    --card-bg: #1c1c1e;
 
     /* ==== 首页 / Blog / Archive 三页共享规范(2026-07-21 定)====
        1. 背景色必须一致:全走 --site-bg,改这一处三页同步,禁止某页单独改值;
@@ -2326,6 +2250,15 @@ body.home-v2.home-landing .design-layout,
 body.home-v2.blog-page .design-layout,
 body.home-v2.works-page .design-layout {
     padding-top: calc(var(--design-menu-top, 76px) + var(--nav-content-gap));
+}
+/* 首页专属:介绍段放大到 zoom:1(2026-08-23)后顶距显大,桌面在共享 gap 上收 24px
+   (120 → 96,用户圈图)。只动 home-landing —— Blog/Archive 仍走统一 token;
+   手机不收(那边 gap 本来就是 80,介绍段也没放大)。媒体查询写在共享规则之后,
+   同特异性靠顺序覆盖。 */
+@media (min-width: 601px) {
+    body.home-v2.home-landing .design-layout {
+        padding-top: calc(var(--design-menu-top, 76px) + var(--nav-content-gap) - 24px);
+    }
 }
 /* 顶栏:三页浅色主题下不用旧版流沙渐变(nav-bg iframe),实底 = --site-bg 与页面无缝;
    渐变层直接隐藏(深色主题本来就由 no-banner.theme-dark 规则隐藏 + 黑底)。 */
@@ -2511,7 +2444,7 @@ body.theme-dark .design-content .category-section .section-divider {
     body.menu-dark .header.home-nav .nav-collapse { background: var(--page-bg); }
     /* 模态里的 Blog / Cases / Contact 三项反白。必须连 .nav-collapse 一起写满 ——
        上面 .home-v2 .header.home-nav .nav-collapse .nav-cat/.header-connect(0,5,0)
-       给三项写死了 #1a1a1a(那是白底菜单的深灰),不写满就压不过,Contact 会黑进背景里。
+       给三项写死了 #1c1c1e(那是白底菜单的深灰),不写满就压不过,Contact 会黑进背景里。
        (.nav-cat 曾侥幸躲过,只因它的反白选择器多带了 .nav-cats 凑到 0,5,1 —— 别依赖这个。) */
     body.menu-dark .header.home-nav .nav-collapse .nav-cat,
     body.menu-dark .header.home-nav .nav-collapse .header-connect {
@@ -2527,14 +2460,14 @@ body.theme-dark .design-content .category-section .section-divider {
     /* 展开后 X 与字标压在黑模态上,必须反白。只在 .nav-open 时 ——
        Cases 是白底页,未展开时反白会让汉堡 / 字标直接消失在白底 banner 里。
        (首页由 body.no-banner.theme-dark .site-wordmark 常驻反白,这条对它只是同值重复。) */
-    body.menu-dark .header.home-nav.nav-open .nav-toggle span { background: rgb(152, 152, 152); }
+    body.menu-dark .header.home-nav.nav-open .nav-toggle span { background: #8e8e93; }
     body.menu-dark .header.home-nav.nav-open .nav-toggle:hover span { background: #fff; }
     body.menu-dark .header.home-nav.nav-open .site-wordmark { filter: invert(1); }
     body.menu-dark .header.home-nav.nav-open svg.site-logo { color: #fff; }
 
     /* —— 页面本身是黑底才需要的(.theme-dark) —— */
     /* 未展开时的汉堡:黑底页上要反白(Cases 白底页不走这条,保持深色) */
-    body.no-banner.theme-dark .header.home-nav .nav-toggle span { background: rgb(152, 152, 152); }
+    body.no-banner.theme-dark .header.home-nav .nav-toggle span { background: #8e8e93; }
     body.no-banner.theme-dark .header.home-nav .nav-toggle:hover span { background: #fff; }
     /* 手机端上面有条 body.home-v2:not(.reading-page) 的 transparent !important,得压回来 */
     body.home-v2.no-banner.theme-dark:not(.reading-page) .header.home-nav { background: var(--page-bg) !important; }
@@ -2590,12 +2523,15 @@ body.home-landing .hero-byline { justify-content: flex-start; }
    的白字体系整体翻成深色系 —— 层级关系不变(前半句压灰、强调词最深)。 */
 /* 背景不在此单独定义 —— 走三页统一的 --site-bg(见「三页共享规范」) */
 body.home-landing .hero-headline { color: rgba(0, 0, 0, 0.4); }
-body.home-landing .hero-headline .accent { color: #181818; }
+body.home-landing .hero-headline .accent { color: #1C1C1E; }
 body.home-landing .hero-by { color: rgba(0, 0, 0, 0.5); }
-body.home-landing .hero-by b { color: #181818; }
+body.home-landing .hero-by b { color: #1C1C1E; }
 body.home-landing .hero-role { color: rgba(0, 0, 0, 0.5); }
-body.home-landing .hero-intro { color: rgba(0, 0, 0, 0.5); }
-body.home-landing .hero-intro b { color: #181818; }
+/* 介绍段灰字(2026-08-23 用户,当日三调:C7C7CC 太虚 → AEAEB2 → 终定灰阶最深档
+   gray-900 #1C1C1E)。正文与重点词只差一线(#1C1C1E),层级改由字重(300 vs 500)
+   和专属字体(手写名/Playwrite)承担。只动介绍段,不动索引行。 */
+body.home-landing .hero-intro { color: var(--gray-900, #1C1C1E); }
+body.home-landing .hero-intro b { color: #1C1C1E; }
 /* landing 版 hero 标题加大一档:原 clamp(26, 4.5vw, 62) 是给「hero + 网格」页用的,
    landing 里标题是绝对主角(桌面封顶 92) */
 body.home-landing .hero-headline { font-size: clamp(40px, 6.5vw, 96px); }   /* 大屏上限 80→96(2026-07-26 用户要求「最大可以再大」;更早 92→80 的降档被此取代) */
@@ -2650,7 +2586,7 @@ body.reading-page .home-nav .theme-toggle {
     border: none;
     background: transparent;
     cursor: pointer;
-    color: #737373;   /* 55% 黑在白圆上的不透明等效色:全套图标统一(2026-07-22) */
+    color: #636366;   /* 55% 黑在白圆上的不透明等效色:全套图标统一(2026-07-22) */
     position: relative;
     z-index: 2;
     transition: color var(--ui-dur) ease;
@@ -2658,7 +2594,7 @@ body.reading-page .home-nav .theme-toggle {
 body.home-landing .home-nav .theme-toggle:hover,
 body.blog-page .home-nav .theme-toggle:hover,
 body.works-page .home-nav .theme-toggle:hover,
-body.reading-page .home-nav .theme-toggle:hover { color: #181818; }
+body.reading-page .home-nav .theme-toggle:hover { color: #1C1C1E; }
 body.home-landing .home-nav .theme-toggle svg,
 body.blog-page .home-nav .theme-toggle svg,
 body.works-page .home-nav .theme-toggle svg,
@@ -2677,34 +2613,34 @@ body.blog-page .home-nav .theme-toggle svg *,
 body.works-page .home-nav .theme-toggle svg *,
 body.reading-page .home-nav .theme-toggle svg *,
 body.home-landing .home-index-row .hi-arrow svg * { vector-effect: non-scaling-stroke; }
-/* 右上角按钮圆形底(2026-07-22):浅色 #F8F8F8 圆(2026-08-22 用户定,原 #fff)/
-   深色 #1A1A1A 圆(--card-bg 同值) */
+/* 右上角按钮圆形底(2026-07-22):浅色 #F2F2F7 圆(2026-08-22 用户定,原 #fff)/
+   深色 #1c1c1e 圆(--card-bg 同值) */
 body.home-landing .home-nav .theme-toggle,
 body.blog-page .home-nav .theme-toggle,
 body.works-page .home-nav .theme-toggle,
 body.reading-page .home-nav .theme-toggle {
-    background: #F8F8F8;
+    background: #F2F2F7;
     border-radius: 50%;
 }
 body.home-landing.theme-dark .home-nav .theme-toggle,
 body.blog-page.theme-dark .home-nav .theme-toggle,
 body.works-page.theme-dark .home-nav .theme-toggle,
-body.reading-page.theme-dark .home-nav .theme-toggle { background: #1A1A1A; }
+body.reading-page.theme-dark .home-nav .theme-toggle { background: #1c1c1e; }
 @media (max-width: 600px) {
     /* 手机端两圆同尺寸(40px);汉堡同样圆底 */
     .home-v2 .header.home-nav .theme-toggle { width: 36px; height: 36px; }   /* 手机两圆 36px(2026-07-22) */
-    /* 汉堡圆底与主题键同色(两圆一对,2026-08-22 随主题键 #fff → #F8F8F8) */
-    .home-v2 .header.home-nav .nav-toggle { background: #F8F8F8; border-radius: 50%; }
+    /* 汉堡圆底与主题键同色(两圆一对,2026-08-22 随主题键 #fff → #F2F2F7) */
+    .home-v2 .header.home-nav .nav-toggle { background: #F2F2F7; border-radius: 50%; }
     body.no-banner.theme-dark .header.home-nav .nav-toggle,
-    body.menu-dark .header.home-nav.nav-open .nav-toggle { background: #1A1A1A; }
+    body.menu-dark .header.home-nav.nav-open .nav-toggle { background: #1c1c1e; }
     /* 主题切换键跟着一起反色。它原先只在 body.theme-dark 下反色,而 .menu-dark 的
        前提是「白底页也可能要黑菜单」—— 那种组合下它仍是白圆 + 深图标,黑菜单里
        就剩它一个白点,与旁边已经变深的关闭键对不上(2026-07-28 用户实测)。
-       取值与 nav-toggle / theme-dark 下的主题键完全一致:圆底 #1A1A1A、
-       图标 rgb(152,152,152)(= 55% 白在 #1A1A1A 上的等效色)、hover 转纯白。 */
+       取值与 nav-toggle / theme-dark 下的主题键完全一致:圆底 #1c1c1e、
+       图标 rgb(152,152,152)(= 55% 白在 #1c1c1e 上的等效色)、hover 转纯白。 */
     body.menu-dark .header.home-nav.nav-open .theme-toggle {
-        background: #1A1A1A;
-        color: rgb(152, 152, 152);
+        background: #1c1c1e;
+        color: #8e8e93;
     }
     body.menu-dark .header.home-nav.nav-open .theme-toggle:hover { color: #fff; }
 }
@@ -2724,7 +2660,7 @@ body.theme-dark .home-nav .theme-toggle .tt-moon { display: block; }
 body.home-landing.theme-dark .home-nav .theme-toggle,
 body.blog-page.theme-dark .home-nav .theme-toggle,
 body.works-page.theme-dark .home-nav .theme-toggle,
-body.reading-page.theme-dark .home-nav .theme-toggle { color: rgb(152, 152, 152); }   /* 55% 白在 #1A1A1A 圆上的等效色 */
+body.reading-page.theme-dark .home-nav .theme-toggle { color: #8e8e93; }   /* 55% 白在 #1c1c1e 圆上的等效色 */
 body.home-landing.theme-dark .home-nav .theme-toggle:hover,
 body.blog-page.theme-dark .home-nav .theme-toggle:hover,
 body.works-page.theme-dark .home-nav .theme-toggle:hover,
@@ -2810,7 +2746,7 @@ body.home-landing .home-index-row {
     gap: 24px;
     padding: 9px 0 40px;   /* 上:分割线 → 标签的间距;下:行下留白 80 → 40(2026-07-26 用户觉得 80 过大) */
     border-top: 1px solid rgba(0, 0, 0, 0.2);
-    color: #181818;
+    color: #1C1C1E;
     text-decoration: none;
     font-size: var(--index-label-size);   /* 与手机端全屏菜单三项同一 token */
     line-height: 1.15;
@@ -3033,9 +2969,10 @@ html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + var(--hero-b
     /* 介绍段的「手绘红」:NetEase 圆环 + UI 设计师下划线共用。
        2026-08-22 三调:#E60012 → #DB0200 都嫌暗,定 #FF3B30(亮、年轻) */
     --hero-red: #FF3B30;
-    /* 整段缩到 90%(2026-08-22 试验分支):zoom 连 px 定死的图形(头像/红环/球/
-       say-hi 笔画)一起等比缩,且参与布局回流 —— transform:scale 只缩绘制不缩占位,
-       字号单调则带不动那批 px 图形。不满意撤这一行即回原尺寸。 */
+    /* 整段缩放走 zoom:连 px 定死的图形(头像/红环/球/say-hi 笔画)一起等比缩,
+       且参与布局回流 —— transform:scale 只缩绘制不缩占位,字号单调则带不动那批
+       px 图形。0.8 是手机档(2026-08-22 定,手机上观感刚好);
+       桌面 0.8 显小,2026-08-23 用户要求单独放大 —— 见下方 min-width:601px 档。 */
     zoom: 0.8;
     max-width: 36em;
     font-size: var(--fs-h2);   /* 2026-08-22 用户两次加档:16→18→24,scale 的 h2 级 */
@@ -3048,6 +2985,13 @@ html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + var(--hero-b
        注意浏览器只对 ≤6 行的块做 balance,这段手机 5 行贴着上限 —— 文案再加长
        (或字号再放大)超过 6 行时 balance 会静默失效,回到贪心折行。 */
     text-wrap: balance;
+}
+/* 桌面档:0.8 在电脑端显小(2026-08-23 用户,手机档观感刚好不动),0.9 → 1 仍不够,
+   三调放大到 1.2。断点取 601px,与 style.css 相关桌面档同一条线。
+   注意 zoom 1.2 后字号实际 28.8px,行更宽、折行位置会变 —— text-wrap: balance
+   的 ≤6 行上限仍有富余。 */
+@media (min-width: 601px) {
+    .hero-intro { zoom: 1.2; }
 }
 /* 重点词(同容 / NetEase / Blog)加粗 500(2026-08-22 用户:600 太粗降一档;
    注意 style.css 字重注释提过这套字体栈里 500 可能与 400 难分,嫌不够粗再回 600) */
@@ -3173,7 +3117,7 @@ html.hero-ready .hero-role { animation-delay: calc((var(--d, 0ms) + var(--hero-b
 .hero-hi svg { display: block; width: 100%; height: 100%; }
 .hero-hi path {
     fill: none;
-    stroke: #181818;
+    stroke: #1C1C1E;
     stroke-width: 1.9;
     stroke-linecap: round;   /* 圆头:手绘小笔画,不进直角 icon 规范族 */
     stroke-dasharray: 1;
@@ -3370,7 +3314,7 @@ body.home-restoring .page-title {
     margin: 0 0 20px;
     font-size: var(--index-label-size);
     line-height: 1.15;
-    color: #181818;
+    color: #1C1C1E;
 }
 body.design-page:not(.reading-page).home-restoring .page-title {
     font-weight: var(--fw-normal, 400) !important;
@@ -3400,7 +3344,7 @@ body.works-page .page-title {
        行高对齐索引行的 1.15(此前吃 h1 默认 1.5,同字号下 mask 高差 25%,就是「跳」)。 */
     font-size: var(--index-label-size);
     line-height: 1.15;
-    color: #181818;
+    color: #1C1C1E;
 }
 /* 标题行(2026-07-27):标题 + 右侧「收起」箭头同行两端对齐;works 的 4 列网格里通栏 */
 body.blog-page .page-title-row,
@@ -3440,7 +3384,7 @@ body.works-page.theme-dark .page-title { color: #fff; }
     margin: 0;
     padding: 0.12em 0;
     cursor: pointer;
-    color: #181818;
+    color: #1C1C1E;
     font-size: var(--index-label-size);
     line-height: 1.15;
     transition: opacity var(--hover-color-dur) ease;
@@ -3711,7 +3655,7 @@ body.article-modal .header .nav-toggle { display: none !important; }
    只写 .nav-cats / .header-connect 命不中 Contact —— 后者在 .header-right 里。
    主题按钮和汉堡是顶栏的直接子元素,不在这层里,仍由上面那条管。 */
 body.article-modal .header .nav-collapse { display: none !important; }
-/* 关闭键与顶栏右侧那两个圆钮同一套外观:36×36 白色圆底(深色主题 #1A1A1A)。
+/* 关闭键与顶栏右侧那两个圆钮同一套外观:36×36 白色圆底(深色主题 #1c1c1e)。
    尺寸/底色/深色值都对齐 .theme-toggle 与 .nav-toggle,改那边时这里一并核对。
    放右侧 —— 顶栏右边本来就是那两个圆钮的位置,模态里它们让位给它(2026-07-27)。 */
 .article-modal-back {
@@ -3731,9 +3675,9 @@ body.article-modal .header .nav-collapse { display: none !important; }
     border: 0;
     padding: 0;
     cursor: pointer;
-    color: #181818;
+    color: #1C1C1E;
 }
-body.theme-dark .article-modal-back { background: #1A1A1A; }
+body.theme-dark .article-modal-back { background: #1c1c1e; }
 /* 独立文章页的关闭键(ArticlePage 渲染的 .article-back-standalone):
    只在「无左列表」的窄宽度出现 —— ≥1000px 有 master–detail 左列表,
    列表本身就是返回路径(2026-08-17 用户定)。 */
@@ -3980,7 +3924,7 @@ body.blog-page .bl-excerpt {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-body.blog-page .bl-date { font-size: var(--fs-caption, 14px); color: #969696; transition: color var(--hover-color-dur) ease; }
+body.blog-page .bl-date { font-size: var(--fs-caption, 14px); color: #8e8e93; transition: color var(--hover-color-dur) ease; }
 @media (hover: hover) {
     body.blog-page .blog-list-item a:hover .bl-title { color: var(--gray-500); }
     body.blog-page .blog-list-item a:hover .bl-excerpt,
@@ -4118,21 +4062,21 @@ body.works-page .card:has(source[src*="3DSphere-particle"]) { background: #16E81
 /* 两张 icon 卡:浅色主题灰底 + 黑图标(默认),深色主题深灰底 + 反相白图标。
    2026-07-26 起两张同色 —— 原先 pixel 卡特意深一档(gray-300)以便与相邻卡拉开分界,
    用户要求统一成 outlined 的那档灰。
-   图标素材本身是 #181818 深色线稿,深色主题下靠 invert(1) 反白。 */
+   图标素材本身是 #1C1C1E 深色线稿,深色主题下靠 invert(1) 反白。 */
 body.works-page .foundation-card.icon-cover:has(iframe[src*="preview-outlined"]),
 body.works-page .foundation-card.icon-cover:has(iframe[src*="preview-pixel"]) { background: var(--gray-200, #e5e5ea); }
 body.works-page.theme-dark .foundation-card.icon-cover:has(iframe[src*="preview-outlined"]),
-body.works-page.theme-dark .foundation-card.icon-cover:has(iframe[src*="preview-pixel"]) { background: #1F1F1F; }
+body.works-page.theme-dark .foundation-card.icon-cover:has(iframe[src*="preview-pixel"]) { background: #1C1C1E; }
 body.works-page.theme-dark .icon-preview-frame { filter: invert(1); }
 
 /* 卡片下方的标题与日期(2026-07-22 用户要求放回:每个作品下显示作品名和时间)。
    宫格是无缝拼贴(gap 0),信息条用自身上下留白隔开上下两行卡片。
-   白底下文字走 style.css 默认配色(label = --gray-900 / date = #969696)。 */
+   白底下文字走 style.css 默认配色(label = --gray-900 / date = #8e8e93)。 */
 /* 封面-信息间距的真正来源是 .card-wrapper 的 flex gap(20px),减半(2026-07-22) */
 body.works-page .card-wrapper { gap: 10px; }
 body.works-page .card-info { padding: 2px 4px 28px; }   /* 封面与文字间距再减半 4 → 2(2026-07-22) */
 /* 标题/时间样式与 Blog 卡一致(2026-07-22):左对齐;meta 行同 .w-meta(gap 10/基线对齐);
-   日期与 tag 用默认字体 14px #969696(去掉等宽与「•」分隔) */
+   日期与 tag 用默认字体 14px #8e8e93(去掉等宽与「•」分隔) */
 /* 作品卡标题与 Blog 卡(.w-title)完全同档(2026-07-26 用户要求):字号回 h3 档,
    走 .home-v2 .card-label 的 --fs-h3 / --fw-bold / 1.4,不再单独降为正文档 */
 body.works-page .card-title-row { justify-content: flex-start; }
@@ -4143,7 +4087,7 @@ body.works-page .card-meta .card-tag { font-family: inherit; font-size: var(--fs
 body.works-page .card-meta .card-tag::after { content: none; }
 
 /* Icon 预览卡:页面转浅色后不再反相 —— icon-studio/preview-*.html 本身透明底 +
-   #181818 深色线稿,落在上面的灰底卡上直接可读(深色版时期这里曾 invert(1) 反白)。 */
+   #1C1C1E 深色线稿,落在上面的灰底卡上直接可读(深色版时期这里曾 invert(1) 反白)。 */
 
 /* 深色主题:卡片文字反白(白底默认配色在黑底上不可读) */
 body.works-page.theme-dark .card-label { color: #fff; }
@@ -4372,7 +4316,7 @@ body.home-v2 .header.home-nav .nav-collapse .header-right .header-connect.nav-le
        而这里菜单是浅底 —— 不改的话整行 hover 块是白块贴浅底,看不出来
        (2026-07-28 用户实测「hover 色块应该是黑色」)。取 :root 的原值。 */
     body.theme-dark:not(.menu-dark) .header.home-nav .nav-collapse {
-        --hl-ink: #1a1a1a;
+        --hl-ink: #1c1c1e;
         --hl-paper: #FDFDFC;   /* = --site-bg(2026-08-22 底色改浅,同步) */
     }
     body.theme-dark:not(.menu-dark) .header.home-nav.nav-open .nav-collapse .nav-cats .nav-cat,
